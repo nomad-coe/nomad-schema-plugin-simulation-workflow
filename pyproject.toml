@@ -13,7 +13,7 @@ dependencies = [
     "nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop",
     "electronicparsers@git+https://github.com/nomad-coe/electronic-parsers.git@develop",
     "atomisticparsers@git+https://github.com/nomad-coe/atomistic-parsers.git@develop",
-    "workflowparsers@git+https://github.com/nomad-coe/workflow-parsers.git@develop"
+    "workflowparsers@git+https://github.com/nomad-coe/workflow-parsers.git@master"
 ]
 
 [project.urls]
