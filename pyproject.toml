@@ -10,10 +10,7 @@ readme = "README.md"
 authors = [{ name = "The NOMAD Authors" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-    "nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop",
-    "electronicparsers@git+https://github.com/nomad-coe/electronic-parsers.git@develop",
-    "atomisticparsers@git+https://github.com/nomad-coe/atomistic-parsers.git@develop",
-    "workflowparsers@git+https://github.com/nomad-coe/workflow-parsers.git@master"
+    "nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop"
 ]
 
 [project.urls]
@@ -28,6 +25,11 @@ dev = [
     'ruff==0.1.4'
 ]
 
+tests = [
+    "electronicparsers@git+https://github.com/nomad-coe/electronic-parsers.git@develop",
+    "atomisticparsers@git+https://github.com/nomad-coe/atomistic-parsers.git@develop",
+    "workflowparsers@git+https://github.com/nomad-coe/workflow-parsers.git@master"
+]
 
 [tool.ruff]
 include = ["simulationworkflowschema/*.py", "tests/*.py"]

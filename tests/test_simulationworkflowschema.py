@@ -48,6 +48,7 @@ def run_parsing(parser_class, filepath):
     return archive
 
 
+# TODO rid of the use of parser
 def test_no_workflow():
     vasp_archive = run_parsing(VASPParser, 'tests/data/vasp_outcar/OUTCAR_broken')
     assert not vasp_archive.workflow2.results.calculations_ref
@@ -211,7 +212,6 @@ def test_geometry_optimization_workflow():
     vasp_archive = run_parsing(
         VASPParser, 'tests/data/vasp/vasprun.xml')
     sec_workflow = vasp_archive.workflow2
-    print(sec_workflow)
     assert sec_workflow.method.type == 'cell_shape'
     assert sec_workflow.results.calculation_result_ref.m_def.name == 'Calculation'
     assert sec_workflow.results.final_energy_difference.to('eV').magnitude == approx(0.00012532)
