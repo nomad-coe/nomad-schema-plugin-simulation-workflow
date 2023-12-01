@@ -59,4 +59,4 @@ fixable = ["ALL"]
 include = ["simulationworkflowschema*"]
 
 [tool.setuptools.package-data]
-nomadschemaesimulationworkflow = ['*/nomad_plugin.yaml']
+simulationworkflowschema = ['*/nomad_plugin.yaml']
