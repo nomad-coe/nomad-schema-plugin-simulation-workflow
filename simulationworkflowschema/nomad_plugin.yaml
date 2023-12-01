@@ -1,0 +1,4 @@
+plugin_type: schema
+name: simulationworkflowschema
+description: |
+  This is a collection of schemas for various types of simulation workflows.
