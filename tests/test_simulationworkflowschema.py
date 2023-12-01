@@ -566,7 +566,7 @@ class TestChemicalReactionWorkflow:
         '''
         Parse all relevant dft calculations.
         '''
-        test_dir = 'tests/data/datamodel/metainfo/simulation/workflow/chemical_reaction'
+        test_dir = 'tests/data/chemical_reaction'
 
         archives = {}
         for root, _, names in os.walk(test_dir):
