@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+from .general import SimulationWorkflow, SimulationWorkflowMethod, SimulationWorkflowResults
 from .single_point import SinglePoint, SinglePointMethod, SinglePointResults
 from .geometry_optimization import GeometryOptimization, GeometryOptimizationMethod, GeometryOptimizationResults
 from .molecular_dynamics import MolecularDynamics, MolecularDynamicsMethod, MolecularDynamicsResults
