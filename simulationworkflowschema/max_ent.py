@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.method import Method, DMFT as DMFTMethodology
-from nomad.datamodel.metainfo.simulation.calculation import BandGap, Dos, GreensFunctions
+from runschema.method import Method, DMFT as DMFTMethodology
+from runschema.calculation import BandGap, Dos, GreensFunctions
 from .general import SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation
 
 

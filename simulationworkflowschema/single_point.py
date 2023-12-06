@@ -19,7 +19,7 @@ import numpy as np
 
 from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.workflow import Link, Task
-from nomad.datamodel.metainfo.simulation.calculation import (
+from runschema.calculation import (
     Dos, BandStructure, BandEnergies, Density, Potential, Spectra,
 )
 from .general import (

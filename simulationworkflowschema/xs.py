@@ -16,7 +16,7 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.calculation import (
+from runschema.calculation import (
     BandGap, Dos, BandStructure, Spectra,
     ElectronicStructureProvenance
 )

@@ -21,7 +21,7 @@ from nptyping import NDArray
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference, derived
 from nomad.datamodel.metainfo.workflow import Link
-from nomad.datamodel.metainfo.simulation.system import System
+from runschema.system import System
 from .general import (
     SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation,
     WORKFLOW_METHOD_NAME, WORKFLOW_RESULTS_NAME

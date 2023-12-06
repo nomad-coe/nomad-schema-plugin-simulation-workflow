@@ -16,11 +16,11 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.method import (
+from runschema.method import (
     XCFunctional, BasisSetContainer, TB as TBMethodology,
     DMFT as DMFTMethodology
 )
-from nomad.datamodel.metainfo.simulation.calculation import (
+from runschema.calculation import (
     BandGap, Dos, BandStructure, GreensFunctions
 )
 from .general import SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation

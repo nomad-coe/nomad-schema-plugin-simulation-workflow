@@ -22,9 +22,9 @@ from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference
 from nomad.datamodel.metainfo.common import FastAccess
 from nomad.datamodel.metainfo.workflow import Workflow, Link, Task
-from nomad.datamodel.metainfo.simulation.method import Method
-from nomad.datamodel.metainfo.simulation.system import System
-from nomad.datamodel.metainfo.simulation.calculation import Calculation
+from runschema.method import Method
+from runschema.system import System
+from runschema.calculation import Calculation
 
 
 def resolve_difference(values):

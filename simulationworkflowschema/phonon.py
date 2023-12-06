@@ -19,7 +19,7 @@ import numpy as np
 
 from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.workflow import Link
-from nomad.datamodel.metainfo.simulation.calculation import Dos, BandStructure
+from runschema.calculation import Dos, BandStructure
 from .general import (
     ParallelSimulation, SimulationWorkflowMethod, SimulationWorkflowResults,
     WORKFLOW_METHOD_NAME, WORKFLOW_RESULTS_NAME
