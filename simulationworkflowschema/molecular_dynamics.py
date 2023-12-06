@@ -21,8 +21,8 @@ import numpy as np
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, MEnum, Reference, MSection
 from nomad.datamodel.metainfo.workflow import Link
-from nomad.datamodel.metainfo.simulation.system import System, AtomsGroup
-from nomad.datamodel.metainfo.simulation.calculation import (
+from runschema.system import System, AtomsGroup
+from runschema.calculation import (
     RadiusOfGyration as RadiusOfGyrationCalculation,
     RadiusOfGyrationValues as RadiusOfGyrationValuesCalculation,
 )

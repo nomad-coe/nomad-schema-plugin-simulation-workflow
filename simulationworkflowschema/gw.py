@@ -16,10 +16,10 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.method import (
+from runschema.method import (
     XCFunctional, BasisSetContainer, GW as GWMethodology
 )
-from nomad.datamodel.metainfo.simulation.calculation import BandGap, Dos, BandStructure
+from runschema.calculation import BandGap, Dos, BandStructure
 from .general import SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation
 
 

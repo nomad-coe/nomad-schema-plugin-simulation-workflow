@@ -16,8 +16,8 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.method import TB as TBMethodology
-from nomad.datamodel.metainfo.simulation.calculation import BandGap, BandStructure
+from runschema.method import TB as TBMethodology
+from runschema.calculation import BandGap, BandStructure
 from .general import SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation
 
 

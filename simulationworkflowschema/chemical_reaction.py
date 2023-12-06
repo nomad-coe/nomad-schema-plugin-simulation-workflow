@@ -19,7 +19,7 @@ import numpy as np
 
 from nomad.metainfo import SubSection, Section, Quantity, MEnum
 from nomad.datamodel.metainfo.workflow import Task
-from nomad.datamodel.metainfo.simulation.calculation import Calculation
+from runschema.calculation import Calculation
 from .general import (
     SimulationWorkflowMethod, SimulationWorkflowResults, SimulationWorkflow
 )

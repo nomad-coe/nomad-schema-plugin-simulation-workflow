@@ -18,8 +18,8 @@
 import numpy as np
 
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.method import BSE as BSEMethodology
-from nomad.datamodel.metainfo.simulation.calculation import Spectra
+from runschema.method import BSE as BSEMethodology
+from runschema.calculation import Spectra
 from .general import SimulationWorkflowResults, SimulationWorkflowMethod, ParallelSimulation
 
 

@@ -20,7 +20,7 @@ from ase import Atoms
 
 from nomad.metainfo import SubSection, Quantity, MEnum
 from nomad.datamodel.metainfo.workflow import Link
-from nomad.datamodel.metainfo.simulation.calculation import EnergyEntry
+from runschema.calculation import EnergyEntry
 
 from .general import (
     SimulationWorkflowMethod, SimulationWorkflowResults, SerialSimulation,
