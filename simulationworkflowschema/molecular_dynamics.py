@@ -882,6 +882,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
             if rdf_results:
                 sec_rdfs = RadialDistributionFunction()
                 sec_rdfs._rdf_results = rdf_results
+                sec_rdfs.normalize(archive, logger)
                 self.radial_distribution_functions.append(sec_rdfs)
 
         # calculate the molecular mean squared displacements
@@ -890,6 +891,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
             if msd_results:
                 sec_msds = MeanSquaredDisplacement()
                 sec_msds._msd_results = msd_results
+                sec_msds.normalize(archive, logger)
                 self.mean_squared_displacements.append(sec_msds)
 
         # calculate radius of gyration for polymers
@@ -921,6 +923,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
 
                 sec_rgs = RadiusOfGyration()
                 sec_rgs._rg_results = rg
+                sec_rgs.normalize(archive, logger)
                 self.radius_of_gyration.append(sec_rgs)
 
                 for calc in sec_calc:
