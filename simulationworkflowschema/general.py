@@ -136,8 +136,8 @@ class SimulationWorkflow(Workflow):
                     Workflow.inputs, Link(name=WORKFLOW_METHOD_NAME, section=self.method))
 
         for link in self.inputs:
-            if isinstance(link.section, System):
-                self.input_structure = link.section
+            if hasattr(link.section, 'atoms'):
+                self._input_structure = link.section
                 break
 
         if not self.outputs:
@@ -233,7 +233,7 @@ class SerialSimulation(SimulationWorkflow):
             for n, calculation in enumerate(self._calculations):
                 inputs, outputs = [], [Link(name=OUTPUT_CALCULATION_NAME, section=calculation)]
                 if calculation.system_ref:
-                    input_structure = self.input_structure if n == 0 else self._calculations[n - 1].system_ref
+                    input_structure = self._input_structure if n == 0 else self._calculations[n - 1].system_ref
                     if not input_structure:
                         input_structure = previous_structure
                     if input_structure:
@@ -241,7 +241,7 @@ class SerialSimulation(SimulationWorkflow):
                     previous_structure = calculation.system_ref
                     outputs.append(Link(name=OUTPUT_SYSTEM_NAME, section=calculation.system_ref))
                 elif len(self._calculations) == len(self._systems):
-                    inputs.append(Link(name=INPUT_SYSTEM_NAME, section=self.input_structure if n == 0 else self._systems[n - 1]))
+                    inputs.append(Link(name=INPUT_SYSTEM_NAME, section=self._input_structure if n == 0 else self._systems[n - 1]))
                     outputs.append(Link(name=OUTPUT_SYSTEM_NAME, section=self._systems[n]))
                 else:
                     continue
