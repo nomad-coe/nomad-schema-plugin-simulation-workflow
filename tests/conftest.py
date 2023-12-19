@@ -80,7 +80,8 @@ def get_template_computation() -> EntryArchive:
     '''Returns a basic archive template for a computational calculation
     '''
     template = EntryArchive()
-    run = template.m_create(Run)
+    run = Run()
+    template.run.append(run)
     run.program = Program(name='VASP', version='4.6.35')
     system = run.m_create(System)
     system.atoms = Atoms(
@@ -440,7 +441,8 @@ def get_template_gw_workflow() -> EntryArchive:
     task_gw.outputs = [Link(name='Output GW calculation', section=archive_gw.run[-1].calculation[-1])]
     # GW workflow entry (no need of creating Method nor Calculation)
     template = EntryArchive()
-    run = template.m_create(Run)
+    run = Run()
+    template.run.append(run)
     run.program = archive_dft.run[-1].program
     run.system = archive_dft.run[-1].system
     workflow = GWworkflow()
@@ -478,7 +480,8 @@ def get_template_dmft_workflow() -> EntryArchive:
     task_dmft.outputs = [Link(name='Output DMFT calculation', section=archive_dmft.run[-1].calculation[-1])]
     # DMFT workflow entry (no need of creating Method nor Calculation)
     template = EntryArchive()
-    run = template.m_create(Run)
+    run = Run()
+    template.run.append(run)
     run.program = archive_dmft.run[-1].program
     run.system = archive_tb.run[-1].system
     workflow = DMFTworkflow()
@@ -515,7 +518,8 @@ def get_template_maxent_workflow() -> EntryArchive:
     task_maxent.outputs = [Link(name='Output MaxEnt Sigma calculation', section=archive_maxent.run[-1].calculation[-1])]
     # DMFT workflow entry (no need of creating Method)
     template = EntryArchive()
-    run = template.m_create(Run)
+    run = Run()
+    template.run.append(run)
     run.program = archive_dmft.run[-1].program
     run.system = archive_dmft.run[-1].system
     scc = run.m_create(Calculation)
@@ -585,7 +589,8 @@ def get_template_bse_workflow() -> EntryArchive:
     task_photon_2.outputs = [Link(name='Output polarization 2', section=archive_photon_2.run[-1].calculation[-1])]
     # BSE workflow entry (no need of creating Calculation). We need to define BSE method.
     template = EntryArchive()
-    run = template.m_create(Run)
+    run = Run()
+    template.run.append(run)
     run.program = archive_photon_1.run[-1].program
     run.system = archive_photon_1.run[-1].system
     method = run.m_create(Method)
@@ -635,7 +640,8 @@ def get_template_xs_workflow() -> EntryArchive:
         Link(name='Polarization 2', section=archive_bse.workflow2.outputs[1].section)]
     # XS (BSE) workflow entry (no need of creating Method nor Calculation)
     template = EntryArchive()
-    run = template.m_create(Run)
+    run = Run()
+    template.run.append(run)
     run.program = archive_dft.run[-1].program
     run.system = archive_dft.run[-1].system
     workflow = XSworkflow()
