@@ -15,75 +15,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nomad.metainfo import SubSection, Quantity, Reference
+from nomad.metainfo import SubSection
 from runschema.calculation import (
-    BandGap,
-    Dos,
-    BandStructure,
     Spectra,
     ElectronicStructureProvenance,
 )
-from .general import (
-    SimulationWorkflowResults,
-    SimulationWorkflowMethod,
-    SerialSimulation,
-)
+from .general import DFTOutputs, GWOutputs, SimulationWorkflowMethod, SerialSimulation
 from .photon_polarization import PhotonPolarizationResults
 
 
-class XSResults(SimulationWorkflowResults):
-    """Groups DFT, GW and PhotonPolarization outputs: band gaps (DFT, GW), DOS (DFT, GW),
+class XSResults(DFTOutputs, GWOutputs):
+    """
+    Groups DFT, GW and PhotonPolarization outputs: band gaps (DFT, GW), DOS (DFT, GW),
     band structures (DFT, GW), spectra (PhotonPolarization). The ResultsNormalizer takes
     care of adding a label 'DFT' or 'GW' in the method `get_xs_workflow_properties`.
     """
-
-    band_gap_dft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the DFT band gap.
-        """,
-    )
-
-    band_gap_gw = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the GW band gap.
-        """,
-    )
-
-    band_structure_dft = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the DFT density of states.
-        """,
-    )
-
-    band_structure_gw = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the GW density of states.
-        """,
-    )
-
-    dos_dft = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the DFT band structure.
-        """,
-    )
-
-    dos_gw = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the GW band structure.
-        """,
-    )
 
     spectra = SubSection(sub_section=PhotonPolarizationResults, repeats=True)
 
@@ -93,7 +39,8 @@ class XSMethod(SimulationWorkflowMethod):
 
 
 class XS(SerialSimulation):
-    """The XS workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
+    """
+    The XS workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the PhotonPolarization EntryArchives are present in the upload.
     """
 
