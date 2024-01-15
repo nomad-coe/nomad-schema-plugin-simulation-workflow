@@ -59,3 +59,4 @@ from .photon_polarization import (
     PhotonPolarizationResults,
 )
 from .thermodynamics import Thermodynamics, ThermodynamicsMethod, ThermodynamicsResults
+from .nmr_magres import NMRMagRes, NMRMagResMethod, NMRMagResResults
