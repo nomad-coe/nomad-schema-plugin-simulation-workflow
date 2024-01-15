@@ -17,108 +17,33 @@
 #
 from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import (
-    XCFunctional,
-    BasisSetContainer,
     TB as TBMethodology,
     DMFT as DMFTMethodology,
 )
-from runschema.calculation import BandGap, Dos, BandStructure, GreensFunctions
 from .general import (
-    SimulationWorkflowResults,
-    SimulationWorkflowMethod,
+    DFTOutputs,
+    TBOutputs,
+    DMFTOutputs,
+    DFTMethod,
     SerialSimulation,
 )
 
 
-class DMFTResults(SimulationWorkflowResults):
-    """Groups DFT, TB and DMFT outputs: band gaps (all), DOS (DFT, TB), band
+class DMFTResults(DFTOutputs, TBOutputs, DMFTOutputs):
+    """
+    Groups DFT, TB and DMFT outputs: band gaps (all), DOS (DFT, TB), band
     structures (DFT, TB), Greens functions (DMFT). The ResultsNormalizer takes care
     of adding a label 'DFT', 'PROJECTION, or 'DMFT' in the method `get_dmft_workflow_properties`.
     """
 
-    band_gap_dft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        DFT band gap.
-        """,
-    )
-
-    band_gap_tb = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        TB band gap.
-        """,
-    )
-
-    band_gap_dmft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        DMFT band gap.
-        """,
-    )
-
-    band_structure_dft = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Ref to the DFT band structure.
-        """,
-    )
-
-    dos_dft = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Ref to the DFT density of states.
-        """,
-    )
-
-    band_structure_tb = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Ref to the TB band structure.
-        """,
-    )
-
-    dos_tb = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Ref to the TB density of states.
-        """,
-    )
-
-    greens_functions_dmft = Quantity(
-        type=Reference(GreensFunctions),
-        shape=["*"],
-        description="""
-        Ref to the DMFT Greens functions.
-        """,
-    )
+    pass
 
 
-class DMFTMethod(SimulationWorkflowMethod):
-    """Groups DFT, TB and DMFT input methodologies: starting XC functional, electrons
+class DMFTMethod(DFTMethod):
+    """
+    Groups DFT, TB and DMFT input methodologies: starting XC functional, electrons
     representation (basis set), TB method reference, DMFT method reference.
     """
-
-    starting_point = Quantity(
-        type=Reference(XCFunctional),
-        description="""
-        Starting point (XC functional or HF) used.
-        """,
-    )
-
-    electrons_representation = Quantity(
-        type=Reference(BasisSetContainer),
-        description="""
-        Basis set used.
-        """,
-    )
 
     tb_method_ref = Quantity(
         type=Reference(TBMethodology),
@@ -136,7 +61,8 @@ class DMFTMethod(SimulationWorkflowMethod):
 
 
 class DMFT(SerialSimulation):
-    """The DMFT workflow is generated in an extra EntryArchive IF both the TB SinglePoint
+    """
+    The DMFT workflow is generated in an extra EntryArchive IF both the TB SinglePoint
     and the DMFT SinglePoint EntryArchives are present in the upload.
     """
 
