@@ -33,6 +33,7 @@ from nomad.datamodel.metainfo.simulation.calculation import (
     BandGap,
     Dos,
     BandStructure,
+    GreensFunctions,
 )
 
 
@@ -338,8 +339,8 @@ class SerialSimulation(SimulationWorkflow):
 # Workflow Methods base classes
 class DFTMethod(SimulationWorkflowMethod):
     """
-    Groups DFT input methodologies: starting XC functional and electrons representation
-    (basis set).
+    Base class defining the DFT input methodologies: starting XC functional and electrons
+    representation (basis set).
     """
 
     starting_point = Quantity(
@@ -357,6 +358,7 @@ class DFTMethod(SimulationWorkflowMethod):
     )
 
 
+# Workflow Results base classes
 class DFTOutputs(SimulationWorkflowResults):
     """
     Base class defining the typical output properties of a DFT SinglePoint calculation.
@@ -413,5 +415,58 @@ class GWOutputs(SimulationWorkflowResults):
         shape=["*"],
         description="""
         Reference to the GW band structure.
+        """,
+    )
+
+
+class TBOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of a tight-binding (TB) SinglePoint
+    calculation.
+    """
+
+    band_gap_tb = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the TB band gap.
+        """,
+    )
+
+    dos_tb = Quantity(
+        type=Reference(Dos),
+        shape=["*"],
+        description="""
+        Reference to the TB density of states.
+        """,
+    )
+
+    band_structure_tb = Quantity(
+        type=Reference(BandStructure),
+        shape=["*"],
+        description="""
+        Reference to the TB band structure.
+        """,
+    )
+
+
+class DMFTOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of a DMFT SinglePoint calculation.
+    """
+
+    band_gap_dmft = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the DMFT band gap.
+        """,
+    )
+
+    greens_functions_dmft = Quantity(
+        type=Reference(GreensFunctions),
+        shape=["*"],
+        description="""
+        Ref to the DMFT Greens functions.
         """,
     )
