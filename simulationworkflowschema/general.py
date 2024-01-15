@@ -34,6 +34,10 @@ from nomad.datamodel.metainfo.simulation.calculation import (
     Dos,
     BandStructure,
     GreensFunctions,
+    MagneticShielding,
+    ElectricFieldGradient,
+    SpinSpinCoupling,
+    MagneticSusceptibility,
 )
 
 
@@ -474,5 +478,43 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
         shape=["*"],
         description="""
         Ref to the Green functions section.
+        """,
+    )
+
+
+class NMROutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of a NMR SinglePoint calculation.
+    """
+
+    magnetic_shielding_nmr = Quantity(
+        type=Reference(MagneticShielding),
+        shape=["*"],
+        description="""
+        Reference to the NMR magnetic shielding tensors.
+        """,
+    )
+
+    electric_field_gradient_nmr = Quantity(
+        type=Reference(ElectricFieldGradient),
+        shape=["*"],
+        description="""
+        Reference to the NMR electric field gradient tensors.
+        """,
+    )
+
+    spin_spin_coupling_nmr = Quantity(
+        type=Reference(SpinSpinCoupling),
+        shape=["*"],
+        description="""
+        Reference to the NMR spin-spin coupling tensors.
+        """,
+    )
+
+    magnetic_susceptibility_nmr = Quantity(
+        type=Reference(MagneticSusceptibility),
+        shape=["*"],
+        description="""
+        Reference to the NMR magnetic susceptibility tensors.
         """,
     )
