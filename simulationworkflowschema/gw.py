@@ -16,87 +16,24 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from runschema.method import XCFunctional, BasisSetContainer, GW as GWMethodology
-from runschema.calculation import BandGap, Dos, BandStructure
-from .general import (
-    SimulationWorkflowResults,
-    SimulationWorkflowMethod,
-    SerialSimulation,
-)
+from runschema.method import GW as GWMethodology
+from .general import DFTOutputs, GWOutputs, DFTMethod, SerialSimulation
 
 
-class GWResults(SimulationWorkflowResults):
-    """Groups DFT and GW outputs: band gaps, DOS, band structures. The ResultsNormalizer
+class GWResults(DFTOutputs, GWOutputs):
+    """
+    Groups DFT and GW outputs: band gaps, DOS, band structures. The ResultsNormalizer
     takes care of adding a label 'DFT' or 'GW' in the method `get_gw_workflow_properties`.
     """
 
-    band_gap_dft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the DFT band gap.
-        """,
-    )
-
-    band_gap_gw = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the GW band gap.
-        """,
-    )
-
-    dos_dft = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the DFT density of states.
-        """,
-    )
-
-    dos_gw = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the GW density of states.
-        """,
-    )
-
-    band_structure_dft = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the DFT band structure.
-        """,
-    )
-
-    band_structure_gw = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the GW band structure.
-        """,
-    )
+    pass
 
 
-class GWMethod(SimulationWorkflowMethod):
-    """Groups DFT and GW input methodologies: starting XC functional, electrons
+class GWMethod(DFTMethod):
+    """
+    Groups DFT and GW input methodologies: starting XC functional, electrons
     representation (basis set), GW method reference.
     """
-
-    starting_point = Quantity(
-        type=Reference(XCFunctional),
-        description="""
-        Reference to the starting point (XC functional or HF) used.
-        """,
-    )
-
-    electrons_representation = Quantity(
-        type=Reference(BasisSetContainer),
-        description="""
-        Reference to the basis set used.
-        """,
-    )
 
     gw_method_ref = Quantity(
         type=Reference(GWMethodology),
@@ -107,7 +44,8 @@ class GWMethod(SimulationWorkflowMethod):
 
 
 class GW(SerialSimulation):
-    """The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
+    """
+    The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the GW SinglePoint EntryArchives are present in the upload.
     """
 
