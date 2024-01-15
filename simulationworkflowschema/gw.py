@@ -17,7 +17,12 @@
 #
 from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import GW as GWMethodology
-from .general import DFTOutputs, GWOutputs, DFTMethod, SerialSimulation
+from .general import (
+    DFTOutputs,
+    GWOutputs,
+    DFTMethod,
+    BeyondDFT2Tasks,
+)
 
 
 class GWResults(DFTOutputs, GWOutputs):
@@ -43,7 +48,7 @@ class GWMethod(DFTMethod):
     )
 
 
-class GW(SerialSimulation):
+class GW(BeyondDFT2Tasks):
     """
     The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the GW SinglePoint EntryArchives are present in the upload.
@@ -54,26 +59,7 @@ class GW(SerialSimulation):
     results = SubSection(sub_section=GWResults)
 
     def normalize(self, archive, logger):
-        super().normalize(archive, logger)
-
-        if len(self.tasks) != 2:
-            logger.error("Expected two tasks.")
-            return
-
-        dft_task = self.tasks[0]
-        gw_task = self.tasks[1]
-
-        if not self.results:
+        if not self.results:  # creates Results section if not present
             self.results = GWResults()
 
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if "dft" in name:
-                calc_section = getattr(dft_task.outputs[-1].section, calc_name)
-            elif "gw" in name:
-                calc_section = getattr(gw_task.outputs[-1].section, calc_name)
-            if calc_section:
-                self.results.m_set(section, calc_section)
+        super().normalize(archive, logger)

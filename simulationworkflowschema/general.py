@@ -336,7 +336,42 @@ class SerialSimulation(SimulationWorkflow):
                 )
 
 
-# Workflow Methods base classes
+class BeyondDFT2Tasks(SerialSimulation):
+    """
+    Base class used to normalize standard workflows beyond DFT containing two specific
+    SinglePoint tasks (GWWorkflow = DFT + GW, DMFTWorkflow = DFT + DMFT,
+    MaxEntWorkflow = DMFT + MaxEnt) and store the outputs in the self.results section.
+    """
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+
+        if len(self.tasks) != 2:
+            logger.error("Expected two tasks.")
+            return
+
+        initial_task = self.tasks[0]
+        final_task = self.tasks[1]
+
+        for name, section in self.results.m_def.all_quantities.items():
+            calc_name = "_".join(name.split("_")[:-1])
+            if calc_name in ["dos", "band_structure"]:
+                calc_name = f"{calc_name}_electronic"
+            calc_section = []
+            if self.m_def.name in ["GW", "DMFT"]:
+                if "dft" in name:
+                    calc_section = getattr(initial_task.outputs[-1].section, calc_name)
+                elif "gw" in name or "dmft" in name:
+                    calc_section = getattr(final_task.outputs[-1].section, calc_name)
+            elif self.m_def.name in ["MaxEnt"]:
+                if "dmft" in name:
+                    calc_section = getattr(initial_task.outputs[-1].section, calc_name)
+                elif "maxent" in name:
+                    calc_section = getattr(final_task.outputs[-1].section, calc_name)
+            if calc_section:
+                self.results.m_set(section, calc_section)
+
+
 class DFTMethod(SimulationWorkflowMethod):
     """
     Base class defining the DFT input methodologies: starting XC functional and electrons
@@ -358,7 +393,6 @@ class DFTMethod(SimulationWorkflowMethod):
     )
 
 
-# Workflow Results base classes
 class DFTOutputs(SimulationWorkflowResults):
     """
     Base class defining the typical output properties of a DFT SinglePoint calculation.
@@ -468,5 +502,44 @@ class DMFTOutputs(SimulationWorkflowResults):
         shape=["*"],
         description="""
         Ref to the DMFT Greens functions.
+        """,
+    )
+
+
+class MaxEntOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of a Maximum Entropy (MaxEnt)
+    SinglePoint calculation.
+    """
+
+    band_gap_maxent = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the MaxEnt band gap.
+        """,
+    )
+
+    dos_maxent = Quantity(
+        type=Reference(Dos),
+        shape=["*"],
+        description="""
+        Reference to the MaxEnt density of states.
+        """,
+    )
+
+    band_structure_maxent = Quantity(
+        type=Reference(BandStructure),
+        shape=["*"],
+        description="""
+        Reference to the MaxEnt band structure.
+        """,
+    )
+
+    greens_functions_maxent = Quantity(
+        type=Reference(GreensFunctions),
+        shape=["*"],
+        description="""
+        Ref to the MaxEnt Greens functions.
         """,
     )

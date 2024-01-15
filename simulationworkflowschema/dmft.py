@@ -25,7 +25,7 @@ from .general import (
     TBOutputs,
     DMFTOutputs,
     DFTMethod,
-    SerialSimulation,
+    BeyondDFT2Tasks,
 )
 
 
@@ -60,7 +60,7 @@ class DMFTMethod(DFTMethod):
     )
 
 
-class DMFT(SerialSimulation):
+class DMFT(BeyondDFT2Tasks):
     """
     The DMFT workflow is generated in an extra EntryArchive IF both the TB SinglePoint
     and the DMFT SinglePoint EntryArchives are present in the upload.
@@ -73,26 +73,7 @@ class DMFT(SerialSimulation):
     results = SubSection(sub_section=DMFTResults)
 
     def normalize(self, archive, logger):
-        super().normalize(archive, logger)
-
-        if len(self.tasks) != 2:
-            logger.error("Expected two tasks: TB and DMFT SinglePoint tasks")
-            return
-
-        proj_task = self.tasks[0]
-        dmft_task = self.tasks[1]
-
-        if not self.results:
+        if not self.results:  # creates Results section if not present
             self.results = DMFTResults()
 
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if "tb" in name:
-                calc_section = getattr(proj_task.outputs[-1].section, calc_name)
-            elif "dmft" in name:
-                calc_section = getattr(dmft_task.outputs[-1].section, calc_name)
-            if calc_section:
-                self.results.m_set(section, calc_section)
+        super().normalize(archive, logger)
