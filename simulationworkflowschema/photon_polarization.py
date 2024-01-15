@@ -20,46 +20,52 @@ import numpy as np
 from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.simulation.method import BSE as BSEMethodology
 from nomad.datamodel.metainfo.simulation.calculation import Spectra
-from .general import SimulationWorkflowResults, SimulationWorkflowMethod, ParallelSimulation
+from .general import (
+    SimulationWorkflowResults,
+    SimulationWorkflowMethod,
+    ParallelSimulation,
+)
 
 
 class PhotonPolarizationResults(SimulationWorkflowResults):
-    '''Groups all polarization outputs: spectrum.
-    '''
+    """Groups all polarization outputs: spectrum."""
 
     n_polarizations = Quantity(
         type=np.int32,
-        description='''
+        description="""
         Number of polarizations for the phonons used for the calculations.
-        ''')
+        """,
+    )
 
     spectrum_polarization = Quantity(
         type=Reference(Spectra),
-        shape=['n_polarizations'],
-        description='''
+        shape=["n_polarizations"],
+        description="""
         Spectrum for a given polarization of the photon.
-        ''')
+        """,
+    )
 
 
 class PhotonPolarizationMethod(SimulationWorkflowMethod):
-    '''Defines the full macroscopic dielectric tensor methodology: BSE method reference.
-    '''
+    """Defines the full macroscopic dielectric tensor methodology: BSE method reference."""
+
     # TODO add TDDFT methodology reference.
 
     bse_method_ref = Quantity(
         type=Reference(BSEMethodology),
-        description='''
+        description="""
         BSE methodology reference.
-        ''')
+        """,
+    )
 
 
 class PhotonPolarization(ParallelSimulation):
-    '''The PhotonPolarization workflow is generated in an extra EntryArchive FOR all polarization
+    """The PhotonPolarization workflow is generated in an extra EntryArchive FOR all polarization
     EntryArchives present in the upload. It groups them for a set of given method parameters.
 
     This entry is also recognized as the full macroscopic dielectric tensor entry (e.g. calculated
     via BSE).
-    '''
+    """
 
     method = SubSection(sub_section=PhotonPolarizationMethod)
 
