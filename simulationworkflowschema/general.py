@@ -22,9 +22,18 @@ from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference
 from nomad.datamodel.metainfo.common import FastAccess
 from nomad.datamodel.metainfo.workflow import Workflow, Link, Task
-from nomad.datamodel.metainfo.simulation.method import Method
+from nomad.datamodel.metainfo.simulation.method import (
+    Method,
+    XCFunctional,
+    BasisSetContainer,
+)
 from nomad.datamodel.metainfo.simulation.system import System
-from nomad.datamodel.metainfo.simulation.calculation import Calculation
+from nomad.datamodel.metainfo.simulation.calculation import (
+    Calculation,
+    BandGap,
+    Dos,
+    BandStructure,
+)
 
 
 def resolve_difference(values):
@@ -324,3 +333,85 @@ class SerialSimulation(SimulationWorkflow):
                 self.tasks.append(
                     Task(name=f"Step {n}", inputs=inputs, outputs=outputs)
                 )
+
+
+# Workflow Methods base classes
+class DFTMethod(SimulationWorkflowMethod):
+    """
+    Groups DFT input methodologies: starting XC functional and electrons representation
+    (basis set).
+    """
+
+    starting_point = Quantity(
+        type=Reference(XCFunctional),
+        description="""
+        Reference to the starting point (XC functional or HF) used.
+        """,
+    )
+
+    electrons_representation = Quantity(
+        type=Reference(BasisSetContainer),
+        description="""
+        Reference to the basis set used.
+        """,
+    )
+
+
+class DFTOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of a DFT SinglePoint calculation.
+    """
+
+    band_gap_dft = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the DFT band gap.
+        """,
+    )
+
+    dos_dft = Quantity(
+        type=Reference(Dos),
+        shape=["*"],
+        description="""
+        Reference to the DFT density of states.
+        """,
+    )
+
+    band_structure_dft = Quantity(
+        type=Reference(BandStructure),
+        shape=["*"],
+        description="""
+        Reference to the DFT band structure.
+        """,
+    )
+
+
+class GWOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of a GW SinglePoint calculation.
+    """
+
+    band_gap_gw = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the GW band gap.
+        """,
+    )
+
+    dos_gw = Quantity(
+        type=Reference(Dos),
+        shape=["*"],
+        description="""
+        Reference to the GW density of states.
+        """,
+    )
+
+    band_structure_gw = Quantity(
+        type=Reference(BandStructure),
+        shape=["*"],
+        description="""
+        Reference to the GW band structure.
+        """,
+    )
