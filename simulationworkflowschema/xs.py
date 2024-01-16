@@ -81,7 +81,11 @@ class XS(BeyondDFT):
         if not self.results:
             self.results = XSResults()
 
-        self.get_gw_workflow_results(dft_task, gw_task)
+        task_map = {
+            "dft": dft_task,
+            "gw": gw_task,
+        }
+        self.get_electronic_structure_workflow_results(task_map)
 
         for xs in xs_tasks:
             if xs.m_xpath("task.results"):
