@@ -25,7 +25,7 @@ from .general import (
 )
 
 
-class MaxEntResults(SimulationWorkflowResults):
+class DMFTPlusMaxEntResults(SimulationWorkflowResults):
     """
     Groups DMFT and MaxEnt outputs: greens functions (DMFT, MaxEnt), band gaps (MaxEnt),
     DOS (MaxEnt), band structures (MaxEnt). The ResultsNormalizer takes care of adding a
@@ -41,7 +41,7 @@ class MaxEntResults(SimulationWorkflowResults):
     )
 
 
-class MaxEntMethod(SimulationWorkflowMethod):
+class DMFTPlusMaxEntMethod(SimulationWorkflowMethod):
     """
     Specifies both DMFT and MaxEnt input methodologies: DMFT method references, MaxEnt method
     reference.
@@ -63,18 +63,18 @@ class MaxEntMethod(SimulationWorkflowMethod):
     )
 
 
-class MaxEnt(BeyondDFT):
+class DMFTPlusMaxEnt(BeyondDFT):
     """
     The MaxEnt (Maximum Entropy) workflow is generated in an extra EntryArchive IF both
     the DMFT SinglePoint and the MaxEnt SinglePoint EntryArchives are present in the upload.
     """
 
-    method = SubSection(sub_section=MaxEntMethod)
+    method = SubSection(sub_section=DMFTPlusMaxEntMethod)
 
-    results = SubSection(sub_section=MaxEntResults)
+    results = SubSection(sub_section=DMFTPlusMaxEntResults)
 
     def normalize(self, archive, logger):
         if not self.results:  # creates Results section if not present
-            self.results = MaxEntResults()
+            self.results = DMFTPlusMaxEntResults()
 
         super().normalize(archive, logger)

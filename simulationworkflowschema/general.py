@@ -426,14 +426,15 @@ class BeyondDFT(SerialSimulation):
         initial_task = self.tasks[0]
         final_task = self.tasks[1]
 
-        workflow_name = self.m_def.name
-        if workflow_name == "GW":
+        workflow_name = self.m_def.name.replace("Plus", "+")
+        self.name = workflow_name
+        if workflow_name == "DFT+GW":
             self.get_gw_workflow_results(initial_task, final_task)
-        elif workflow_name == "DMFT":
+        elif workflow_name == "DFT+TB+DMFT":
             self.get_dmft_workflow_results(initial_task, final_task)
-        elif workflow_name == "MaxEnt":
+        elif workflow_name == "DMFT+MaxEnt":
             self.get_maxent_workflow_results(initial_task, final_task)
-        elif workflow_name == "TB":
+        elif workflow_name == "FirstPrinciples+TB":
             self.get_tb_workflow_results(initial_task, final_task)
 
 

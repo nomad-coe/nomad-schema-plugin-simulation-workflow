@@ -25,7 +25,7 @@ from .general import (
 )
 
 
-class GWResults(SimulationWorkflowResults):
+class DFTPlusGWResults(SimulationWorkflowResults):
     """
     Groups DFT and GW outputs: band gaps, DOS, band structures. The ResultsNormalizer
     takes care of adding a label 'DFT' or 'GW' in the method `get_gw_workflow_properties`.
@@ -38,7 +38,7 @@ class GWResults(SimulationWorkflowResults):
     gw_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
 
-class GWMethod(DFTMethod):
+class DFTPlusGWMethod(DFTMethod):
     """
     Specifies both DFT and GW input methodologies: starting XC functional, electrons
     representation (basis set), GW method reference.
@@ -52,18 +52,18 @@ class GWMethod(DFTMethod):
     )
 
 
-class GW(BeyondDFT):
+class DFTPlusGW(BeyondDFT):
     """
     The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the GW SinglePoint EntryArchives are present in the upload.
     """
 
-    method = SubSection(sub_section=GWMethod)
+    method = SubSection(sub_section=DFTPlusGWMethod)
 
-    results = SubSection(sub_section=GWResults)
+    results = SubSection(sub_section=DFTPlusGWResults)
 
     def normalize(self, archive, logger):
         if not self.results:  # creates Results section if not present
-            self.results = GWResults()
+            self.results = DFTPlusGWResults()
 
         super().normalize(archive, logger)
