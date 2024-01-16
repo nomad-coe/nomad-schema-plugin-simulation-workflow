@@ -28,7 +28,7 @@ from .general import (
 )
 
 
-class DMFTResults(SimulationWorkflowResults):
+class DFTPlusTBPlusDMFTResults(SimulationWorkflowResults):
     """
     Groups DFT, TB and DMFT outputs: band gaps (all), DOS (DFT, TB), band
     structures (DFT, TB), Greens functions (DMFT). The ResultsNormalizer takes care
@@ -46,7 +46,7 @@ class DMFTResults(SimulationWorkflowResults):
     )
 
 
-class DMFTMethod(DFTMethod):
+class DFTPlusTBPlusDMFTMethod(DFTMethod):
     """
     Specifies all DFT, TB and DMFT input methodologies: starting XC functional, electrons
     representation (basis set), TB method reference, DMFT method reference.
@@ -67,20 +67,18 @@ class DMFTMethod(DFTMethod):
     )
 
 
-class DMFT(BeyondDFT):
+class DFTPlusTBPlusDMFT(BeyondDFT):  # TODO implement connection with DFT task
     """
     The DMFT workflow is generated in an extra EntryArchive IF both the TB SinglePoint
     and the DMFT SinglePoint EntryArchives are present in the upload.
     """
 
-    # TODO extend to reference a DFT SinglePoint.
+    method = SubSection(sub_section=DFTPlusTBPlusDMFTMethod)
 
-    method = SubSection(sub_section=DMFTMethod)
-
-    results = SubSection(sub_section=DMFTResults)
+    results = SubSection(sub_section=DFTPlusTBPlusDMFTResults)
 
     def normalize(self, archive, logger):
         if not self.results:  # creates Results section if not present
-            self.results = DMFTResults()
+            self.results = DFTPlusTBPlusDMFTResults()
 
         super().normalize(archive, logger)

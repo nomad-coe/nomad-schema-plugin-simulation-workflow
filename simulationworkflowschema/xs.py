@@ -62,8 +62,6 @@ class XS(BeyondDFT):
     results = SubSection(sub_section=XSResults)
 
     def normalize(self, archive, logger):
-        # super().normalize(archive, logger)
-
         if len(self.tasks) < 2:
             logger.error(
                 "Expected more than one task: DFT+PhotonPolarization or DFT+GW+PhotonPolarization."

@@ -44,11 +44,15 @@ from .chemical_reaction import (
     ChemicalReactionResults,
 )
 from .elastic import Elastic, ElasticMethod, ElasticResults
-from .tb import TB, TBMethod, TBResults
-from .gw import GW, GWMethod, GWResults
+from .tb import (
+    FirstPrinciplesPlusTB,
+    FirstPrinciplesPlusTBMethod,
+    FirstPrinciplesPlusTBResults,
+)
+from .gw import DFTPlusGW, DFTPlusGWMethod, DFTPlusGWResults
 from .xs import XS, XSMethod, XSResults
-from .dmft import DMFT, DMFTMethod, DMFTResults
-from .max_ent import MaxEnt, MaxEntMethod, MaxEntResults
+from .dmft import DFTPlusTBPlusDMFT, DFTPlusTBPlusDMFTMethod, DFTPlusTBPlusDMFTResults
+from .max_ent import DMFTPlusMaxEnt, DMFTPlusMaxEntMethod, DMFTPlusMaxEntResults
 from .photon_polarization import (
     PhotonPolarization,
     PhotonPolarizationMethod,

@@ -25,7 +25,7 @@ from .general import (
 )
 
 
-class TBResults(SimulationWorkflowResults):
+class FirstPrinciplesPlusTBResults(SimulationWorkflowResults):
     """
     Groups first principles and TB outputs: band gaps, DOS, band structures. The
     ResultsNormalizer takes care of adding a label 'FirstPrinciples' or 'TB' in the method
@@ -39,7 +39,7 @@ class TBResults(SimulationWorkflowResults):
     tb_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
 
-class TBMethod(SimulationWorkflowMethod):
+class FirstPrinciplesPlusTBMethod(SimulationWorkflowMethod):
     """
     Specifies both the first principles and the TB input methodologies.
     """
@@ -60,18 +60,18 @@ class TBMethod(SimulationWorkflowMethod):
     )
 
 
-class TB(SerialSimulation):
+class FirstPrinciplesPlusTB(SerialSimulation):
     """
     The TB (tight-binding) workflow is generated in an extra EntryArchive IF both
     the first principles SinglePoint and the TB SinglePoint EntryArchives are present in the upload.
     """
 
-    method = SubSection(sub_section=TBMethod)
+    method = SubSection(sub_section=FirstPrinciplesPlusTBMethod)
 
-    results = SubSection(sub_section=TBResults)
+    results = SubSection(sub_section=FirstPrinciplesPlusTBResults)
 
     def normalize(self, archive, logger):
         if not self.results:  # creates Results section if not present
-            self.results = TBResults()
+            self.results = FirstPrinciplesPlusTBResults()
 
         super().normalize(archive, logger)
