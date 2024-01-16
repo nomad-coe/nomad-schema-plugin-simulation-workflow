@@ -477,7 +477,7 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
         """,
     )
 
-    greens_functions_dmft = Quantity(
+    greens_functions = Quantity(
         type=Reference(GreensFunctions),
         shape=["*"],
         description="""
