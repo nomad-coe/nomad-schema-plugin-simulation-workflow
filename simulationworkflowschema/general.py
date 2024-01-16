@@ -21,7 +21,7 @@ import numpy as np
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference
 from nomad.datamodel.metainfo.common import FastAccess
-from nomad.datamodel.metainfo.workflow import Workflow, Link, Task
+from nomad.datamodel.metainfo.workflow import Workflow, Link, Task, TaskReference
 from nomad.datamodel.metainfo.simulation.method import (
     Method,
     XCFunctional,
@@ -336,12 +336,78 @@ class SerialSimulation(SimulationWorkflow):
                 )
 
 
-class BeyondDFT2Tasks(SerialSimulation):
+class BeyondDFT(SerialSimulation):
     """
     Base class used to normalize standard workflows beyond DFT containing two specific
     SinglePoint tasks (GWWorkflow = DFT + GW, DMFTWorkflow = DFT + DMFT,
-    MaxEntWorkflow = DMFT + MaxEnt) and store the outputs in the self.results section.
+    MaxEntWorkflow = DMFT + MaxEnt, and so on) and store the outputs in the self.results
+    section.
     """
+
+    def _resolve_outputs_section(self, output_section, task: TaskReference) -> None:
+        """
+        Resolves the output_section of a task and stores the results in the output_section.
+
+        Args:
+            task (TaskReference): The task from which the outputs are got.
+        """
+        for name, section in output_section.m_def.all_quantities.items():
+            calc_name = "_".join(name.split("_")[:-1])
+            if calc_name in ["dos", "band_structure"]:
+                calc_name = f"{calc_name}_electronic"
+            try:
+                calc_section = getattr(task.outputs[-1].section, calc_name)
+                output_section.m_set(section, calc_section)
+            except Exception:
+                continue
+
+    def get_gw_workflow_results(self) -> None:
+        """
+        Gets the GW workflow results section by resolving the DFTOutputs from the initial
+        task and the GWOutputs from the final task.
+        """
+        dft_outputs = DFTOutputs()
+        self._resolve_outputs_section(dft_outputs, self.tasks[0])
+        gw_outputs = GWOutputs()
+        self._resolve_outputs_section(gw_outputs, self.tasks[1])
+        self.results.dft_outputs = dft_outputs
+        self.results.gw_outputs = gw_outputs
+
+    def get_dmft_workflow_results(self) -> None:
+        """
+        Gets the DMFT workflow results section by resolving the TBOutputs from the initial
+        task and the DMFTOutputs from the final task.
+        """
+        tb_outputs = TBOutputs()
+        self._resolve_outputs_section(tb_outputs, self.tasks[0])
+        dmft_outputs = DMFTOutputs()
+        self._resolve_outputs_section(dmft_outputs, self.tasks[1])
+        self.results.tb_outputs = tb_outputs
+        self.results.dmft_outputs = dmft_outputs
+
+    def get_maxent_workflow_results(self) -> None:
+        """
+        Gets the MaxEnt workflow results section by resolving the DMFTOutputs from the
+        initial task and the MaxEntOutputs from the final task.
+        """
+        dmft_outputs = DMFTOutputs()
+        self._resolve_outputs_section(dmft_outputs, self.tasks[0])
+        maxent_outputs = MaxEntOutputs()
+        self._resolve_outputs_section(maxent_outputs, self.tasks[1])
+        self.results.dmft_outputs = dmft_outputs
+        self.results.maxent_outputs = maxent_outputs
+
+    def get_tb_workflow_results(self) -> None:
+        """
+        Gets the TB workflow results section by resolving the FirstPrinciplesOutputs from the
+        initial task and the TBOutputs from the final task.
+        """
+        first_principles_outputs = FirstPrinciplesOutputs()
+        self._resolve_outputs_section(first_principles_outputs, self.tasks[0])
+        tb_outputs = TBOutputs()
+        self._resolve_outputs_section(tb_outputs, self.tasks[1])
+        self.results.first_principles_outputs = first_principles_outputs
+        self.results.tb_outputs = tb_outputs
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
@@ -350,26 +416,15 @@ class BeyondDFT2Tasks(SerialSimulation):
             logger.error("Expected two tasks.")
             return
 
-        initial_task = self.tasks[0]
-        final_task = self.tasks[1]
-
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if self.m_def.name in ["GW", "DMFT"]:
-                if "dft" in name:
-                    calc_section = getattr(initial_task.outputs[-1].section, calc_name)
-                elif "gw" in name or "dmft" in name:
-                    calc_section = getattr(final_task.outputs[-1].section, calc_name)
-            elif self.m_def.name in ["MaxEnt"]:
-                if "dmft" in name:
-                    calc_section = getattr(initial_task.outputs[-1].section, calc_name)
-                elif "maxent" in name:
-                    calc_section = getattr(final_task.outputs[-1].section, calc_name)
-            if calc_section:
-                self.results.m_set(section, calc_section)
+        workflow_name = self.m_def.name
+        if workflow_name == "GW":
+            self.get_gw_workflow_results()
+        elif workflow_name == "DMFT":
+            self.get_dmft_workflow_results()
+        elif workflow_name == "MaxEnt":
+            self.get_maxent_workflow_results()
+        elif workflow_name == "TB":
+            self.get_tb_workflow_results()
 
 
 class DFTMethod(SimulationWorkflowMethod):
@@ -389,6 +444,37 @@ class DFTMethod(SimulationWorkflowMethod):
         type=Reference(BasisSetContainer),
         description="""
         Reference to the basis set used.
+        """,
+    )
+
+
+class FirstPrinciplesOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of any first principles SinglePoint
+    calculation.
+    """
+
+    band_gap_first_principles = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the first principles band gap.
+        """,
+    )
+
+    dos_first_principles = Quantity(
+        type=Reference(Dos),
+        shape=["*"],
+        description="""
+        Reference to the first principles density of states.
+        """,
+    )
+
+    band_structure_first_principles = Quantity(
+        type=Reference(BandStructure),
+        shape=["*"],
+        description="""
+        Reference to the first principles band structure.
         """,
     )
 
