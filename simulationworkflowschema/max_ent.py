@@ -19,8 +19,7 @@ from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.simulation.method import Method, DMFT as DMFTMethodology
 from .general import (
     SimulationWorkflowResults,
-    DMFTOutputs,
-    MaxEntOutputs,
+    ElectronicStructureOutputs,
     SimulationWorkflowMethod,
     BeyondDFT,
 )
@@ -33,9 +32,13 @@ class MaxEntResults(SimulationWorkflowResults):
     label 'DMFT' or 'MaxEnt' in the method `get_maxent_workflow_properties`.
     """
 
-    dmft_outputs = SubSection(sub_section=DMFTOutputs.m_def, repeats=False)
+    dmft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
+    )
 
-    maxent_outputs = SubSection(sub_section=MaxEntOutputs.m_def, repeats=False)
+    maxent_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
+    )
 
 
 class MaxEntMethod(SimulationWorkflowMethod):

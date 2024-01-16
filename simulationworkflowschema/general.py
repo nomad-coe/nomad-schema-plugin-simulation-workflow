@@ -352,12 +352,11 @@ class BeyondDFT(SerialSimulation):
             task (TaskReference): The task from which the outputs are got.
         """
         for name, section in output_section.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
+            name = f"{name}_electronic" if name in ["dos", "band_structure"] else name
             try:
-                calc_section = getattr(task.outputs[-1].section, calc_name)
-                output_section.m_set(section, calc_section)
+                calc_section = getattr(task.outputs[-1].section, name)
+                if calc_section:
+                    output_section.m_set(section, calc_section)
             except Exception:
                 continue
 
@@ -366,9 +365,9 @@ class BeyondDFT(SerialSimulation):
         Gets the GW workflow results section by resolving the DFTOutputs from the initial
         task and the GWOutputs from the final task.
         """
-        dft_outputs = DFTOutputs()
+        dft_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(dft_outputs, self.tasks[0])
-        gw_outputs = GWOutputs()
+        gw_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(gw_outputs, self.tasks[1])
         self.results.dft_outputs = dft_outputs
         self.results.gw_outputs = gw_outputs
@@ -378,9 +377,9 @@ class BeyondDFT(SerialSimulation):
         Gets the DMFT workflow results section by resolving the TBOutputs from the initial
         task and the DMFTOutputs from the final task.
         """
-        tb_outputs = TBOutputs()
+        tb_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(tb_outputs, self.tasks[0])
-        dmft_outputs = DMFTOutputs()
+        dmft_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(dmft_outputs, self.tasks[1])
         self.results.tb_outputs = tb_outputs
         self.results.dmft_outputs = dmft_outputs
@@ -390,9 +389,9 @@ class BeyondDFT(SerialSimulation):
         Gets the MaxEnt workflow results section by resolving the DMFTOutputs from the
         initial task and the MaxEntOutputs from the final task.
         """
-        dmft_outputs = DMFTOutputs()
+        dmft_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(dmft_outputs, self.tasks[0])
-        maxent_outputs = MaxEntOutputs()
+        maxent_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(maxent_outputs, self.tasks[1])
         self.results.dmft_outputs = dmft_outputs
         self.results.maxent_outputs = maxent_outputs
@@ -402,9 +401,9 @@ class BeyondDFT(SerialSimulation):
         Gets the TB workflow results section by resolving the FirstPrinciplesOutputs from the
         initial task and the TBOutputs from the final task.
         """
-        first_principles_outputs = FirstPrinciplesOutputs()
+        first_principles_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(first_principles_outputs, self.tasks[0])
-        tb_outputs = TBOutputs()
+        tb_outputs = ElectronicStructureOutputs()
         self._resolve_outputs_section(tb_outputs, self.tasks[1])
         self.results.first_principles_outputs = first_principles_outputs
         self.results.tb_outputs = tb_outputs
@@ -448,138 +447,33 @@ class DFTMethod(SimulationWorkflowMethod):
     )
 
 
-class FirstPrinciplesOutputs(SimulationWorkflowResults):
+class ElectronicStructureOutputs(SimulationWorkflowResults):
     """
-    Base class defining the typical output properties of any first principles SinglePoint
-    calculation.
+    Base class defining the typical output properties of any electronic structure
+    SinglePoint calculation: DFT, TB, DMFT, GW, MaxEnt, XS.
     """
 
-    band_gap_first_principles = Quantity(
+    band_gap = Quantity(
         type=Reference(BandGap),
         shape=["*"],
         description="""
-        Reference to the first principles band gap.
+        Reference to the band gap section.
         """,
     )
 
-    dos_first_principles = Quantity(
+    dos = Quantity(
         type=Reference(Dos),
         shape=["*"],
         description="""
-        Reference to the first principles density of states.
+        Reference to the density of states section.
         """,
     )
 
-    band_structure_first_principles = Quantity(
+    band_structure = Quantity(
         type=Reference(BandStructure),
         shape=["*"],
         description="""
-        Reference to the first principles band structure.
-        """,
-    )
-
-
-class DFTOutputs(SimulationWorkflowResults):
-    """
-    Base class defining the typical output properties of a DFT SinglePoint calculation.
-    """
-
-    band_gap_dft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the DFT band gap.
-        """,
-    )
-
-    dos_dft = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the DFT density of states.
-        """,
-    )
-
-    band_structure_dft = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the DFT band structure.
-        """,
-    )
-
-
-class GWOutputs(SimulationWorkflowResults):
-    """
-    Base class defining the typical output properties of a GW SinglePoint calculation.
-    """
-
-    band_gap_gw = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the GW band gap.
-        """,
-    )
-
-    dos_gw = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the GW density of states.
-        """,
-    )
-
-    band_structure_gw = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the GW band structure.
-        """,
-    )
-
-
-class TBOutputs(SimulationWorkflowResults):
-    """
-    Base class defining the typical output properties of a tight-binding (TB) SinglePoint
-    calculation.
-    """
-
-    band_gap_tb = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the TB band gap.
-        """,
-    )
-
-    dos_tb = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the TB density of states.
-        """,
-    )
-
-    band_structure_tb = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the TB band structure.
-        """,
-    )
-
-
-class DMFTOutputs(SimulationWorkflowResults):
-    """
-    Base class defining the typical output properties of a DMFT SinglePoint calculation.
-    """
-
-    band_gap_dmft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the DMFT band gap.
+        Reference to the band structure section.
         """,
     )
 
@@ -587,45 +481,6 @@ class DMFTOutputs(SimulationWorkflowResults):
         type=Reference(GreensFunctions),
         shape=["*"],
         description="""
-        Ref to the DMFT Greens functions.
-        """,
-    )
-
-
-class MaxEntOutputs(SimulationWorkflowResults):
-    """
-    Base class defining the typical output properties of a Maximum Entropy (MaxEnt)
-    SinglePoint calculation.
-    """
-
-    band_gap_maxent = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the MaxEnt band gap.
-        """,
-    )
-
-    dos_maxent = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the MaxEnt density of states.
-        """,
-    )
-
-    band_structure_maxent = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the MaxEnt band structure.
-        """,
-    )
-
-    greens_functions_maxent = Quantity(
-        type=Reference(GreensFunctions),
-        shape=["*"],
-        description="""
-        Ref to the MaxEnt Greens functions.
+        Ref to the Green functions section.
         """,
     )

@@ -19,8 +19,7 @@ from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.simulation.method import GW as GWMethodology
 from .general import (
     SimulationWorkflowResults,
-    DFTOutputs,
-    GWOutputs,
+    ElectronicStructureOutputs,
     DFTMethod,
     BeyondDFT,
 )
@@ -32,9 +31,11 @@ class GWResults(SimulationWorkflowResults):
     takes care of adding a label 'DFT' or 'GW' in the method `get_gw_workflow_properties`.
     """
 
-    dft_outputs = SubSection(sub_section=DFTOutputs.m_def, repeats=False)
+    dft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
+    )
 
-    gw_outputs = SubSection(sub_section=GWOutputs.m_def, repeats=False)
+    gw_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
 
 class GWMethod(DFTMethod):

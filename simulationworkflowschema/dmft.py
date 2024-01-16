@@ -22,9 +22,7 @@ from nomad.datamodel.metainfo.simulation.method import (
 )
 from .general import (
     SimulationWorkflowResults,
-    DFTOutputs,
-    TBOutputs,
-    DMFTOutputs,
+    ElectronicStructureOutputs,
     DFTMethod,
     BeyondDFT,
 )
@@ -37,11 +35,15 @@ class DMFTResults(SimulationWorkflowResults):
     of adding a label 'DFT', 'PROJECTION, or 'DMFT' in the method `get_dmft_workflow_properties`.
     """
 
-    dft_outputs = SubSection(sub_section=DFTOutputs.m_def, repeats=False)
+    dft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
+    )
 
-    tb_outputs = SubSection(sub_section=TBOutputs.m_def, repeats=False)
+    tb_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
-    dmft_outputs = SubSection(sub_section=DMFTOutputs.m_def, repeats=False)
+    dmft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
+    )
 
 
 class DMFTMethod(DFTMethod):
