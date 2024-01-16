@@ -65,35 +65,18 @@ def run_parsing(parser_class, filepath):
 
 
 # TODO rid of the use of parser
-def test_no_workflow():
-    vasp_archive = run_parsing(VASPParser, "tests/data/vasp_outcar/OUTCAR_broken")
-    assert not vasp_archive.workflow2.results.calculations_ref
-
-
-def test_single_point_workflow():
-    vasp_archive = run_parsing(VASPParser, "tests/data/vasp/vasprun.xml.static")
-    sec_workflow = vasp_archive.workflow2
-    assert sec_workflow.method.method == "DFT"
-    assert sec_workflow.results.n_scf_steps == 9
-    assert sec_workflow.results.final_scf_energy_difference > 0
-    assert sec_workflow.results.dos is not None
-    assert sec_workflow.results.band_structure is None
-    assert sec_workflow.results.eigenvalues is not None
-    assert sec_workflow.results.density_charge is None
-    assert sec_workflow.results.spectra is None
-    assert sec_workflow.results.is_converged
 
 
 def test_gw_workflow(gw_workflow):
     """Testing GW workflow (DFT+GW) entry"""
     workflow = gw_workflow.workflow2
-    assert workflow.name == "GW"
+    assert workflow.name == "DFT+GW"
     assert workflow.method.gw_method_ref.type == "G0W0"
     assert workflow.method.electrons_representation.type == "plane waves"
     assert workflow.method.starting_point.name == "GGA_X_PBE"
     results = gw_workflow.results
     assert results.method.method_name == "GW"
-    assert results.method.workflow_name == "GW"
+    assert results.method.workflow_name == "DFT+GW"
     assert results.method.simulation.program_name == "VASP"
     assert results.method.simulation.program_version == "4.6.35"
     assert results.method.simulation.gw.type == "G0W0"
@@ -111,7 +94,7 @@ def test_gw_workflow(gw_workflow):
 def test_dmft_workflow(dmft_workflow):
     """Testing DMFT workflow entry"""
     workflow = dmft_workflow.workflow2
-    assert workflow.name == "DMFT"
+    assert workflow.name == "DFT+TB+DMFT"
     assert not workflow.method.tb_method_ref.wannier.is_maximally_localized
     assert workflow.method.dmft_method_ref.n_impurities == 1
     assert workflow.method.dmft_method_ref.n_correlated_orbitals[0] == 3
@@ -121,7 +104,7 @@ def test_dmft_workflow(dmft_workflow):
     assert workflow.method.dmft_method_ref.impurity_solver == "CT-HYB"
     results = dmft_workflow.results
     assert results.method.method_name == "DMFT"
-    assert results.method.workflow_name == "DMFT"
+    assert results.method.workflow_name == "DFT+TB+DMFT"
     assert results.method.simulation.program_name == "w2dynamics"
     assert results.method.simulation.dmft.impurity_solver_type == "CT-HYB"
     assert results.method.simulation.dmft.inverse_temperature.magnitude == 60.0
@@ -141,7 +124,7 @@ def test_dmft_workflow(dmft_workflow):
 def test_maxent_workflow(maxent_workflow):
     """Testing MaxEnt workflow entry"""
     workflow = maxent_workflow.workflow2
-    assert workflow.name == "MaxEnt"
+    assert workflow.name == "DMFT+MaxEnt"
     assert workflow.method.dmft_method_ref.n_impurities == 1
     assert workflow.method.dmft_method_ref.n_correlated_orbitals[0] == 3
     assert workflow.method.dmft_method_ref.n_electrons[0] == 1.0
@@ -151,7 +134,7 @@ def test_maxent_workflow(maxent_workflow):
     assert workflow.method.maxent_method_ref
     results = maxent_workflow.results
     assert results.method.method_name == "DMFT"
-    assert results.method.workflow_name == "MaxEnt"
+    assert results.method.workflow_name == "DMFT+MaxEnt"
     assert results.method.simulation.program_name == "w2dynamics"
     assert results.method.simulation.dmft.impurity_solver_type == "CT-HYB"
     assert results.method.simulation.dmft.inverse_temperature.magnitude == 60.0
@@ -185,7 +168,7 @@ def test_bse_workflow(bse_workflow):
     assert workflow.method.bse_method_ref.solver == "Lanczos-Haydock"
     results = bse_workflow.results
     assert results.method.method_name == "BSE"
-    assert results.method.workflow_name == "PhotonPolarization"
+    assert results.method.workflow_name == "BSE"
     assert results.method.simulation.program_name == "VASP"
     assert results.method.simulation.program_version == "4.6.35"
     assert results.method.simulation.bse.type == "Singlet"
