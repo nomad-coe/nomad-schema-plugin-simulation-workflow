@@ -22,8 +22,7 @@ from runschema.calculation import (
 )
 from .general import (
     SimulationWorkflowResults,
-    DFTOutputs,
-    GWOutputs,
+    ElectronicStructureOutputs,
     SimulationWorkflowMethod,
     SerialSimulation,
 )
@@ -37,9 +36,11 @@ class XSResults(SimulationWorkflowResults):
     care of adding a label 'DFT' or 'GW' in the method `get_xs_workflow_properties`.
     """
 
-    dft_outputs = SubSection(sub_section=DFTOutputs.m_def, repeats=False)
+    dft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
+    )
 
-    gw_outputs = SubSection(sub_section=GWOutputs.m_def, repeats=False)
+    gw_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
     spectra = SubSection(sub_section=PhotonPolarizationResults, repeats=True)
 

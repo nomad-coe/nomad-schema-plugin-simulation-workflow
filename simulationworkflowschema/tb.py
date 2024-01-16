@@ -19,8 +19,7 @@ from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import TB as TBMethodology, Method
 from .general import (
     SimulationWorkflowResults,
-    FirstPrinciplesOutputs,
-    TBOutputs,
+    ElectronicStructureOutputs,
     SimulationWorkflowMethod,
     SerialSimulation,
 )
@@ -34,10 +33,10 @@ class TBResults(SimulationWorkflowResults):
     """
 
     first_principles_outputs = SubSection(
-        sub_section=FirstPrinciplesOutputs.m_def, repeats=False
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
     )
 
-    tb_outputs = SubSection(sub_section=TBOutputs.m_def, repeats=False)
+    tb_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
 
 class TBMethod(SimulationWorkflowMethod):
