@@ -21,27 +21,32 @@ from runschema.method import (
     DMFT as DMFTMethodology,
 )
 from .general import (
+    SimulationWorkflowResults,
     DFTOutputs,
     TBOutputs,
     DMFTOutputs,
     DFTMethod,
-    BeyondDFT2Tasks,
+    BeyondDFT,
 )
 
 
-class DMFTResults(DFTOutputs, TBOutputs, DMFTOutputs):
+class DMFTResults(SimulationWorkflowResults):
     """
     Groups DFT, TB and DMFT outputs: band gaps (all), DOS (DFT, TB), band
     structures (DFT, TB), Greens functions (DMFT). The ResultsNormalizer takes care
     of adding a label 'DFT', 'PROJECTION, or 'DMFT' in the method `get_dmft_workflow_properties`.
     """
 
-    pass
+    dft_outputs = SubSection(sub_section=DFTOutputs.m_def, repeats=False)
+
+    tb_outputs = SubSection(sub_section=TBOutputs.m_def, repeats=False)
+
+    dmft_outputs = SubSection(sub_section=DMFTOutputs.m_def, repeats=False)
 
 
 class DMFTMethod(DFTMethod):
     """
-    Groups DFT, TB and DMFT input methodologies: starting XC functional, electrons
+    Specifies all DFT, TB and DMFT input methodologies: starting XC functional, electrons
     representation (basis set), TB method reference, DMFT method reference.
     """
 
@@ -60,7 +65,7 @@ class DMFTMethod(DFTMethod):
     )
 
 
-class DMFT(BeyondDFT2Tasks):
+class DMFT(BeyondDFT):
     """
     The DMFT workflow is generated in an extra EntryArchive IF both the TB SinglePoint
     and the DMFT SinglePoint EntryArchives are present in the upload.

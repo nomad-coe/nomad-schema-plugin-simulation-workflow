@@ -18,26 +18,29 @@
 from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import Method, DMFT as DMFTMethodology
 from .general import (
+    SimulationWorkflowResults,
     DMFTOutputs,
     MaxEntOutputs,
     SimulationWorkflowMethod,
-    BeyondDFT2Tasks,
+    BeyondDFT,
 )
 
 
-class MaxEntResults(DMFTOutputs, MaxEntOutputs):
+class MaxEntResults(SimulationWorkflowResults):
     """
     Groups DMFT and MaxEnt outputs: greens functions (DMFT, MaxEnt), band gaps (MaxEnt),
     DOS (MaxEnt), band structures (MaxEnt). The ResultsNormalizer takes care of adding a
     label 'DMFT' or 'MaxEnt' in the method `get_maxent_workflow_properties`.
     """
 
-    pass
+    dmft_outputs = SubSection(sub_section=DMFTOutputs.m_def, repeats=False)
+
+    maxent_outputs = SubSection(sub_section=MaxEntOutputs.m_def, repeats=False)
 
 
 class MaxEntMethod(SimulationWorkflowMethod):
     """
-    Groups DMFT and MaxEnt input methodologies: DMFT method references, MaxEnt method
+    Specifies both DMFT and MaxEnt input methodologies: DMFT method references, MaxEnt method
     reference.
     """
 
@@ -57,7 +60,7 @@ class MaxEntMethod(SimulationWorkflowMethod):
     )
 
 
-class MaxEnt(BeyondDFT2Tasks):
+class MaxEnt(BeyondDFT):
     """
     The MaxEnt (Maximum Entropy) workflow is generated in an extra EntryArchive IF both
     the DMFT SinglePoint and the MaxEnt SinglePoint EntryArchives are present in the upload.

@@ -18,25 +18,28 @@
 from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import GW as GWMethodology
 from .general import (
+    SimulationWorkflowResults,
     DFTOutputs,
     GWOutputs,
     DFTMethod,
-    BeyondDFT2Tasks,
+    BeyondDFT,
 )
 
 
-class GWResults(DFTOutputs, GWOutputs):
+class GWResults(SimulationWorkflowResults):
     """
     Groups DFT and GW outputs: band gaps, DOS, band structures. The ResultsNormalizer
     takes care of adding a label 'DFT' or 'GW' in the method `get_gw_workflow_properties`.
     """
 
-    pass
+    dft_outputs = SubSection(sub_section=DFTOutputs.m_def, repeats=False)
+
+    gw_outputs = SubSection(sub_section=GWOutputs.m_def, repeats=False)
 
 
 class GWMethod(DFTMethod):
     """
-    Groups DFT and GW input methodologies: starting XC functional, electrons
+    Specifies both DFT and GW input methodologies: starting XC functional, electrons
     representation (basis set), GW method reference.
     """
 
@@ -48,7 +51,7 @@ class GWMethod(DFTMethod):
     )
 
 
-class GW(BeyondDFT2Tasks):
+class GW(BeyondDFT):
     """
     The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the GW SinglePoint EntryArchives are present in the upload.
