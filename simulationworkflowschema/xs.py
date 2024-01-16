@@ -20,16 +20,26 @@ from nomad.datamodel.metainfo.simulation.calculation import (
     Spectra,
     ElectronicStructureProvenance,
 )
-from .general import DFTOutputs, GWOutputs, SimulationWorkflowMethod, SerialSimulation
+from .general import (
+    SimulationWorkflowResults,
+    DFTOutputs,
+    GWOutputs,
+    SimulationWorkflowMethod,
+    SerialSimulation,
+)
 from .photon_polarization import PhotonPolarizationResults
 
 
-class XSResults(DFTOutputs, GWOutputs):
+class XSResults(SimulationWorkflowResults):
     """
     Groups DFT, GW and PhotonPolarization outputs: band gaps (DFT, GW), DOS (DFT, GW),
     band structures (DFT, GW), spectra (PhotonPolarization). The ResultsNormalizer takes
     care of adding a label 'DFT' or 'GW' in the method `get_xs_workflow_properties`.
     """
+
+    dft_outputs = SubSection(sub_section=DFTOutputs.m_def, repeats=False)
+
+    gw_outputs = SubSection(sub_section=GWOutputs.m_def, repeats=False)
 
     spectra = SubSection(sub_section=PhotonPolarizationResults, repeats=True)
 
@@ -79,12 +89,14 @@ class XS(SerialSimulation):
             calc_section = []
             if "dft" in name:
                 calc_section = getattr(dft_task.outputs[-1].section, calc_name)
+                if calc_section:
+                    self.results.dft_outputs = DFTOutputs().m_set(section, calc_section)
             elif "gw" in name and gw_task:
                 calc_section = getattr(gw_task.outputs[-1].section, calc_name)
+                if calc_section:
+                    self.results.gw_outputs = GWOutputs().m_set(section, calc_section)
             elif name == "spectra":
-                pass
-            if calc_section:
-                self.results.m_set(section, calc_section)
+                continue
         for xs in xs_tasks:
             if xs.m_xpath("task.results"):
                 photon_results = xs.task.results
