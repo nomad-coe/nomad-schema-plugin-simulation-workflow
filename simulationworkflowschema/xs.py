@@ -24,7 +24,7 @@ from .general import (
     SimulationWorkflowResults,
     ElectronicStructureOutputs,
     SimulationWorkflowMethod,
-    SerialSimulation,
+    BeyondDFT,
 )
 from .photon_polarization import PhotonPolarizationResults
 
@@ -49,7 +49,7 @@ class XSMethod(SimulationWorkflowMethod):
     pass
 
 
-class XS(SerialSimulation):
+class XS(BeyondDFT):
     """
     The XS workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the PhotonPolarization EntryArchives are present in the upload.
@@ -62,7 +62,7 @@ class XS(SerialSimulation):
     results = SubSection(sub_section=XSResults)
 
     def normalize(self, archive, logger):
-        super().normalize(archive, logger)
+        # super().normalize(archive, logger)
 
         if len(self.tasks) < 2:
             logger.error(
@@ -83,21 +83,8 @@ class XS(SerialSimulation):
         if not self.results:
             self.results = XSResults()
 
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if "dft" in name:
-                calc_section = getattr(dft_task.outputs[-1].section, calc_name)
-                if calc_section:
-                    self.results.dft_outputs = DFTOutputs().m_set(section, calc_section)
-            elif "gw" in name and gw_task:
-                calc_section = getattr(gw_task.outputs[-1].section, calc_name)
-                if calc_section:
-                    self.results.gw_outputs = GWOutputs().m_set(section, calc_section)
-            elif name == "spectra":
-                continue
+        self.get_gw_workflow_results(dft_task, gw_task)
+
         for xs in xs_tasks:
             if xs.m_xpath("task.results"):
                 photon_results = xs.task.results

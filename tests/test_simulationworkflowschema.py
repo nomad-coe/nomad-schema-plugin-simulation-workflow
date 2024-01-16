@@ -211,8 +211,8 @@ def test_xs_workflow(xs_workflow):
     assert len(workflow.tasks) == 2
     assert workflow.tasks[0].name == "DFT" and workflow.tasks[1].name == "BSE 1"
     assert (
-        workflow.results.dos_dft
-        and workflow.results.band_structure_dft
+        workflow.results.dft_outputs.dos
+        and workflow.results.dft_outputs.band_structure
         and workflow.results.spectra
     )
     results = xs_workflow.results

@@ -360,51 +360,59 @@ class BeyondDFT(SerialSimulation):
             except Exception:
                 continue
 
-    def get_gw_workflow_results(self) -> None:
+    def get_gw_workflow_results(
+        self, initial_task: TaskReference, final_task: TaskReference
+    ) -> None:
         """
         Gets the GW workflow results section by resolving the DFTOutputs from the initial
         task and the GWOutputs from the final task.
         """
         dft_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(dft_outputs, self.tasks[0])
+        self._resolve_outputs_section(dft_outputs, initial_task)
         gw_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(gw_outputs, self.tasks[1])
+        self._resolve_outputs_section(gw_outputs, final_task)
         self.results.dft_outputs = dft_outputs
         self.results.gw_outputs = gw_outputs
 
-    def get_dmft_workflow_results(self) -> None:
+    def get_dmft_workflow_results(
+        self, initial_task: TaskReference, final_task: TaskReference
+    ) -> None:
         """
         Gets the DMFT workflow results section by resolving the TBOutputs from the initial
         task and the DMFTOutputs from the final task.
         """
         tb_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(tb_outputs, self.tasks[0])
+        self._resolve_outputs_section(tb_outputs, initial_task)
         dmft_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(dmft_outputs, self.tasks[1])
+        self._resolve_outputs_section(dmft_outputs, final_task)
         self.results.tb_outputs = tb_outputs
         self.results.dmft_outputs = dmft_outputs
 
-    def get_maxent_workflow_results(self) -> None:
+    def get_maxent_workflow_results(
+        self, initial_task: TaskReference, final_task: TaskReference
+    ) -> None:
         """
         Gets the MaxEnt workflow results section by resolving the DMFTOutputs from the
         initial task and the MaxEntOutputs from the final task.
         """
         dmft_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(dmft_outputs, self.tasks[0])
+        self._resolve_outputs_section(dmft_outputs, initial_task)
         maxent_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(maxent_outputs, self.tasks[1])
+        self._resolve_outputs_section(maxent_outputs, final_task)
         self.results.dmft_outputs = dmft_outputs
         self.results.maxent_outputs = maxent_outputs
 
-    def get_tb_workflow_results(self) -> None:
+    def get_tb_workflow_results(
+        self, initial_task: TaskReference, final_task: TaskReference
+    ) -> None:
         """
         Gets the TB workflow results section by resolving the FirstPrinciplesOutputs from the
         initial task and the TBOutputs from the final task.
         """
         first_principles_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(first_principles_outputs, self.tasks[0])
+        self._resolve_outputs_section(first_principles_outputs, initial_task)
         tb_outputs = ElectronicStructureOutputs()
-        self._resolve_outputs_section(tb_outputs, self.tasks[1])
+        self._resolve_outputs_section(tb_outputs, final_task)
         self.results.first_principles_outputs = first_principles_outputs
         self.results.tb_outputs = tb_outputs
 
@@ -415,15 +423,18 @@ class BeyondDFT(SerialSimulation):
             logger.error("Expected two tasks.")
             return
 
+        initial_task = self.tasks[0]
+        final_task = self.tasks[1]
+
         workflow_name = self.m_def.name
         if workflow_name == "GW":
-            self.get_gw_workflow_results()
+            self.get_gw_workflow_results(initial_task, final_task)
         elif workflow_name == "DMFT":
-            self.get_dmft_workflow_results()
+            self.get_dmft_workflow_results(initial_task, final_task)
         elif workflow_name == "MaxEnt":
-            self.get_maxent_workflow_results()
+            self.get_maxent_workflow_results(initial_task, final_task)
         elif workflow_name == "TB":
-            self.get_tb_workflow_results()
+            self.get_tb_workflow_results(initial_task, final_task)
 
 
 class DFTMethod(SimulationWorkflowMethod):
