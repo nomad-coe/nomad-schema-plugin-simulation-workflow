@@ -385,40 +385,19 @@ class BeyondDFT(SerialSimulation):
             return
 
         # We extract the workflow name from the tasks names
-        workflow_name = []
-        for task in self.tasks:
-            workflow_name.append(task.name)
-        self.name = "+".join(workflow_name)
-        if self.name != self.m_def.name.replace("Plus", "+"):
-            logger.warning(
-                "Joining tasks names does not match workflow name from class definition."
-            )
-
+        self.name = "+".join([task.name for task in self.tasks if task.name])
+        task_map = {
+            task.name.lower(): self.tasks[n] for n, task in enumerate(self.tasks)
+        }
         # Resolve workflow2.results for each standard BeyondDFT workflow
         if self.name == "DFT+GW":
-            task_map = {
-                "dft": self.tasks[0],
-                "gw": self.tasks[1],
-            }
             self.get_electronic_structure_workflow_results(task_map)
-        elif self.name == "DFT+TB+DMFT":
-            # TODO extend for DFT tasks
-            task_map = {
-                "tb": self.tasks[0],
-                "dmft": self.tasks[1],
-            }
+        elif self.name == "TB+DMFT":  # TODO extend for DFT tasks
             self.get_electronic_structure_workflow_results(task_map)
         elif self.name == "DMFT+MaxEnt":
-            task_map = {
-                "dmft": self.tasks[0],
-                "maxent": self.tasks[1],
-            }
             self.get_electronic_structure_workflow_results(task_map)
-        elif self.name == "First Principles+TB":
-            task_map = {
-                "first_principles": self.tasks[0],
-                "tb": self.tasks[1],
-            }
+        elif self.name == "FirstPrinciples+TB":
+            task_map["first_principles"] = task_map.pop("firstprinciples")
             self.get_electronic_structure_workflow_results(task_map)
 
 

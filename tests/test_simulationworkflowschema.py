@@ -109,7 +109,7 @@ def test_gw_workflow(gw_workflow):
 def test_dmft_workflow(dmft_workflow):
     """Testing DMFT workflow entry"""
     workflow = dmft_workflow.workflow2
-    assert workflow.name == "DFT+TB+DMFT"
+    assert workflow.name == "TB+DMFT"
     assert not workflow.method.tb_method_ref.wannier.is_maximally_localized
     assert workflow.method.dmft_method_ref.n_impurities == 1
     assert workflow.method.dmft_method_ref.n_correlated_orbitals[0] == 3
@@ -119,7 +119,7 @@ def test_dmft_workflow(dmft_workflow):
     assert workflow.method.dmft_method_ref.impurity_solver == "CT-HYB"
     results = dmft_workflow.results
     assert results.method.method_name == "DMFT"
-    assert results.method.workflow_name == "DFT+TB+DMFT"
+    assert results.method.workflow_name == "TB+DMFT"
     assert results.method.simulation.program_name == "w2dynamics"
     assert results.method.simulation.dmft.impurity_solver_type == "CT-HYB"
     assert results.method.simulation.dmft.inverse_temperature.magnitude == 60.0

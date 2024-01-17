@@ -560,7 +560,7 @@ def get_template_dmft_workflow() -> EntryArchive:
     run_normalize(archive_dmft)
     # Defining Projection and DMFT tasks for later the DMFT workflow
     task_proj = TaskReference(task=archive_tb.workflow2)
-    task_proj.name = "Projection"
+    task_proj.name = "TB"
     task_proj.inputs = [
         Link(name="Input structure", section=archive_tb.run[-1].system[-1])
     ]
@@ -626,7 +626,7 @@ def get_template_maxent_workflow() -> EntryArchive:
         )
     ]
     task_maxent = TaskReference(task=archive_dmft.workflow2)
-    task_maxent.name = "MaxEnt Sigma"
+    task_maxent.name = "MaxEnt"
     task_maxent.inputs = [
         Link(
             name="Output DMFT calculation", section=archive_dmft.run[-1].calculation[-1]
@@ -634,7 +634,7 @@ def get_template_maxent_workflow() -> EntryArchive:
     ]
     task_maxent.outputs = [
         Link(
-            name="Output MaxEnt Sigma calculation",
+            name="Output MaxEnt calculation",
             section=archive_maxent.run[-1].calculation[-1],
         )
     ]
@@ -659,7 +659,7 @@ def get_template_maxent_workflow() -> EntryArchive:
     )
     outputs = [
         Link(
-            name="Output MaxEnt Sigma calculation",
+            name="Output MaxEnt calculation",
             section=archive_dmft.run[-1].calculation[-1],
         ),
         Link(
