@@ -20,6 +20,8 @@ from .general import (
     SimulationWorkflow,
     SimulationWorkflowMethod,
     SimulationWorkflowResults,
+    ParallelSimulation,
+    SerialSimulation,
     BeyondDFT,
     DFTMethod,
     ElectronicStructureOutputs,
