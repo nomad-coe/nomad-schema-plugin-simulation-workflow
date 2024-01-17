@@ -482,32 +482,32 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
     )
 
 
-class NMROutputs(SimulationWorkflowResults):
+class MagneticOutputs(SimulationWorkflowResults):
     """
-    Base class defining the typical output properties of a NMR SinglePoint calculation.
+    Base class defining the typical output properties of magnetic SinglePoint calculations.
     """
 
-    magnetic_shielding_nmr = Quantity(
+    magnetic_shielding = Quantity(
         type=Reference(MagneticShielding),
         shape=["*"],
         description="""
-        Reference to the NMR magnetic shielding tensors.
+        Reference to the magnetic shielding tensors.
         """,
     )
 
-    electric_field_gradient_nmr = Quantity(
+    electric_field_gradient = Quantity(
         type=Reference(ElectricFieldGradient),
         shape=["*"],
         description="""
-        Reference to the NMR electric field gradient tensors.
+        Reference to the electric field gradient tensors.
         """,
     )
 
-    spin_spin_coupling_nmr = Quantity(
+    spin_spin_coupling = Quantity(
         type=Reference(SpinSpinCoupling),
         shape=["*"],
         description="""
-        Reference to the NMR spin-spin coupling tensors.
+        Reference to the spin-spin coupling tensors.
         """,
     )
 
@@ -515,6 +515,6 @@ class NMROutputs(SimulationWorkflowResults):
         type=Reference(MagneticSusceptibility),
         shape=["*"],
         description="""
-        Reference to the NMR magnetic susceptibility tensors.
+        Reference to the magnetic susceptibility tensors.
         """,
     )

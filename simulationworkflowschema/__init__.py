@@ -20,6 +20,10 @@ from .general import (
     SimulationWorkflow,
     SimulationWorkflowMethod,
     SimulationWorkflowResults,
+    BeyondDFT,
+    DFTMethod,
+    ElectronicStructureOutputs,
+    MagneticOutputs,
 )
 from .single_point import SinglePoint, SinglePointMethod, SinglePointResults
 from .geometry_optimization import (
@@ -59,4 +63,3 @@ from .photon_polarization import (
     PhotonPolarizationResults,
 )
 from .thermodynamics import Thermodynamics, ThermodynamicsMethod, ThermodynamicsResults
-from .nmr_magres import NMRMagRes, NMRMagResMethod, NMRMagResResults
