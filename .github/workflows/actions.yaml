@@ -11,8 +11,8 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        pip install --ignore-installed --upgrade pip
-        pip install --ignore-installed .[dev,tests]
+        pip install --force-reinstall --upgrade pip
+        pip install .[dev,tests] --no-deps nomad-schema-plugin-simulation-workflow 
     - name: mypy
       run: |
         python -m mypy --ignore-missing-imports --follow-imports=silent --no-strict-optional simulationworkflowschema tests
