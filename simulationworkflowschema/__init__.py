@@ -20,6 +20,12 @@ from .general import (
     SimulationWorkflow,
     SimulationWorkflowMethod,
     SimulationWorkflowResults,
+    ParallelSimulation,
+    SerialSimulation,
+    BeyondDFT,
+    DFTMethod,
+    ElectronicStructureOutputs,
+    MagneticOutputs,
 )
 from .single_point import SinglePoint, SinglePointMethod, SinglePointResults
 from .geometry_optimization import (

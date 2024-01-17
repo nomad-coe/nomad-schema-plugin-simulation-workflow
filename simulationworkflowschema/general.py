@@ -34,6 +34,10 @@ from runschema.calculation import (
     Dos,
     BandStructure,
     GreensFunctions,
+    MagneticShielding,
+    ElectricFieldGradient,
+    SpinSpinCoupling,
+    MagneticSusceptibility,
 )
 
 
@@ -474,5 +478,43 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
         shape=["*"],
         description="""
         Ref to the Green functions section.
+        """,
+    )
+
+
+class MagneticOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of magnetic SinglePoint calculations.
+    """
+
+    magnetic_shielding = Quantity(
+        type=Reference(MagneticShielding),
+        shape=["*"],
+        description="""
+        Reference to the magnetic shielding tensors.
+        """,
+    )
+
+    electric_field_gradient = Quantity(
+        type=Reference(ElectricFieldGradient),
+        shape=["*"],
+        description="""
+        Reference to the electric field gradient tensors.
+        """,
+    )
+
+    spin_spin_coupling = Quantity(
+        type=Reference(SpinSpinCoupling),
+        shape=["*"],
+        description="""
+        Reference to the spin-spin coupling tensors.
+        """,
+    )
+
+    magnetic_susceptibility_nmr = Quantity(
+        type=Reference(MagneticSusceptibility),
+        shape=["*"],
+        description="""
+        Reference to the magnetic susceptibility tensors.
         """,
     )
