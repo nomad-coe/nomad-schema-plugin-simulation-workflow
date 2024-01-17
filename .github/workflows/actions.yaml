@@ -11,8 +11,8 @@ jobs:
         python-version: 3.9
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
-        pip install --force-reinstall .[dev,tests]
+        pip install --ignore-installed --upgrade pip
+        pip install --ignore-installed .[dev,tests]
     - name: mypy
       run: |
         python -m mypy --ignore-missing-imports --follow-imports=silent --no-strict-optional simulationworkflowschema tests
