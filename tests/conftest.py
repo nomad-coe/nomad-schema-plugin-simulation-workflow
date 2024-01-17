@@ -26,19 +26,19 @@ from nomad.units import ureg
 from nomad.normalizing import normalizers
 from nomad.utils import get_logger
 from nomad.datamodel import EntryArchive, EntryMetadata
-from nomad.datamodel.metainfo.simulation.run import Run, Program
-from nomad.datamodel.metainfo.simulation.method import (
+from runschema.run import Run, Program
+from runschema.method import (
     Method, BasisSetContainer, BasisSet, Electronic, DFT, XCFunctional, Functional,
     Electronic, Smearing, Scf, GW, Photon, BSE, DMFT, AtomParameters, TB, Wannier,
     LatticeModelHamiltonian, HubbardKanamoriModel)
-from nomad.datamodel.metainfo.simulation.calculation import (
+from runschema.calculation import (
     Calculation, Energy, EnergyEntry, Dos, DosValues, BandStructure, BandEnergies,
     RadiusOfGyration, RadiusOfGyrationValues, GreensFunctions, Spectra, ElectronicStructureProvenance)
 
-from nomad.datamodel.metainfo.simulation.method import (
+from runschema.method import (
     Method, BasisSetContainer, BasisSet, Electronic, XCFunctional, Functional, DFT, GW
 )
-from nomad.datamodel.metainfo.simulation.system import AtomsGroup, System, Atoms
+from runschema.system import AtomsGroup, System, Atoms
 from nomad.datamodel.metainfo.workflow import (
     Link, TaskReference
 )

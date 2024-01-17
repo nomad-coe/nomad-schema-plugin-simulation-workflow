@@ -26,13 +26,9 @@ import json
 from nomad.units import ureg
 from nomad.utils import get_logger
 from nomad.datamodel import EntryArchive, EntryMetadata
-from nomad.datamodel.metainfo.simulation.run import Run, Program
-from nomad.datamodel.metainfo.simulation.calculation import (
-    Calculation,
-    Energy,
-    EnergyEntry,
-)
-from nomad.datamodel.metainfo.simulation.system import System, Atoms
+from runschema.run import Run, Program
+from runschema.calculation import Calculation, Energy, EnergyEntry
+from runschema.system import System, Atoms
 from nomad.datamodel.metainfo.workflow import Task, Link
 from simulationworkflowschema.general import (
     SimulationWorkflow,
