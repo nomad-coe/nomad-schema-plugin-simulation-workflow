@@ -23,17 +23,20 @@ from nomad.datamodel.metainfo.workflow import Link
 from runschema.calculation import EnergyEntry
 
 from .general import (
-    SimulationWorkflowMethod, SimulationWorkflowResults, SerialSimulation,
-    WORKFLOW_METHOD_NAME, WORKFLOW_RESULTS_NAME, resolve_difference
+    SimulationWorkflowMethod,
+    SimulationWorkflowResults,
+    SerialSimulation,
+    WORKFLOW_METHOD_NAME,
+    WORKFLOW_RESULTS_NAME,
+    resolve_difference,
 )
 
 
 class GeometryOptimizationMethod(SimulationWorkflowMethod):
-
     type = Quantity(
-        type=MEnum('static', 'atomic', 'cell_shape', 'cell_volume'),
+        type=MEnum("static", "atomic", "cell_shape", "cell_volume"),
         shape=[],
-        description='''
+        description="""
         The type of geometry optimization, which denotes what is being optimized.
 
         Allowed values are:
@@ -50,123 +53,136 @@ class GeometryOptimizationMethod(SimulationWorkflowMethod):
 
         | `"cell_shape"`        | `"cell_volume"` but without the isotropic constraint: all cell parameters are updated |
 
-        ''')
+        """,
+    )
 
     method = Quantity(
         type=str,
         shape=[],
-        description='''
+        description="""
         The method used for geometry optimization. Some known possible values are:
         `"steepest_descent"`, `"conjugant_gradient"`, `"low_memory_broyden_fletcher_goldfarb_shanno"`.
-        ''')
+        """,
+    )
 
     convergence_tolerance_energy_difference = Quantity(
         type=np.float64,
         shape=[],
-        unit='joule',
-        description='''
+        unit="joule",
+        description="""
         The input energy difference tolerance criterion.
-        ''')
+        """,
+    )
 
     convergence_tolerance_force_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit='newton',
-        description='''
+        unit="newton",
+        description="""
         The input maximum net force tolerance criterion.
-        ''')
+        """,
+    )
 
     convergence_tolerance_stress_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit='pascal',
-        description='''
+        unit="pascal",
+        description="""
         The input maximum stress tolerance criterion.
-        ''')
+        """,
+    )
 
     convergence_tolerance_displacement_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit='meter',
-        description='''
+        unit="meter",
+        description="""
         The input maximum displacement tolerance criterion.
-        ''')
+        """,
+    )
 
     optimization_steps_maximum = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Maximum number of optimization steps.
-        ''')
+        """,
+    )
 
     save_frequency = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         The number of optimization steps between saving the calculation.
-        ''')
+        """,
+    )
 
 
 class GeometryOptimizationResults(SimulationWorkflowResults):
-
     optimization_steps = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Number of saved optimization steps.
-        ''')
+        """,
+    )
 
     energies = Quantity(
         type=np.float64,
-        unit='joule',
-        shape=['optimization_steps'],
-        description='''
+        unit="joule",
+        shape=["optimization_steps"],
+        description="""
         List of energy_total values gathered from the single configuration
         calculations that are a part of the optimization trajectory.
-        ''')
+        """,
+    )
 
     steps = Quantity(
         type=np.int32,
-        shape=['optimization_steps'],
-        description='''
+        shape=["optimization_steps"],
+        description="""
         The step index corresponding to each saved configuration.
-        ''')
+        """,
+    )
 
     final_energy_difference = Quantity(
         type=np.float64,
         shape=[],
-        unit='joule',
-        description='''
+        unit="joule",
+        description="""
         The difference in the energy_total between the last two steps during
         optimization.
-        ''')
+        """,
+    )
 
     final_force_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit='newton',
-        description='''
+        unit="newton",
+        description="""
         The maximum net force in the last optimization step.
-        ''')
+        """,
+    )
 
     final_displacement_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit='meter',
-        description='''
+        unit="meter",
+        description="""
         The maximum displacement in the last optimization step with respect to previous.
-        ''')
+        """,
+    )
 
     is_converged_geometry = Quantity(
         type=bool,
         shape=[],
-        description='''
+        description="""
         Indicates if the geometry convergence criteria were fulfilled.
-        ''')
+        """,
+    )
 
 
 class GeometryOptimization(SerialSimulation):
-
     method = SubSection(sub_section=GeometryOptimizationMethod)
 
     results = SubSection(sub_section=GeometryOptimizationResults)
@@ -182,21 +198,21 @@ class GeometryOptimization(SerialSimulation):
                 cell1_normed = cell1 / np.linalg.norm(cell1)
                 cell2_normed = cell2 / np.linalg.norm(cell2)
                 if (cell1_normed == cell2_normed).all():
-                    return 'cell_volume'
+                    return "cell_volume"
                 else:
-                    return 'cell_shape'
+                    return "cell_shape"
 
         if len(self._systems) < 2:
-            return 'static'
+            return "static"
 
         else:
             if self._systems[0].atoms is None or self._systems[-1].atoms is None:
-                return 'static'
+                return "static"
 
             cell_init = self._systems[0].atoms.lattice_vectors
             cell_final = self._systems[-1].atoms.lattice_vectors
             if cell_init is None or cell_final is None:
-                return 'static'
+                return "static"
 
             cell_relaxation = compare_cell(cell_init.magnitude, cell_final.magnitude)
 
@@ -206,12 +222,12 @@ class GeometryOptimization(SerialSimulation):
             atom_pos_init = self._systems[0].atoms.positions
             atom_pos_final = self._systems[-1].atoms.positions
             if atom_pos_init is None or atom_pos_final is None:
-                return 'static'
+                return "static"
 
             if (atom_pos_init.magnitude == atom_pos_final.magnitude).all():
-                return 'static'
+                return "static"
 
-            return 'atomic'
+            return "atomic"
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
@@ -243,32 +259,45 @@ class GeometryOptimization(SerialSimulation):
                 break
             energies.append(energy.magnitude)
         if invalid:
-            logger.warning('Energy not reported for an calculation that is part of a geometry optimization')
+            logger.warning(
+                "Energy not reported for an calculation that is part of a geometry optimization"
+            )
         if energies:
             self.results.energies = energies * EnergyEntry.value.unit
 
         energy_difference = resolve_difference(energies)
         if not self.results.final_energy_difference and energy_difference is not None:
-            self.results.final_energy_difference = energy_difference * EnergyEntry.value.unit
+            self.results.final_energy_difference = (
+                energy_difference * EnergyEntry.value.unit
+            )
 
         if not self.results.final_force_maximum:
             if len(self._calculations) > 0:
-                if self._calculations[-1].forces is not None and self._calculations[-1].forces.total is not None:
+                if (
+                    self._calculations[-1].forces is not None
+                    and self._calculations[-1].forces.total is not None
+                ):
                     forces = self._calculations[-1].forces.total.value
                     if forces is not None:
                         max_force = np.max(np.linalg.norm(forces.magnitude, axis=1))
                         self.results.final_force_maximum = max_force * forces.units
 
         if not self.results.final_displacement_maximum and self._systems:
+
             def get_atoms_positions(index):
                 system = self._systems[index]
-                if not system.atoms or system.atoms.positions is None or system.atoms.lattice_vectors is None:
+                if (
+                    not system.atoms
+                    or system.atoms.positions is None
+                    or system.atoms.lattice_vectors is None
+                ):
                     return
                 try:
                     atoms = Atoms(
                         positions=system.atoms.positions.magnitude,
                         cell=system.atoms.lattice_vectors.magnitude,
-                        pbc=system.atoms.periodic)
+                        pbc=system.atoms.periodic,
+                    )
                     atoms.wrap()
                     return atoms.get_positions()
                 except Exception:
@@ -290,17 +319,26 @@ class GeometryOptimization(SerialSimulation):
             # we can have several criteria for convergence: energy, force, displacement
             criteria = []
             try:
-                criteria.append(self.results.final_energy_difference <= self.method.convergence_tolerance_energy_difference)
+                criteria.append(
+                    self.results.final_energy_difference
+                    <= self.method.convergence_tolerance_energy_difference
+                )
             except Exception:
                 pass
 
             try:
-                criteria.append(self.results.final_force_maximum <= self.method.convergence_tolerance_force_maximum)
+                criteria.append(
+                    self.results.final_force_maximum
+                    <= self.method.convergence_tolerance_force_maximum
+                )
             except Exception:
                 pass
 
             try:
-                criteria.append(self.results.final_displacement_maximum <= self.method.convergence_tolerance_displacement_maximum)
+                criteria.append(
+                    self.results.final_displacement_maximum
+                    <= self.method.convergence_tolerance_displacement_maximum
+                )
             except Exception:
                 pass
 

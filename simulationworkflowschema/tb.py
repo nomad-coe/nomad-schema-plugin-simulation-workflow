@@ -18,51 +18,57 @@
 from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import TB as TBMethodology
 from runschema.calculation import BandGap, BandStructure
-from .general import SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation
+from .general import (
+    SimulationWorkflowResults,
+    SimulationWorkflowMethod,
+    SerialSimulation,
+)
 
 
 class TBResults(SimulationWorkflowResults):
-
     band_gap_first_principles = Quantity(
         type=Reference(BandGap),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
             Reference to the First-principles band gap.
-            ''')
+            """,
+    )
 
     band_gap_tb = Quantity(
         type=Reference(BandGap),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
             Reference to the TB band gap.
-            ''')
+            """,
+    )
 
     band_structure_first_principles = Quantity(
         type=Reference(BandStructure),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the first-principles band structure.
-        ''')
+        """,
+    )
 
     band_structure_tb = Quantity(
         type=Reference(BandStructure),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the tight-Binding band structure.
-        ''')
+        """,
+    )
 
 
 class TBMethod(SimulationWorkflowMethod):
-
     tb_method_ref = Quantity(
         type=Reference(TBMethodology),
-        description='''
+        description="""
         Reference to the tight-Binding methodology.
-        ''')
+        """,
+    )
 
 
 class TB(SerialSimulation):
-
     method = SubSection(sub_section=TBMethod)
 
     results = SubSection(sub_section=TBResults)
@@ -77,22 +83,24 @@ class TB(SerialSimulation):
             self.results = TBResults()
 
         if len(self.tasks) != 2:
-            logger.error('Expected two tasks.')
+            logger.error("Expected two tasks.")
             return
 
         first_principles_task = self.tasks[0]
         tb_task = self.tasks[1]
 
         for name, section in self.results.m_def.all_quantities.items():
-            calc_name = '_'.join(name.split('_')[:-1])
-            if name.endswith('first_principles'):
-                calc_name = '_'.join(name.split('_')[:-2])
-            if calc_name in ['band_structure']:
-                calc_name = f'{calc_name}_electronic'
+            calc_name = "_".join(name.split("_")[:-1])
+            if name.endswith("first_principles"):
+                calc_name = "_".join(name.split("_")[:-2])
+            if calc_name in ["band_structure"]:
+                calc_name = f"{calc_name}_electronic"
             calc_section = []
-            if 'first_principles' in name:
-                calc_section = getattr(first_principles_task.outputs[-1].section, calc_name)
-            elif 'tb' in name:
+            if "first_principles" in name:
+                calc_section = getattr(
+                    first_principles_task.outputs[-1].section, calc_name
+                )
+            elif "tb" in name:
                 calc_section = getattr(tb_task.outputs[-1].section, calc_name)
             if calc_section:
                 self.results.m_set(section, calc_section)
