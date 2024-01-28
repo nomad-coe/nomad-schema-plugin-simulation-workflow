@@ -140,8 +140,8 @@ class SimulationWorkflow(Workflow):
                 )
 
         for link in self.inputs:
-            if hasattr(link.section, "atoms"):
-                self._input_structure = link.section
+            if isinstance(link.section, System):
+                self.input_structure = link.section
                 break
 
         if not self.outputs:
