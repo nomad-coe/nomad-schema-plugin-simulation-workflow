@@ -227,8 +227,7 @@ def test_xs_workflow(xs_workflow):
     assert results.method.simulation.bse.basis_set_type == "plane waves"
     assert results.properties.electronic and results.properties.spectroscopic
     assert results.properties.electronic.dos_electronic_new[0].label == "DFT"
-    # TODO ask chema why this fails
-    # assert len(results.properties.spectroscopic.spectra) == 2
+    assert len(results.properties.spectroscopic.spectra) == 2
     assert (
         results.properties.spectroscopic.spectra[0].provenance
         != results.properties.spectroscopic.spectra[1].provenance
