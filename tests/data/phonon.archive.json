@@ -1,6 +1,7 @@
 {
   "run": [
     {
+      "m_def": "runschema.run.Run",
       "program": {
         "name": "Phonopy",
         "version": "2.11.0"

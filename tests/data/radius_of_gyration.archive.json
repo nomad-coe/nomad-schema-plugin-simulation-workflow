@@ -1,6 +1,7 @@
 {
   "run": [
     {
+      "m_def": "runschema.run.Run",
       "x_gromacs_section_input_output_files": {
         "m_def": "atomisticparsers.gromacs.metainfo.gromacs.x_gromacs_section_input_output_files",
         "x_gromacs_inout_file_topoltpr": "protein_small_nowater.tpr",

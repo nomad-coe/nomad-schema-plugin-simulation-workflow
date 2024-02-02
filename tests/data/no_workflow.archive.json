@@ -1,6 +1,7 @@
 {
   "run": [
     {
+      "m_def": "runschema.run.Run",
       "program": {
         "name": "VASP",
         "version": "5.3.2 13Sep12 complex serial LinuxIFC",
