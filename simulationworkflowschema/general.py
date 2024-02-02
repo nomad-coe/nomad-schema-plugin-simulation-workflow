@@ -21,7 +21,7 @@ import numpy as np
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference
 from nomad.datamodel.metainfo.common import FastAccess
-from nomad.datamodel.metainfo.workflow import Workflow, Link, Task
+from nomad.datamodel.metainfo.workflow import Workflow, Link, Task, TaskReference
 from runschema.method import (
     Method,
     XCFunctional,
