@@ -19,136 +19,150 @@ import numpy as np
 
 from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.workflow import Link
-from nomad.datamodel.metainfo.simulation.calculation import Dos, BandStructure
+from runschema.calculation import Dos, BandStructure
 from .general import (
-    ParallelSimulation, SimulationWorkflowMethod, SimulationWorkflowResults,
-    WORKFLOW_METHOD_NAME, WORKFLOW_RESULTS_NAME
+    ParallelSimulation,
+    SimulationWorkflowMethod,
+    SimulationWorkflowResults,
+    WORKFLOW_METHOD_NAME,
+    WORKFLOW_RESULTS_NAME,
 )
 from .thermodynamics import ThermodynamicsResults
 
 
 class PhononMethod(SimulationWorkflowMethod):
-
     force_calculator = Quantity(
         type=str,
         shape=[],
-        description='''
+        description="""
         Name of the program used to calculate the forces.
-        ''')
+        """,
+    )
 
     mesh_density = Quantity(
         type=np.float64,
         shape=[],
-        unit='1 / meter ** 3',
-        description='''
+        unit="1 / meter ** 3",
+        description="""
         Density of the k-mesh for sampling.
-        ''')
+        """,
+    )
 
     random_displacements = Quantity(
         type=bool,
         shape=[],
-        description='''
+        description="""
         Identifies if displacements are made randomly.
-        ''')
+        """,
+    )
 
     with_non_analytic_correction = Quantity(
         type=bool,
         shape=[],
-        description='''
+        description="""
         Identifies if non-analytical term corrections are applied to dynamical matrix.
-        ''')
+        """,
+    )
 
     with_grueneisen_parameters = Quantity(
         type=bool,
         shape=[],
-        description='''
+        description="""
         Identifies if Grueneisen parameters are calculated.
-        ''')
+        """,
+    )
 
 
 class PhononResults(ThermodynamicsResults):
-
     n_imaginary_frequencies = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Number of modes with imaginary frequencies.
-        ''')
+        """,
+    )
 
     n_bands = Quantity(
         type=np.int32,
         shape=[],
-        description='''
+        description="""
         Number of phonon bands.
-        ''')
+        """,
+    )
 
     n_qpoints = Quantity(
         type=np.int32,
         shape=[],
-        description='''
+        description="""
         Number of q points for which phonon properties are evaluated.
-        ''')
+        """,
+    )
 
     qpoints = Quantity(
         type=np.float64,
-        shape=['n_qpoints', 3],
-        description='''
+        shape=["n_qpoints", 3],
+        description="""
         Value of the qpoints.
-        ''')
+        """,
+    )
 
     group_velocity = Quantity(
         type=np.float64,
-        shape=['n_qpoints', 'n_bands', 3],
-        unit='meter / second',
-        description='''
+        shape=["n_qpoints", "n_bands", 3],
+        unit="meter / second",
+        description="""
         Calculated value of the group velocity at each qpoint.
-        ''')
+        """,
+    )
 
     n_displacements = Quantity(
         type=np.int32,
         shape=[],
-        description='''
+        description="""
         Number of independent displacements.
-        ''')
+        """,
+    )
 
     n_atoms = Quantity(
         type=np.int32,
         shape=[],
-        description='''
+        description="""
         Number of atoms in the simulation cell.
-        ''')
+        """,
+    )
 
     displacements = Quantity(
         type=np.float64,
-        shape=['n_displacements', 'n_atoms', 3],
-        unit='meter',
-        description='''
+        shape=["n_displacements", "n_atoms", 3],
+        unit="meter",
+        description="""
         Value of the displacements applied to each atom in the simulation cell.
-        ''')
+        """,
+    )
 
     dos = Quantity(
         type=Reference(Dos),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the electronic density of states data.
-        ''')
+        """,
+    )
 
     band_structure = Quantity(
         type=Reference(BandStructure),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the electronic band structure data.
-        ''')
+        """,
+    )
 
 
 class Phonon(ParallelSimulation):
-
     method = SubSection(sub_section=PhononMethod)
 
     results = SubSection(sub_section=PhononResults)
 
     def normalize(self, archive, logger):
-
         super().normalize(archive, logger)
 
         if not self._calculations or not self._calculations[0].band_structure_phonon:

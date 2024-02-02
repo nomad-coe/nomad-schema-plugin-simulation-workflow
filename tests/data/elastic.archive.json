@@ -1,6 +1,7 @@
 {
   "run": [
     {
+      "m_def": "runschema.run.Run",
       "program": {
         "name": "elastic",
         "version": "1.0"

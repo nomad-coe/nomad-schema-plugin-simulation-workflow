@@ -16,89 +16,100 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from nomad.datamodel.metainfo.simulation.method import (
-    XCFunctional, BasisSetContainer, GW as GWMethodology
+from runschema.method import XCFunctional, BasisSetContainer, GW as GWMethodology
+from runschema.calculation import BandGap, Dos, BandStructure
+from .general import (
+    SimulationWorkflowResults,
+    SimulationWorkflowMethod,
+    SerialSimulation,
 )
-from nomad.datamodel.metainfo.simulation.calculation import BandGap, Dos, BandStructure
-from .general import SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation
 
 
 class GWResults(SimulationWorkflowResults):
-    '''Groups DFT and GW outputs: band gaps, DOS, band structures. The ResultsNormalizer
+    """Groups DFT and GW outputs: band gaps, DOS, band structures. The ResultsNormalizer
     takes care of adding a label 'DFT' or 'GW' in the method `get_gw_workflow_properties`.
-    '''
+    """
 
     band_gap_dft = Quantity(
         type=Reference(BandGap),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the DFT band gap.
-        ''')
+        """,
+    )
 
     band_gap_gw = Quantity(
         type=Reference(BandGap),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the GW band gap.
-        ''')
+        """,
+    )
 
     dos_dft = Quantity(
         type=Reference(Dos),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the DFT density of states.
-        ''')
+        """,
+    )
 
     dos_gw = Quantity(
         type=Reference(Dos),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the GW density of states.
-        ''')
+        """,
+    )
 
     band_structure_dft = Quantity(
         type=Reference(BandStructure),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the DFT band structure.
-        ''')
+        """,
+    )
 
     band_structure_gw = Quantity(
         type=Reference(BandStructure),
-        shape=['*'],
-        description='''
+        shape=["*"],
+        description="""
         Reference to the GW band structure.
-        ''')
+        """,
+    )
 
 
 class GWMethod(SimulationWorkflowMethod):
-    '''Groups DFT and GW input methodologies: starting XC functional, electrons
+    """Groups DFT and GW input methodologies: starting XC functional, electrons
     representation (basis set), GW method reference.
-    '''
+    """
 
     starting_point = Quantity(
         type=Reference(XCFunctional),
-        description='''
+        description="""
         Reference to the starting point (XC functional or HF) used.
-        ''')
+        """,
+    )
 
     electrons_representation = Quantity(
         type=Reference(BasisSetContainer),
-        description='''
+        description="""
         Reference to the basis set used.
-        ''')
+        """,
+    )
 
     gw_method_ref = Quantity(
         type=Reference(GWMethodology),
-        description='''
+        description="""
         Reference to the GW methodology.
-        ''')
+        """,
+    )
 
 
 class GW(SerialSimulation):
-    '''The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
+    """The GW workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the GW SinglePoint EntryArchives are present in the upload.
-    '''
+    """
 
     method = SubSection(sub_section=GWMethod)
 
@@ -108,7 +119,7 @@ class GW(SerialSimulation):
         super().normalize(archive, logger)
 
         if len(self.tasks) != 2:
-            logger.error('Expected two tasks.')
+            logger.error("Expected two tasks.")
             return
 
         dft_task = self.tasks[0]
@@ -118,13 +129,13 @@ class GW(SerialSimulation):
             self.results = GWResults()
 
         for name, section in self.results.m_def.all_quantities.items():
-            calc_name = '_'.join(name.split('_')[:-1])
-            if calc_name in ['dos', 'band_structure']:
-                calc_name = f'{calc_name}_electronic'
+            calc_name = "_".join(name.split("_")[:-1])
+            if calc_name in ["dos", "band_structure"]:
+                calc_name = f"{calc_name}_electronic"
             calc_section = []
-            if 'dft' in name:
+            if "dft" in name:
                 calc_section = getattr(dft_task.outputs[-1].section, calc_name)
-            elif 'gw' in name:
+            elif "gw" in name:
                 calc_section = getattr(gw_task.outputs[-1].section, calc_name)
             if calc_section:
                 self.results.m_set(section, calc_section)

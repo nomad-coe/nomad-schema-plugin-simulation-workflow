@@ -21,162 +21,180 @@ from nptyping import NDArray
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference, derived
 from nomad.datamodel.metainfo.workflow import Link
-from nomad.datamodel.metainfo.simulation.system import System
+from runschema.system import System
 from .general import (
-    SimulationWorkflowResults, SimulationWorkflowMethod, SerialSimulation,
-    WORKFLOW_METHOD_NAME, WORKFLOW_RESULTS_NAME
+    SimulationWorkflowResults,
+    SimulationWorkflowMethod,
+    SerialSimulation,
+    WORKFLOW_METHOD_NAME,
+    WORKFLOW_RESULTS_NAME,
 )
 
 
 class Decomposition(ArchiveSection):
-    '''
+    """
     Section containing information about the system to which an unstable compound will
     decompose to.
-    '''
+    """
 
     m_def = Section(validate=False)
 
     fraction = Quantity(
         type=np.float64,
         shape=[],
-        description='''
+        description="""
         Amount of the resulting system.
-        ''')
+        """,
+    )
 
     system_ref = Quantity(
         type=Reference(System.m_def),
         shape=[],
-        description='''
+        description="""
         Reference to the resulting system.
-        ''')
+        """,
+    )
 
     formula = Quantity(
         type=str,
         shape=[],
-        description='''
+        description="""
         Chemical formula of the resulting system.
-        ''')
+        """,
+    )
 
 
 class Stability(ArchiveSection):
-    '''
+    """
     Section containing information regarding the stability of the system.
-    '''
+    """
 
     m_def = Section(validate=False)
 
     n_references = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Number of reference systems.
-        ''')
+        """,
+    )
 
     systems_ref = Quantity(
         type=Reference(System.m_def),
-        shape=['n_references'],
-        description='''
+        shape=["n_references"],
+        description="""
         References to the reference systems.
-        ''')
+        """,
+    )
 
     formation_energy = Quantity(
         type=np.float64,
         shape=[],
-        unit='joule',
-        description='''
+        unit="joule",
+        description="""
         Calculated value of the formation energy of the compound.
-        ''')
+        """,
+    )
 
     delta_formation_energy = Quantity(
         type=np.float64,
         shape=[],
-        unit='joule',
-        description='''
+        unit="joule",
+        description="""
         Energy with respect to the convex hull.
-        ''')
+        """,
+    )
 
     n_references = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Number of reference systems.
-        ''')
+        """,
+    )
 
     is_stable = Quantity(
         type=bool,
         shape=[],
-        description='''
+        description="""
         Indicates if a compound is stable.
-        ''')
+        """,
+    )
 
     decomposition = SubSection(sub_section=Decomposition.m_def, repeats=True)
 
 
 class ThermodynamicsResults(SimulationWorkflowResults):
-
     n_values = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Number of thermodynamics property evaluations.
-        ''')
+        """,
+    )
 
     temperature = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='kelvin',
-        description='''
+        shape=["n_values"],
+        unit="kelvin",
+        description="""
         Specifies the temperatures at which properties such as the Helmholtz free energy
         are calculated.
-        ''')
+        """,
+    )
 
     pressure = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='pascal',
-        description='''
+        shape=["n_values"],
+        unit="pascal",
+        description="""
         Array containing the values of the pressure (one third of the trace of the stress
         tensor) corresponding to each property evaluation.
-        ''')
+        """,
+    )
 
     helmholtz_free_energy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Helmholtz free energy per unit cell at constant volume.
-        ''')
+        """,
+    )
 
     heat_capacity_c_p = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule / kelvin',
-        description='''
+        shape=["n_values"],
+        unit="joule / kelvin",
+        description="""
         Heat capacity per cell unit at constant pressure.
-        ''')
+        """,
+    )
 
     heat_capacity_c_v = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule / kelvin',
-        description='''
+        shape=["n_values"],
+        unit="joule / kelvin",
+        description="""
         Heat capacity per cell unit at constant volume.
-        ''')
+        """,
+    )
 
     @derived(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule / (kelvin * kilogram)',
-        description='''
+        shape=["n_values"],
+        unit="joule / (kelvin * kilogram)",
+        description="""
         Specific heat capacity at constant volume.
-        ''',
-        cached=True
+        """,
+        cached=True,
     )
     def heat_capacity_c_v_specific(self) -> NDArray:
         """Returns the specific heat capacity by dividing the heat capacity per
         cell with the mass of the atoms in the cell.
         """
         import nomad.atomutils
+
         workflow = self.m_parent
         if not workflow._systems or not workflow._systems[0].atoms:
             return
@@ -189,23 +207,25 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     vibrational_free_energy_at_constant_volume = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Holds the vibrational free energy per cell unit at constant volume.
-        ''')
+        """,
+    )
 
     @derived(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule / kilogram',
-        description='''
+        shape=["n_values"],
+        unit="joule / kilogram",
+        description="""
         Stores the specific vibrational free energy at constant volume.
-        ''',
-        cached=True
+        """,
+        cached=True,
     )
     def vibrational_free_energy_at_constant_volume_specific(self) -> NDArray:
         import nomad.atomutils
+
         workflow = self.m_parent
         if not workflow._systems or not workflow._systems[0].atoms:
             return
@@ -218,59 +238,66 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     vibrational_free_energy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Calculated value of the vibrational free energy, F_vib.
-        ''')
+        """,
+    )
 
     vibrational_internal_energy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Calculated value of the vibrational internal energy, U_vib.
-        ''')
+        """,
+    )
 
     vibrational_entropy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule / kelvin',
-        description='''
+        shape=["n_values"],
+        unit="joule / kelvin",
+        description="""
         Calculated value of the vibrational entropy, S.
-        ''')
+        """,
+    )
 
     gibbs_free_energy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Calculated value of the Gibbs free energy, G.
-        ''')
+        """,
+    )
 
     entropy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule / kelvin',
-        description='''
+        shape=["n_values"],
+        unit="joule / kelvin",
+        description="""
         Calculated value of the entropy.
-        ''')
+        """,
+    )
 
     enthalpy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Calculated value of enthalpy.
-        ''')
+        """,
+    )
 
     internal_energy = Quantity(
         type=np.float64,
-        shape=['n_values'],
-        unit='joule',
-        description='''
+        shape=["n_values"],
+        unit="joule",
+        description="""
         Calculated value of the internal energy, U.
-        ''')
+        """,
+    )
 
     stability = SubSection(sub_section=Stability.m_def, repeats=False)
 
@@ -289,7 +316,11 @@ class ThermodynamicsResults(SimulationWorkflowResults):
                 if hasattr(calc, name):
                     try:
                         quantity = calc[name]
-                        values.append(quantity.magnitude if hasattr(quantity, 'magnitude') else quantity)
+                        values.append(
+                            quantity.magnitude
+                            if hasattr(quantity, "magnitude")
+                            else quantity
+                        )
                         continue
                     except Exception:
                         pass
@@ -297,35 +328,37 @@ class ThermodynamicsResults(SimulationWorkflowResults):
                 for thermo in calc.thermodynamics:
                     try:
                         quantity = thermo[name]
-                        values.append(quantity.magnitude if hasattr(quantity, 'magnitude') else quantity)
+                        values.append(
+                            quantity.magnitude
+                            if hasattr(quantity, "magnitude")
+                            else quantity
+                        )
                     except Exception:
                         pass
             if len(values) == 0:
                 return
 
-            unit = quantity.units if hasattr(quantity, 'units') else 1.0
+            unit = quantity.units if hasattr(quantity, "units") else 1.0
             setattr(self, name, np.array(values) * unit)
 
         if self.temperature is None:
-            set_thermo_property('temperature')
+            set_thermo_property("temperature")
 
         if self.helmholtz_free_energy is None:
-            set_thermo_property('helmholtz_free_energy')
+            set_thermo_property("helmholtz_free_energy")
 
         if self.vibrational_free_energy_at_constant_volume is None:
-            set_thermo_property('vibrational_free_energy_at_constant_volume')
+            set_thermo_property("vibrational_free_energy_at_constant_volume")
 
         if self.heat_capacity_c_v is None:
-            set_thermo_property('heat_capacity_c_v')
+            set_thermo_property("heat_capacity_c_v")
 
 
 class ThermodynamicsMethod(SimulationWorkflowMethod):
-
     pass
 
 
 class Thermodynamics(SerialSimulation):
-
     method = SubSection(sub_section=ThermodynamicsMethod)
 
     results = SubSection(sub_section=ThermodynamicsResults)

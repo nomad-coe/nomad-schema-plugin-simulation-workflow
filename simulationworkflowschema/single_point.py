@@ -19,101 +19,120 @@ import numpy as np
 
 from nomad.metainfo import SubSection, Quantity, Reference
 from nomad.datamodel.metainfo.workflow import Link, Task
-from nomad.datamodel.metainfo.simulation.calculation import (
-    Dos, BandStructure, BandEnergies, Density, Potential, Spectra,
+from runschema.calculation import (
+    Dos,
+    BandStructure,
+    BandEnergies,
+    Density,
+    Potential,
+    Spectra,
 )
 from .general import (
-    SimulationWorkflowResults, SimulationWorkflowMethod, SimulationWorkflow,
-    INPUT_SYSTEM_NAME, INPUT_METHOD_NAME, OUTPUT_CALCULATION_NAME,
-    WORKFLOW_METHOD_NAME, WORKFLOW_RESULTS_NAME, resolve_difference
+    SimulationWorkflowResults,
+    SimulationWorkflowMethod,
+    SimulationWorkflow,
+    INPUT_SYSTEM_NAME,
+    INPUT_METHOD_NAME,
+    OUTPUT_CALCULATION_NAME,
+    WORKFLOW_METHOD_NAME,
+    WORKFLOW_RESULTS_NAME,
+    resolve_difference,
 )
 
 
 class SinglePointResults(SimulationWorkflowResults):
-
     n_scf_steps = Quantity(
         type=int,
         shape=[],
-        description='''
+        description="""
         Number of self-consistent steps in the calculation.
-        ''')
+        """,
+    )
 
     final_scf_energy_difference = Quantity(
         type=np.float64,
         shape=[],
-        unit='joule',
-        description='''
+        unit="joule",
+        description="""
         The difference in the energy between the last two scf steps.
-        ''')
+        """,
+    )
 
     is_converged = Quantity(
         type=bool,
         shape=[],
-        description='''
+        description="""
         Indicates if the convergence criteria were fullfilled.
-        ''')
+        """,
+    )
 
     n_data = Quantity(
         type=np.int32,
         shape=[],
-        description='''
-        ''')
+        description="""
+        """,
+    )
 
     dos = Quantity(
         type=Reference(Dos),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the electronic density of states data.
-        ''')
+        """,
+    )
 
     band_structure = Quantity(
         type=Reference(BandStructure),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the electronic band structure data.
-        ''')
+        """,
+    )
 
     eigenvalues = Quantity(
         type=Reference(BandEnergies),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the eigenvalues.
-        ''')
+        """,
+    )
 
     potential = Quantity(
         type=Reference(Potential),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the potential data.
-        ''')
+        """,
+    )
 
     density_charge = Quantity(
         type=Reference(Density),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the charge density data.
-        ''')
+        """,
+    )
 
     spectra = Quantity(
         type=Reference(Spectra),
-        shape=['n_data'],
-        description='''
+        shape=["n_data"],
+        description="""
         Reference to the spectral data.
-        ''')
+        """,
+    )
 
 
 class SinglePointMethod(SimulationWorkflowMethod):
-
     method = Quantity(
         type=str,
         shape=[],
-        description='''
+        description="""
         Calculation method used.
-        ''')
+        """,
+    )
 
 
 class SinglePoint(SimulationWorkflow):
-
     method = SubSection(sub_section=SinglePointMethod)
 
     results = SubSection(sub_section=SinglePointResults)
@@ -125,13 +144,17 @@ class SinglePoint(SimulationWorkflow):
             task = Task()
             if self._systems:
                 task.m_add_sub_section(
-                    Task.inputs, Link(name=INPUT_SYSTEM_NAME, section=self._systems[0]))
+                    Task.inputs, Link(name=INPUT_SYSTEM_NAME, section=self._systems[0])
+                )
             if self._methods:
                 task.m_add_sub_section(
-                    Task.inputs, Link(name=INPUT_METHOD_NAME, section=self._methods[0]))
+                    Task.inputs, Link(name=INPUT_METHOD_NAME, section=self._methods[0])
+                )
             if self._calculations:
                 task.m_add_sub_section(
-                    Task.inputs, Link(name=OUTPUT_CALCULATION_NAME, section=self._calculations[0]))
+                    Task.inputs,
+                    Link(name=OUTPUT_CALCULATION_NAME, section=self._calculations[0]),
+                )
 
             self.tasks = [task]
 
@@ -140,19 +163,23 @@ class SinglePoint(SimulationWorkflow):
 
         if not self.inputs:
             self.m_add_sub_section(
-                SimulationWorkflow.inputs, Link(name=WORKFLOW_METHOD_NAME, section=self.method))
+                SimulationWorkflow.inputs,
+                Link(name=WORKFLOW_METHOD_NAME, section=self.method),
+            )
 
         if not self.results:
             self.results = SinglePointResults()
 
         if not self.outputs:
             self.m_add_sub_section(
-                SimulationWorkflow.outputs, Link(name=WORKFLOW_RESULTS_NAME, section=self.results))
+                SimulationWorkflow.outputs,
+                Link(name=WORKFLOW_RESULTS_NAME, section=self.results),
+            )
 
         if not self.method.method:
             try:
                 # TODO keep extending for other SinglePoint
-                for method_name in ['dft', 'gw', 'bse', 'dmft']:
+                for method_name in ["dft", "gw", "bse", "dmft"]:
                     if self._methods[-1].m_xpath(method_name):
                         self.method.method = method_name.upper()
                         break
@@ -166,7 +193,11 @@ class SinglePoint(SimulationWorkflow):
         if not self.results.n_scf_steps:
             self.results.n_scf_steps = len(last_calc.scf_iteration)
 
-        energies = [scf.energy.total.value for scf in last_calc.scf_iteration if scf.energy is not None and scf.energy.total is not None]
+        energies = [
+            scf.energy.total.value
+            for scf in last_calc.scf_iteration
+            if scf.energy is not None and scf.energy.total is not None
+        ]
         delta_energy = resolve_difference(energies)
         if not self.results.final_scf_energy_difference and delta_energy is not None:
             self.results.final_scf_energy_difference = delta_energy
@@ -205,17 +236,38 @@ class ParallelSimulation(SimulationWorkflow):
 
         if not self.tasks:
             for n, calculation in enumerate(self._calculations):
-                inputs, outputs = [], [Link(name=OUTPUT_CALCULATION_NAME, section=calculation)]
+                inputs, outputs = (
+                    [],
+                    [Link(name=OUTPUT_CALCULATION_NAME, section=calculation)],
+                )
                 if self._calculations[n].system_ref:
-                    inputs.append(Link(name=INPUT_SYSTEM_NAME, section=self._calculations[n].system_ref))
+                    inputs.append(
+                        Link(
+                            name=INPUT_SYSTEM_NAME,
+                            section=self._calculations[n].system_ref,
+                        )
+                    )
                 elif len(self._calculations) == len(self._systems):
-                    inputs.append(Link(name=INPUT_SYSTEM_NAME, section=self._systems[n]))
+                    inputs.append(
+                        Link(name=INPUT_SYSTEM_NAME, section=self._systems[n])
+                    )
                 else:
                     continue
                 if self._calculations[n].method_ref:
-                    inputs.append(Link(name=INPUT_METHOD_NAME, section=self._calculations[n].method_ref))
+                    inputs.append(
+                        Link(
+                            name=INPUT_METHOD_NAME,
+                            section=self._calculations[n].method_ref,
+                        )
+                    )
                 elif len(self._calculations) == len(self._methods):
-                    inputs.append(Link(name=INPUT_METHOD_NAME, section=self._methods[n]))
+                    inputs.append(
+                        Link(name=INPUT_METHOD_NAME, section=self._methods[n])
+                    )
                 elif len(self._methods) == 1:
-                    inputs.append(Link(name=INPUT_METHOD_NAME, section=self._methods[0]))
-                self.tasks.append(Task(name=f'Calculation {n}', inputs=inputs, outputs=outputs))
+                    inputs.append(
+                        Link(name=INPUT_METHOD_NAME, section=self._methods[0])
+                    )
+                self.tasks.append(
+                    Task(name=f"Calculation {n}", inputs=inputs, outputs=outputs)
+                )

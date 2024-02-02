@@ -1,6 +1,7 @@
 {
   "run": [
     {
+      "m_def": "runschema.run.Run",
       "program": {
         "name": "VASP",
         "version": "5.4.4.18Apr17-6-g9f103f2a35 (build Oct 11 2019 00:52:55) complex parallel LinuxGNU",
