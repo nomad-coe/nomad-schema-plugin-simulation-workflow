@@ -1,6 +1,7 @@
 {
   "run": [
     {
+      "m_def": "runschema.run.Run",
       "program": {
         "name": "VASP",
         "version": "5.4.1 24Jun15 complex parallel IFC91_ompi",
