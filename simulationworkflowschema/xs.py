@@ -15,75 +15,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from nomad.metainfo import SubSection, Quantity, Reference
+from nomad.metainfo import SubSection
 from runschema.calculation import (
-    BandGap,
-    Dos,
-    BandStructure,
     Spectra,
     ElectronicStructureProvenance,
 )
 from .general import (
     SimulationWorkflowResults,
+    ElectronicStructureOutputs,
     SimulationWorkflowMethod,
-    SerialSimulation,
+    BeyondDFT,
 )
 from .photon_polarization import PhotonPolarizationResults
 
 
 class XSResults(SimulationWorkflowResults):
-    """Groups DFT, GW and PhotonPolarization outputs: band gaps (DFT, GW), DOS (DFT, GW),
+    """
+    Groups DFT, GW and PhotonPolarization outputs: band gaps (DFT, GW), DOS (DFT, GW),
     band structures (DFT, GW), spectra (PhotonPolarization). The ResultsNormalizer takes
     care of adding a label 'DFT' or 'GW' in the method `get_xs_workflow_properties`.
     """
 
-    band_gap_dft = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the DFT band gap.
-        """,
+    dft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
     )
 
-    band_gap_gw = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        Reference to the GW band gap.
-        """,
-    )
-
-    band_structure_dft = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the DFT density of states.
-        """,
-    )
-
-    band_structure_gw = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the GW density of states.
-        """,
-    )
-
-    dos_dft = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the DFT band structure.
-        """,
-    )
-
-    dos_gw = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Reference to the GW band structure.
-        """,
-    )
+    gw_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
     spectra = SubSection(sub_section=PhotonPolarizationResults, repeats=True)
 
@@ -92,8 +49,9 @@ class XSMethod(SimulationWorkflowMethod):
     pass
 
 
-class XS(SerialSimulation):
-    """The XS workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
+class XS(BeyondDFT):
+    """
+    The XS workflow is generated in an extra EntryArchive IF both the DFT SinglePoint
     and the PhotonPolarization EntryArchives are present in the upload.
     """
 
@@ -104,8 +62,6 @@ class XS(SerialSimulation):
     results = SubSection(sub_section=XSResults)
 
     def normalize(self, archive, logger):
-        super().normalize(archive, logger)
-
         if len(self.tasks) < 2:
             logger.error(
                 "Expected more than one task: DFT+PhotonPolarization or DFT+GW+PhotonPolarization."
@@ -125,19 +81,12 @@ class XS(SerialSimulation):
         if not self.results:
             self.results = XSResults()
 
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if "dft" in name:
-                calc_section = getattr(dft_task.outputs[-1].section, calc_name)
-            elif "gw" in name and gw_task:
-                calc_section = getattr(gw_task.outputs[-1].section, calc_name)
-            elif name == "spectra":
-                pass
-            if calc_section:
-                self.results.m_set(section, calc_section)
+        task_map = {
+            "dft": dft_task,
+            "gw": gw_task,
+        }
+        self.get_electronic_structure_workflow_results(task_map)
+
         for xs in xs_tasks:
             if xs.m_xpath("task.results"):
                 photon_results = xs.task.results

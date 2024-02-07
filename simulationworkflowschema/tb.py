@@ -16,91 +16,62 @@
 # limitations under the License.
 #
 from nomad.metainfo import SubSection, Quantity, Reference
-from runschema.method import TB as TBMethodology
-from runschema.calculation import BandGap, BandStructure
+from runschema.method import TB as TBMethodology, Method
 from .general import (
     SimulationWorkflowResults,
+    ElectronicStructureOutputs,
     SimulationWorkflowMethod,
     SerialSimulation,
 )
 
 
-class TBResults(SimulationWorkflowResults):
-    band_gap_first_principles = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-            Reference to the First-principles band gap.
-            """,
+class FirstPrinciplesPlusTBResults(SimulationWorkflowResults):
+    """
+    Groups first principles and TB outputs: band gaps, DOS, band structures. The
+    ResultsNormalizer takes care of adding a label 'FirstPrinciples' or 'TB' in the method
+    `get_tb_workflow_properties`.
+    """
+
+    first_principles_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
     )
 
-    band_gap_tb = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-            Reference to the TB band gap.
-            """,
-    )
+    tb_outputs = SubSection(sub_section=ElectronicStructureOutputs.m_def, repeats=False)
 
-    band_structure_first_principles = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
+
+class FirstPrinciplesPlusTBMethod(SimulationWorkflowMethod):
+    """
+    Specifies both the first principles and the TB input methodologies.
+    """
+
+    # TODO refine this referencing
+    first_principles_method_ref = Quantity(
+        type=Reference(Method),
         description="""
-        Reference to the first-principles band structure.
+        First principles methodology reference.
         """,
     )
 
-    band_structure_tb = Quantity(
-        type=Reference(BandStructure),
-        shape=["*"],
-        description="""
-        Reference to the tight-Binding band structure.
-        """,
-    )
-
-
-class TBMethod(SimulationWorkflowMethod):
     tb_method_ref = Quantity(
         type=Reference(TBMethodology),
         description="""
-        Reference to the tight-Binding methodology.
+        TB methodology reference.
         """,
     )
 
 
-class TB(SerialSimulation):
-    method = SubSection(sub_section=TBMethod)
+class FirstPrinciplesPlusTB(SerialSimulation):
+    """
+    The TB (tight-binding) workflow is generated in an extra EntryArchive IF both
+    the first principles SinglePoint and the TB SinglePoint EntryArchives are present in the upload.
+    """
 
-    results = SubSection(sub_section=TBResults)
+    method = SubSection(sub_section=FirstPrinciplesPlusTBMethod)
+
+    results = SubSection(sub_section=FirstPrinciplesPlusTBResults)
 
     def normalize(self, archive, logger):
+        if not self.results:  # creates Results section if not present
+            self.results = FirstPrinciplesPlusTBResults()
+
         super().normalize(archive, logger)
-
-        if not self.method:
-            self.method = TBMethod()
-
-        if not self.results:
-            self.results = TBResults()
-
-        if len(self.tasks) != 2:
-            logger.error("Expected two tasks.")
-            return
-
-        first_principles_task = self.tasks[0]
-        tb_task = self.tasks[1]
-
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if name.endswith("first_principles"):
-                calc_name = "_".join(name.split("_")[:-2])
-            if calc_name in ["band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if "first_principles" in name:
-                calc_section = getattr(
-                    first_principles_task.outputs[-1].section, calc_name
-                )
-            elif "tb" in name:
-                calc_section = getattr(tb_task.outputs[-1].section, calc_name)
-            if calc_section:
-                self.results.m_set(section, calc_section)

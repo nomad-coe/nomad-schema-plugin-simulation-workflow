@@ -21,10 +21,24 @@ import numpy as np
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference
 from nomad.datamodel.metainfo.common import FastAccess
-from nomad.datamodel.metainfo.workflow import Workflow, Link, Task
-from runschema.method import Method
+from nomad.datamodel.metainfo.workflow import Workflow, Link, Task, TaskReference
+from runschema.method import (
+    Method,
+    XCFunctional,
+    BasisSetContainer,
+)
 from runschema.system import System
-from runschema.calculation import Calculation
+from runschema.calculation import (
+    Calculation,
+    BandGap,
+    Dos,
+    BandStructure,
+    GreensFunctions,
+    MagneticShielding,
+    ElectricFieldGradient,
+    SpinSpinCoupling,
+    MagneticSusceptibility,
+)
 
 
 def resolve_difference(values):
@@ -324,3 +338,162 @@ class SerialSimulation(SimulationWorkflow):
                 self.tasks.append(
                     Task(name=f"Step {n}", inputs=inputs, outputs=outputs)
                 )
+
+
+class BeyondDFT(SerialSimulation):
+    """
+    Base class used to normalize standard workflows beyond DFT containing two specific
+    SinglePoint tasks (GWWorkflow = DFT + GW, DMFTWorkflow = DFT + DMFT,
+    MaxEntWorkflow = DMFT + MaxEnt, and so on) and store the outputs in the self.results
+    section.
+    """
+
+    def _resolve_outputs_section(self, output_section, task: TaskReference) -> None:
+        """
+        Resolves the output_section of a task and stores the results in the output_section.
+
+        Args:
+            task (TaskReference): The task from which the outputs are got.
+        """
+        for name, section in output_section.m_def.all_quantities.items():
+            name = f"{name}_electronic" if name in ["dos", "band_structure"] else name
+            try:
+                calc_section = getattr(task.outputs[-1].section, name)
+                if calc_section:
+                    output_section.m_set(section, calc_section)
+            except Exception:
+                continue
+
+    def get_electronic_structure_workflow_results(self, task_map: dict) -> None:
+        """
+        Gets the standard electronic structure workflow results section by resolving the
+        outputs specified in the `task_map`.
+
+        Args:
+            task_map (dict): The dictionary used to resolve the outputs sections.
+        """
+        for method, task in task_map.items():
+            outputs = ElectronicStructureOutputs()
+            self._resolve_outputs_section(outputs, task)
+            setattr(self.results, f"{method}_outputs", outputs)
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+
+        if len(self.tasks) != 2:
+            logger.error("Expected two tasks.")
+            return
+
+        # We extract the workflow name from the tasks names
+        self.name = "+".join([task.name for task in self.tasks if task.name])
+        task_map = {
+            task.name.lower(): self.tasks[n] for n, task in enumerate(self.tasks)
+        }
+        # Resolve workflow2.results for each standard BeyondDFT workflow
+        if self.name == "DFT+GW":
+            self.get_electronic_structure_workflow_results(task_map)
+        elif self.name == "TB+DMFT":  # TODO extend for DFT tasks
+            self.get_electronic_structure_workflow_results(task_map)
+        elif self.name == "DMFT+MaxEnt":
+            self.get_electronic_structure_workflow_results(task_map)
+        elif self.name == "FirstPrinciples+TB":
+            task_map["first_principles"] = task_map.pop("firstprinciples")
+            self.get_electronic_structure_workflow_results(task_map)
+
+
+class DFTMethod(SimulationWorkflowMethod):
+    """
+    Base class defining the DFT input methodologies: starting XC functional and electrons
+    representation (basis set).
+    """
+
+    starting_point = Quantity(
+        type=Reference(XCFunctional),
+        description="""
+        Reference to the starting point (XC functional or HF) used.
+        """,
+    )
+
+    electrons_representation = Quantity(
+        type=Reference(BasisSetContainer),
+        description="""
+        Reference to the basis set used.
+        """,
+    )
+
+
+class ElectronicStructureOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of any electronic structure
+    SinglePoint calculation: DFT, TB, DMFT, GW, MaxEnt, XS.
+    """
+
+    band_gap = Quantity(
+        type=Reference(BandGap),
+        shape=["*"],
+        description="""
+        Reference to the band gap section.
+        """,
+    )
+
+    dos = Quantity(
+        type=Reference(Dos),
+        shape=["*"],
+        description="""
+        Reference to the density of states section.
+        """,
+    )
+
+    band_structure = Quantity(
+        type=Reference(BandStructure),
+        shape=["*"],
+        description="""
+        Reference to the band structure section.
+        """,
+    )
+
+    greens_functions = Quantity(
+        type=Reference(GreensFunctions),
+        shape=["*"],
+        description="""
+        Ref to the Green functions section.
+        """,
+    )
+
+
+class MagneticOutputs(SimulationWorkflowResults):
+    """
+    Base class defining the typical output properties of magnetic SinglePoint calculations.
+    """
+
+    magnetic_shielding = Quantity(
+        type=Reference(MagneticShielding),
+        shape=["*"],
+        description="""
+        Reference to the magnetic shielding tensors.
+        """,
+    )
+
+    electric_field_gradient = Quantity(
+        type=Reference(ElectricFieldGradient),
+        shape=["*"],
+        description="""
+        Reference to the electric field gradient tensors.
+        """,
+    )
+
+    spin_spin_coupling = Quantity(
+        type=Reference(SpinSpinCoupling),
+        shape=["*"],
+        description="""
+        Reference to the spin-spin coupling tensors.
+        """,
+    )
+
+    magnetic_susceptibility_nmr = Quantity(
+        type=Reference(MagneticSusceptibility),
+        shape=["*"],
+        description="""
+        Reference to the magnetic susceptibility tensors.
+        """,
+    )

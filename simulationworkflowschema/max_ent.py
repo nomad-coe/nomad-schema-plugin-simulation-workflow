@@ -17,55 +17,35 @@
 #
 from nomad.metainfo import SubSection, Quantity, Reference
 from runschema.method import Method, DMFT as DMFTMethodology
-from runschema.calculation import BandGap, Dos, GreensFunctions
 from .general import (
     SimulationWorkflowResults,
+    ElectronicStructureOutputs,
     SimulationWorkflowMethod,
-    SerialSimulation,
+    BeyondDFT,
 )
 
 
-class MaxEntResults(SimulationWorkflowResults):
-    """Groups DMFT and MaxEnt outputs: greens functions (DMFT, MaxEnt), band gaps (MaxEnt),
+class DMFTPlusMaxEntResults(SimulationWorkflowResults):
+    """
+    Groups DMFT and MaxEnt outputs: greens functions (DMFT, MaxEnt), band gaps (MaxEnt),
     DOS (MaxEnt), band structures (MaxEnt). The ResultsNormalizer takes care of adding a
     label 'DMFT' or 'MaxEnt' in the method `get_maxent_workflow_properties`.
     """
 
-    greens_functions_dmft = Quantity(
-        type=Reference(GreensFunctions),
-        shape=["*"],
-        description="""
-        Ref to the DMFT Greens functions.
-        """,
+    dmft_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
     )
 
-    band_gap_maxent = Quantity(
-        type=Reference(BandGap),
-        shape=["*"],
-        description="""
-        MaxEnt band gap.
-        """,
-    )
-
-    dos_maxent = Quantity(
-        type=Reference(Dos),
-        shape=["*"],
-        description="""
-        Ref to the MaxEnt density of states (also called spectral function).
-        """,
-    )
-
-    greens_functions_maxent = Quantity(
-        type=Reference(GreensFunctions),
-        shape=["*"],
-        description="""
-        Ref to the MaxEnt Greens functions.
-        """,
+    maxent_outputs = SubSection(
+        sub_section=ElectronicStructureOutputs.m_def, repeats=False
     )
 
 
-class MaxEntMethod(SimulationWorkflowMethod):
-    """Groups DMFT and MaxEnt input methodologies: DMFT method references, MaxEnt method reference."""
+class DMFTPlusMaxEntMethod(SimulationWorkflowMethod):
+    """
+    Specifies both DMFT and MaxEnt input methodologies: DMFT method references, MaxEnt method
+    reference.
+    """
 
     dmft_method_ref = Quantity(
         type=Reference(DMFTMethodology),
@@ -83,36 +63,18 @@ class MaxEntMethod(SimulationWorkflowMethod):
     )
 
 
-class MaxEnt(SerialSimulation):
-    """The MaxEnt (Maximum Entropy) workflow is generated in an extra EntryArchive IF both
+class DMFTPlusMaxEnt(BeyondDFT):
+    """
+    The MaxEnt (Maximum Entropy) workflow is generated in an extra EntryArchive IF both
     the DMFT SinglePoint and the MaxEnt SinglePoint EntryArchives are present in the upload.
     """
 
-    method = SubSection(sub_section=MaxEntMethod)
+    method = SubSection(sub_section=DMFTPlusMaxEntMethod)
 
-    results = SubSection(sub_section=MaxEntResults)
+    results = SubSection(sub_section=DMFTPlusMaxEntResults)
 
     def normalize(self, archive, logger):
+        if not self.results:  # creates Results section if not present
+            self.results = DMFTPlusMaxEntResults()
+
         super().normalize(archive, logger)
-
-        if len(self.tasks) != 2:
-            logger.error("Expected two tasks: DMFT and MaxEnt SinglePoint tasks")
-            return
-
-        dmft_task = self.tasks[0]
-        maxent_task = self.tasks[1]
-
-        if not self.results:
-            self.results = MaxEntResults()
-
-        for name, section in self.results.m_def.all_quantities.items():
-            calc_name = "_".join(name.split("_")[:-1])
-            if calc_name in ["dos", "band_structure"]:
-                calc_name = f"{calc_name}_electronic"
-            calc_section = []
-            if "dmft" in name:
-                calc_section = getattr(dmft_task.outputs[-1].section, calc_name)
-            elif "maxent" in name:
-                calc_section = getattr(maxent_task.outputs[-1].section, calc_name)
-            if calc_section:
-                self.results.m_set(section, calc_section)
