@@ -504,6 +504,10 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
 
     barostat_parameters = SubSection(sub_section=BarostatParameters.m_def, repeats=True)
 
+    # free_energy_perturbation_parameters = SubSection(
+    #     sub_section=FreeEnergyPerturbationParameters.m_def, repeats=True
+    # )
+
 
 class Property(ArchiveSection):
     """
