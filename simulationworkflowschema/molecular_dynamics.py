@@ -384,6 +384,130 @@ class BarostatParameters(ArchiveSection):
     )
 
 
+class Lambdas(MSection):
+    """
+    Section for storing all lambda parameters for free energy perturbation
+    """
+
+    m_def = Section(validate=False)
+
+    kind = (
+        Quantity(
+            type=MEnum(
+                "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
+            ),
+            shape=[],
+            description="""
+        The type of lambda interpolation
+
+        Allowed values are:
+
+        | kind          | Description                               |
+
+        | ---------------------- | ----------------------------------------- |
+
+        | `"output"`           | Lambdas for the free energy outputs saved.
+                                    These will also act as a default in case some
+                                    relevant lambdas are not specified. |
+
+        | `"coulomb"`          | Lambdas for interpolating electrostatic interactions. |
+
+        | `"vdw"`              | Lambdas for interpolating van der Waals interactions. |
+
+        | `"bonded"`           | Lambdas for interpolating all intramolecular interactions. |
+
+        | `"restraint"`        | Lambdas for interpolating restraints. |
+
+        | `"mass"`             | Lambdas for interpolating masses. |
+
+        | `"temperature"`      | Lambdas for interpolating temperature. |
+        """,
+        ),
+    )
+
+    value = Quantity(
+        type=np.float64,
+        shape=[],
+        description="""
+        List of lambdas.
+        """,
+    )
+
+
+class FreeEnergyPerturbationParameters(ArchiveSection):
+    """
+    Section containing the parameters pertaining to a free energy perturbation workflow.
+    The parameters are stored for each molecular dynamics run separately, to be referenced
+    by the overarching workflow.
+    """
+
+    m_def = Section(validate=False)
+
+    lamdas = SubSection(
+        sub_section=Lambdas.m_def,
+        description="""
+        Contains the lists of lambda values defined for the free energy perturbation.
+        """,
+        repeats=True,
+    )
+
+    atom_indices = Quantity(
+        type=np.dtype(np.int32),
+        shape=[],
+        description="""
+        List of atom indices involved in the interpolation.
+        """,
+    )
+
+    initial_state_vdw = Quantity(
+        type=MEnum("on", "off"),
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on or off in the initial state (i.e., lambda = 0).
+        """,
+    )
+
+    final_state_vdw = Quantity(
+        type=MEnum("on", "off"),
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on or off in the final state (i.e., lambda = 0).
+        """,
+    )
+
+    initial_state_coloumb = Quantity(
+        type=MEnum("on", "off"),
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on or off in the initial state (i.e., lambda = 0).
+        """,
+    )
+
+    final_state_coloumb = Quantity(
+        type=MEnum("on", "off"),
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on or off in the final state (i.e., lambda = 0).
+        """,
+    )
+
+    initial_state_bonded = Quantity(
+        type=MEnum("on", "off"),
+        shape=[],
+        description="""
+        Specifies whether bonded interactions are on or off in the initial state (i.e., lambda = 0).
+        """,
+    )
+
+    final_state_bonded = Quantity(
+        type=MEnum("on", "off"),
+        shape=[],
+        description="""
+        Specifies whether bonded interactions are on or off in the final state (i.e., lambda = 0).
+        """,
+    )
+
+
 class MolecularDynamicsMethod(SimulationWorkflowMethod):
     thermodynamic_ensemble = Quantity(
         type=MEnum("NVE", "NVT", "NPT", "NPH"),
@@ -504,9 +628,9 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
 
     barostat_parameters = SubSection(sub_section=BarostatParameters.m_def, repeats=True)
 
-    # free_energy_perturbation_parameters = SubSection(
-    #     sub_section=FreeEnergyPerturbationParameters.m_def, repeats=True
-    # )
+    free_energy_perturbation_parameters = SubSection(
+        sub_section=FreeEnergyPerturbationParameters.m_def, repeats=True
+    )
 
 
 class Property(ArchiveSection):
