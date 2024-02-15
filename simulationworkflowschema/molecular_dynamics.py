@@ -443,7 +443,7 @@ class FreeEnergyPerturbationParameters(ArchiveSection):
 
     m_def = Section(validate=False)
 
-    lamdas = SubSection(
+    lambdas = SubSection(
         sub_section=Lambdas.m_def,
         description="""
         Contains the lists of lambda values defined for the free energy perturbation.
