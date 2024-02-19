@@ -391,13 +391,12 @@ class Lambdas(MSection):
 
     m_def = Section(validate=False)
 
-    kind = (
-        Quantity(
-            type=MEnum(
-                "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
-            ),
-            shape=[],
-            description="""
+    kind = Quantity(
+        type=MEnum(
+            "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
+        ),
+        shape=[],
+        description="""
         The type of lambda interpolation
 
         Allowed values are:
@@ -422,7 +421,6 @@ class Lambdas(MSection):
 
         | `"temperature"`      | Lambdas for interpolating temperature. |
         """,
-        ),
     )
 
     value = Quantity(
