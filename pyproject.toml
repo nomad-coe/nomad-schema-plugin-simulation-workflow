@@ -11,7 +11,6 @@ authors = [{ name = "The NOMAD Authors" }]
 license = { text = "Apache-2.0" }
 dependencies = [
     "nomad-lab>=1.2.0",
-    # "nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop",
     "nomad-schema-plugin-run@git+https://github.com/nomad-coe/nomad-schema-plugin-run.git@develop",
 ]
 
@@ -25,11 +24,6 @@ dev = [
     "pytest-timeout==1.4.2",
     "pytest-cov==2.7.1",
     "ruff==0.1.4",
-]
-
-tests = [
-    # we need the latest nomad version for testing
-    # "nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop",
 ]
 
 [tool.ruff]
