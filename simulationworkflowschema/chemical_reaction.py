@@ -31,7 +31,7 @@ class ChemicalReactionMethod(SimulationWorkflowMethod):
     m_def = Section(validate=False)
 
     reaction_type = Quantity(
-        type=MEnum("surface_adsorption"),
+        type=MEnum('surface_adsorption'),
         description="""
         The type of the chemical reaction.
         """,
@@ -41,7 +41,7 @@ class ChemicalReactionMethod(SimulationWorkflowMethod):
 class ChemicalReactionResults(SimulationWorkflowResults):
     reaction_energy = Quantity(
         type=np.float64,
-        unit="joule",
+        unit='joule',
         description="""
         Calculated value of the reaction energy, E_reaction= E_products - E_reactants
         """,
@@ -49,7 +49,7 @@ class ChemicalReactionResults(SimulationWorkflowResults):
 
     activation_energy = Quantity(
         type=np.float64,
-        unit="joule",
+        unit='joule',
         description="""
         Calculated value of the activation energy, E_activation = E_transitions - E_reactants
         """,
@@ -76,29 +76,29 @@ class ChemicalReaction(SimulationWorkflow):
             calculation = input.section
             if calculation.m_def.section_cls != Calculation or not input.name:
                 continue
-            if calculation.m_xpath("energy.total.value") is None:
+            if calculation.m_xpath('energy.total.value') is None:
                 logger.error(
-                    "Calculation energy required to calculate adsorption energy."
+                    'Calculation energy required to calculate adsorption energy.'
                 )
                 reactants, products, transitions = [], [], []
                 break
             # TODO resolve reagent type automatically
-            if "product" in input.name.lower():
+            if 'product' in input.name.lower():
                 products.append(calculation)
-            elif "transition" in input.name.lower():
+            elif 'transition' in input.name.lower():
                 transitions.append(calculation)
-            elif "reactant" in input.name.lower():
+            elif 'reactant' in input.name.lower():
                 reactants.append(calculation)
 
         def get_lattices(calculations):
             lattices = []
             for calculation in calculations:
                 dimensionality = calculation.m_parent.m_parent.m_xpath(
-                    "results.material.dimensionality"
+                    'results.material.dimensionality'
                 )
-                if not dimensionality or dimensionality == "0D":
+                if not dimensionality or dimensionality == '0D':
                     continue
-                lattice = calculation.m_xpath("system_ref.atoms.lattice_vectors")
+                lattice = calculation.m_xpath('system_ref.atoms.lattice_vectors')
                 if lattice is not None:
                     lattices.append(lattice)
             return lattices
@@ -111,7 +111,7 @@ class ChemicalReaction(SimulationWorkflow):
                 if not array_equal[
                     np.where((reference_lattice != 0) & (lattice != 0))
                 ].all():
-                    logger.error("Reactant and product lattices do not match.")
+                    logger.error('Reactant and product lattices do not match.')
                     reactants, products = [], []
                     break
             for lattice in get_lattices(transitions):
@@ -119,14 +119,14 @@ class ChemicalReaction(SimulationWorkflow):
                 if not array_equal[
                     np.where((reference_lattice != 0) & (lattice != 0))
                 ].all():
-                    logger.error("Reactant and transition state lattices do not match.")
+                    logger.error('Reactant and transition state lattices do not match.')
                     transitions = []
                     break
 
         def get_labels(calculations):
             atom_labels = []
             for calculation in calculations:
-                labels = calculation.m_xpath("system_ref.atoms.labels")
+                labels = calculation.m_xpath('system_ref.atoms.labels')
                 if labels:
                     atom_labels.extend(labels)
             return sorted(atom_labels)
@@ -135,10 +135,10 @@ class ChemicalReaction(SimulationWorkflow):
         # products and transition state
         reactants_labels = get_labels(reactants)
         if reactants_labels != get_labels(products):
-            logger.error("Inconsistent composition of reactants and products.")
+            logger.error('Inconsistent composition of reactants and products.')
             reactants, products = [], []
         if transitions and reactants_labels != get_labels(transitions):
-            logger.error("Inconsistent composition of reactants and transition states.")
+            logger.error('Inconsistent composition of reactants and transition states.')
             transitions = []
 
         energy_reactants = np.sum(
@@ -160,7 +160,7 @@ class ChemicalReaction(SimulationWorkflow):
         # create task for calculating reaction energy
         self.tasks.append(
             Task(
-                name="Calculation of reaction energy.",
+                name='Calculation of reaction energy.',
                 inputs=self.inputs,
                 outputs=self.outputs,
             )

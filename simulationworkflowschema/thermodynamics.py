@@ -81,7 +81,7 @@ class Stability(ArchiveSection):
 
     systems_ref = Quantity(
         type=Reference(System.m_def),
-        shape=["n_references"],
+        shape=['n_references'],
         description="""
         References to the reference systems.
         """,
@@ -90,7 +90,7 @@ class Stability(ArchiveSection):
     formation_energy = Quantity(
         type=np.float64,
         shape=[],
-        unit="joule",
+        unit='joule',
         description="""
         Calculated value of the formation energy of the compound.
         """,
@@ -99,7 +99,7 @@ class Stability(ArchiveSection):
     delta_formation_energy = Quantity(
         type=np.float64,
         shape=[],
-        unit="joule",
+        unit='joule',
         description="""
         Energy with respect to the convex hull.
         """,
@@ -135,8 +135,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     temperature = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="kelvin",
+        shape=['n_values'],
+        unit='kelvin',
         description="""
         Specifies the temperatures at which properties such as the Helmholtz free energy
         are calculated.
@@ -145,8 +145,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     pressure = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="pascal",
+        shape=['n_values'],
+        unit='pascal',
         description="""
         Array containing the values of the pressure (one third of the trace of the stress
         tensor) corresponding to each property evaluation.
@@ -155,8 +155,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     helmholtz_free_energy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Helmholtz free energy per unit cell at constant volume.
         """,
@@ -164,8 +164,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     heat_capacity_c_p = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule / kelvin",
+        shape=['n_values'],
+        unit='joule / kelvin',
         description="""
         Heat capacity per cell unit at constant pressure.
         """,
@@ -173,8 +173,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     heat_capacity_c_v = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule / kelvin",
+        shape=['n_values'],
+        unit='joule / kelvin',
         description="""
         Heat capacity per cell unit at constant volume.
         """,
@@ -182,8 +182,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     @derived(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule / (kelvin * kilogram)",
+        shape=['n_values'],
+        unit='joule / (kelvin * kilogram)',
         description="""
         Specific heat capacity at constant volume.
         """,
@@ -207,8 +207,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     vibrational_free_energy_at_constant_volume = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Holds the vibrational free energy per cell unit at constant volume.
         """,
@@ -216,8 +216,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     @derived(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule / kilogram",
+        shape=['n_values'],
+        unit='joule / kilogram',
         description="""
         Stores the specific vibrational free energy at constant volume.
         """,
@@ -238,8 +238,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     vibrational_free_energy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Calculated value of the vibrational free energy, F_vib.
         """,
@@ -247,8 +247,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     vibrational_internal_energy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Calculated value of the vibrational internal energy, U_vib.
         """,
@@ -256,8 +256,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     vibrational_entropy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule / kelvin",
+        shape=['n_values'],
+        unit='joule / kelvin',
         description="""
         Calculated value of the vibrational entropy, S.
         """,
@@ -265,8 +265,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     gibbs_free_energy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Calculated value of the Gibbs free energy, G.
         """,
@@ -274,8 +274,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     entropy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule / kelvin",
+        shape=['n_values'],
+        unit='joule / kelvin',
         description="""
         Calculated value of the entropy.
         """,
@@ -283,8 +283,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     enthalpy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Calculated value of enthalpy.
         """,
@@ -292,8 +292,8 @@ class ThermodynamicsResults(SimulationWorkflowResults):
 
     internal_energy = Quantity(
         type=np.float64,
-        shape=["n_values"],
-        unit="joule",
+        shape=['n_values'],
+        unit='joule',
         description="""
         Calculated value of the internal energy, U.
         """,
@@ -318,7 +318,7 @@ class ThermodynamicsResults(SimulationWorkflowResults):
                         quantity = calc[name]
                         values.append(
                             quantity.magnitude
-                            if hasattr(quantity, "magnitude")
+                            if hasattr(quantity, 'magnitude')
                             else quantity
                         )
                         continue
@@ -330,7 +330,7 @@ class ThermodynamicsResults(SimulationWorkflowResults):
                         quantity = thermo[name]
                         values.append(
                             quantity.magnitude
-                            if hasattr(quantity, "magnitude")
+                            if hasattr(quantity, 'magnitude')
                             else quantity
                         )
                     except Exception:
@@ -338,20 +338,20 @@ class ThermodynamicsResults(SimulationWorkflowResults):
             if len(values) == 0:
                 return
 
-            unit = quantity.units if hasattr(quantity, "units") else 1.0
+            unit = quantity.units if hasattr(quantity, 'units') else 1.0
             setattr(self, name, np.array(values) * unit)
 
         if self.temperature is None:
-            set_thermo_property("temperature")
+            set_thermo_property('temperature')
 
         if self.helmholtz_free_energy is None:
-            set_thermo_property("helmholtz_free_energy")
+            set_thermo_property('helmholtz_free_energy')
 
         if self.vibrational_free_energy_at_constant_volume is None:
-            set_thermo_property("vibrational_free_energy_at_constant_volume")
+            set_thermo_property('vibrational_free_energy_at_constant_volume')
 
         if self.heat_capacity_c_v is None:
-            set_thermo_property("heat_capacity_c_v")
+            set_thermo_property('heat_capacity_c_v')
 
 
 class ThermodynamicsMethod(SimulationWorkflowMethod):

@@ -42,7 +42,7 @@ class PhononMethod(SimulationWorkflowMethod):
     mesh_density = Quantity(
         type=np.float64,
         shape=[],
-        unit="1 / meter ** 3",
+        unit='1 / meter ** 3',
         description="""
         Density of the k-mesh for sampling.
         """,
@@ -100,7 +100,7 @@ class PhononResults(ThermodynamicsResults):
 
     qpoints = Quantity(
         type=np.float64,
-        shape=["n_qpoints", 3],
+        shape=['n_qpoints', 3],
         description="""
         Value of the qpoints.
         """,
@@ -108,8 +108,8 @@ class PhononResults(ThermodynamicsResults):
 
     group_velocity = Quantity(
         type=np.float64,
-        shape=["n_qpoints", "n_bands", 3],
-        unit="meter / second",
+        shape=['n_qpoints', 'n_bands', 3],
+        unit='meter / second',
         description="""
         Calculated value of the group velocity at each qpoint.
         """,
@@ -133,8 +133,8 @@ class PhononResults(ThermodynamicsResults):
 
     displacements = Quantity(
         type=np.float64,
-        shape=["n_displacements", "n_atoms", 3],
-        unit="meter",
+        shape=['n_displacements', 'n_atoms', 3],
+        unit='meter',
         description="""
         Value of the displacements applied to each atom in the simulation cell.
         """,
@@ -142,7 +142,7 @@ class PhononResults(ThermodynamicsResults):
 
     dos = Quantity(
         type=Reference(Dos),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the electronic density of states data.
         """,
@@ -150,7 +150,7 @@ class PhononResults(ThermodynamicsResults):
 
     band_structure = Quantity(
         type=Reference(BandStructure),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the electronic band structure data.
         """,

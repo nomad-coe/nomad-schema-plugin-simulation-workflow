@@ -64,7 +64,7 @@ class XS(BeyondDFT):
     def normalize(self, archive, logger):
         if len(self.tasks) < 2:
             logger.error(
-                "Expected more than one task: DFT+PhotonPolarization or DFT+GW+PhotonPolarization."
+                'Expected more than one task: DFT+PhotonPolarization or DFT+GW+PhotonPolarization.'
             )
             return
 
@@ -72,7 +72,7 @@ class XS(BeyondDFT):
         xs_tasks = [self.tasks[i] for i in range(1, len(self.tasks))]
         gw_task = None
         # Check if the xs_tasks contain GW SinglePoint or a list of PhotonPolarizations
-        if xs_tasks[0].task.m_def.name != "PhotonPolarization":
+        if xs_tasks[0].task.m_def.name != 'PhotonPolarization':
             gw_task = xs_tasks[0]
             xs_tasks.pop(
                 0
@@ -82,19 +82,19 @@ class XS(BeyondDFT):
             self.results = XSResults()
 
         task_map = {
-            "dft": dft_task,
-            "gw": gw_task,
+            'dft': dft_task,
+            'gw': gw_task,
         }
         self.get_electronic_structure_workflow_results(task_map)
 
         for xs in xs_tasks:
-            if xs.m_xpath("task.results"):
+            if xs.m_xpath('task.results'):
                 photon_results = xs.task.results
                 # Adding provenance to BSE method section, in addition to the existent 'photon' provenance
-                if xs.task.m_xpath("inputs[1].section"):
+                if xs.task.m_xpath('inputs[1].section'):
                     for spectra in photon_results.spectrum_polarization:
                         provenance = ElectronicStructureProvenance(
-                            methodology=xs.task.inputs[1].section, label="bse"
+                            methodology=xs.task.inputs[1].section, label='bse'
                         )
                         spectra.m_add_sub_section(Spectra.provenance, provenance)
                 self.results.m_add_sub_section(XSResults.spectra, photon_results)

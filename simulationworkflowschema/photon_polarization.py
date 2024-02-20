@@ -39,7 +39,7 @@ class PhotonPolarizationResults(SimulationWorkflowResults):
 
     spectrum_polarization = Quantity(
         type=Reference(Spectra),
-        shape=["n_polarizations"],
+        shape=['n_polarizations'],
         description="""
         Spectrum for a given polarization of the photon.
         """,

@@ -52,7 +52,7 @@ class SinglePointResults(SimulationWorkflowResults):
     final_scf_energy_difference = Quantity(
         type=np.float64,
         shape=[],
-        unit="joule",
+        unit='joule',
         description="""
         The difference in the energy between the last two scf steps.
         """,
@@ -75,7 +75,7 @@ class SinglePointResults(SimulationWorkflowResults):
 
     dos = Quantity(
         type=Reference(Dos),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the electronic density of states data.
         """,
@@ -83,7 +83,7 @@ class SinglePointResults(SimulationWorkflowResults):
 
     band_structure = Quantity(
         type=Reference(BandStructure),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the electronic band structure data.
         """,
@@ -91,7 +91,7 @@ class SinglePointResults(SimulationWorkflowResults):
 
     eigenvalues = Quantity(
         type=Reference(BandEnergies),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the eigenvalues.
         """,
@@ -99,7 +99,7 @@ class SinglePointResults(SimulationWorkflowResults):
 
     potential = Quantity(
         type=Reference(Potential),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the potential data.
         """,
@@ -107,7 +107,7 @@ class SinglePointResults(SimulationWorkflowResults):
 
     density_charge = Quantity(
         type=Reference(Density),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the charge density data.
         """,
@@ -115,7 +115,7 @@ class SinglePointResults(SimulationWorkflowResults):
 
     spectra = Quantity(
         type=Reference(Spectra),
-        shape=["n_data"],
+        shape=['n_data'],
         description="""
         Reference to the spectral data.
         """,
@@ -179,7 +179,7 @@ class SinglePoint(SimulationWorkflow):
         if not self.method.method:
             try:
                 # TODO keep extending for other SinglePoint
-                for method_name in ["dft", "gw", "bse", "dmft"]:
+                for method_name in ['dft', 'gw', 'bse', 'dmft']:
                     if self._methods[-1].m_xpath(method_name):
                         self.method.method = method_name.upper()
                         break
@@ -269,5 +269,5 @@ class ParallelSimulation(SimulationWorkflow):
                         Link(name=INPUT_METHOD_NAME, section=self._methods[0])
                     )
                 self.tasks.append(
-                    Task(name=f"Calculation {n}", inputs=inputs, outputs=outputs)
+                    Task(name=f'Calculation {n}', inputs=inputs, outputs=outputs)
                 )

@@ -51,16 +51,16 @@ class ThermostatParameters(ArchiveSection):
 
     thermostat_type = Quantity(
         type=MEnum(
-            "andersen",
-            "berendsen",
-            "brownian",
-            "langevin_goga",
-            "langevin_schneider",
-            "nose_hoover",
-            "velocity_rescaling",
-            "velocity_rescaling_langevin",
-            "velocity_rescaling_woodcock",
-            "langevin_leap_frog",
+            'andersen',
+            'berendsen',
+            'brownian',
+            'langevin_goga',
+            'langevin_schneider',
+            'nose_hoover',
+            'velocity_rescaling',
+            'velocity_rescaling_langevin',
+            'velocity_rescaling_woodcock',
+            'langevin_leap_frog',
         ),
         shape=[],
         description="""
@@ -112,7 +112,7 @@ class ThermostatParameters(ArchiveSection):
     reference_temperature = Quantity(
         type=np.float64,
         shape=[],
-        unit="kelvin",
+        unit='kelvin',
         description="""
         The target temperature for the simulation. Typically used when temperature_profile is "constant".
         """,
@@ -121,7 +121,7 @@ class ThermostatParameters(ArchiveSection):
     coupling_constant = Quantity(
         type=np.float64,
         shape=[],
-        unit="s",
+        unit='s',
         description="""
         The time constant for temperature coupling. Need to describe what this means for the various
         thermostat options...
@@ -131,14 +131,14 @@ class ThermostatParameters(ArchiveSection):
     effective_mass = Quantity(
         type=np.float64,
         shape=[],
-        unit="kilogram",
+        unit='kilogram',
         description="""
         The effective or fictitious mass of the temperature resevoir.
         """,
     )
 
     temperature_profile = Quantity(
-        type=MEnum("constant", "linear", "exponential"),
+        type=MEnum('constant', 'linear', 'exponential'),
         shape=[],
         description="""
         Type of temperature control (i.e., annealing) procedure. Can be "constant" (no annealing), "linear", or "exponential".
@@ -150,7 +150,7 @@ class ThermostatParameters(ArchiveSection):
     reference_temperature_start = Quantity(
         type=np.float64,
         shape=[],
-        unit="kelvin",
+        unit='kelvin',
         description="""
         The initial target temperature for the simulation. Typically used when temperature_profile is "linear" or "exponential".
         """,
@@ -159,7 +159,7 @@ class ThermostatParameters(ArchiveSection):
     reference_temperature_end = Quantity(
         type=np.float64,
         shape=[],
-        unit="kelvin",
+        unit='kelvin',
         description="""
         The final target temperature for the simulation.  Typically used when temperature_profile is "linear" or "exponential".
         """,
@@ -218,11 +218,11 @@ class BarostatParameters(ArchiveSection):
 
     barostat_type = Quantity(
         type=MEnum(
-            "berendsen",
-            "martyna_tuckerman_tobias_klein",
-            "nose_hoover",
-            "parrinello_rahman",
-            "stochastic_cell_rescaling",
+            'berendsen',
+            'martyna_tuckerman_tobias_klein',
+            'nose_hoover',
+            'parrinello_rahman',
+            'stochastic_cell_rescaling',
         ),
         shape=[],
         description="""
@@ -260,7 +260,7 @@ class BarostatParameters(ArchiveSection):
     )
 
     coupling_type = Quantity(
-        type=MEnum("isotropic", "semi_isotropic", "anisotropic"),
+        type=MEnum('isotropic', 'semi_isotropic', 'anisotropic'),
         shape=[],
         description="""
         Describes the symmetry of pressure coupling. Specifics can be inferred from the `coupling constant`
@@ -280,7 +280,7 @@ class BarostatParameters(ArchiveSection):
     reference_pressure = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="pascal",
+        unit='pascal',
         description="""
         The target pressure for the simulation, stored in a 3x3 matrix, indicating the values for individual directions
         along the diagonal, and coupling between directions on the off-diagonal. Typically used when pressure_profile is "constant".
@@ -290,7 +290,7 @@ class BarostatParameters(ArchiveSection):
     coupling_constant = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="s",
+        unit='s',
         description="""
         The time constants for pressure coupling, stored in a 3x3 matrix, indicating the values for individual directions
         along the diagonal, and coupling between directions on the off-diagonal. 0 values along the off-diagonal
@@ -301,7 +301,7 @@ class BarostatParameters(ArchiveSection):
     compressibility = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="1 / pascal",
+        unit='1 / pascal',
         description="""
         An estimate of the system's compressibility, used for box rescaling, stored in a 3x3 matrix indicating the values for individual directions
         along the diagonal, and coupling between directions on the off-diagonal. If None, it may indicate that these values
@@ -311,7 +311,7 @@ class BarostatParameters(ArchiveSection):
     )
 
     pressure_profile = Quantity(
-        type=MEnum("constant", "linear", "exponential"),
+        type=MEnum('constant', 'linear', 'exponential'),
         shape=[],
         description="""
         Type of pressure control procedure. Can be "constant" (no annealing), "linear", or "exponential".
@@ -323,7 +323,7 @@ class BarostatParameters(ArchiveSection):
     reference_pressure_start = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="pascal",
+        unit='pascal',
         description="""
         The initial target pressure for the simulation, stored in a 3x3 matrix, indicating the values for individual directions
         along the diagonal, and coupling between directions on the off-diagonal. Typically used when pressure_profile is "linear" or "exponential".
@@ -333,7 +333,7 @@ class BarostatParameters(ArchiveSection):
     reference_pressure_end = Quantity(
         type=np.float64,
         shape=[3, 3],
-        unit="pascal",
+        unit='pascal',
         description="""
         The final target pressure for the simulation, stored in a 3x3 matrix, indicating the values for individual directions
         along the diagonal, and coupling between directions on the off-diagonal.  Typically used when pressure_profile is "linear" or "exponential".
@@ -386,7 +386,7 @@ class BarostatParameters(ArchiveSection):
 
 class MolecularDynamicsMethod(SimulationWorkflowMethod):
     thermodynamic_ensemble = Quantity(
-        type=MEnum("NVE", "NVT", "NPT", "NPH"),
+        type=MEnum('NVE', 'NVT', 'NPT', 'NPH'),
         shape=[],
         description="""
         The type of thermodynamic ensemble that was simulated.
@@ -409,14 +409,14 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
 
     integrator_type = Quantity(
         type=MEnum(
-            "brownian",
-            "conjugant_gradient",
-            "langevin_goga",
-            "langevin_schneider",
-            "leap_frog",
-            "rRESPA_multitimescale",
-            "velocity_verlet",
-            "langevin_leap_frog",
+            'brownian',
+            'conjugant_gradient',
+            'langevin_goga',
+            'langevin_schneider',
+            'leap_frog',
+            'rRESPA_multitimescale',
+            'velocity_verlet',
+            'langevin_leap_frog',
         ),
         shape=[],
         description="""
@@ -452,7 +452,7 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
     integration_timestep = Quantity(
         type=np.float64,
         shape=[],
-        unit="s",
+        unit='s',
         description="""
         The timestep at which the numerical integration is performed.
         """,
@@ -513,7 +513,7 @@ class Property(ArchiveSection):
     m_def = Section(validate=False)
 
     type = Quantity(
-        type=MEnum("molecular", "atomic"),
+        type=MEnum('molecular', 'atomic'),
         shape=[],
         description="""
         Describes if the observable is calculated at the molecular or atomic level.
@@ -554,7 +554,7 @@ class PropertyValues(MSection):
 
     errors = Quantity(
         type=np.float64,
-        shape=["*"],
+        shape=['*'],
         description="""
         Error associated with the determination of the property.
         """,
@@ -594,7 +594,7 @@ class EnsemblePropertyValues(PropertyValues):
 
     bins_magnitude = Quantity(
         type=np.float64,
-        shape=["n_bins"],
+        shape=['n_bins'],
         description="""
         Values of the variable along which the property is calculated.
         """,
@@ -610,7 +610,7 @@ class EnsemblePropertyValues(PropertyValues):
 
     value_magnitude = Quantity(
         type=np.float64,
-        shape=["n_bins"],
+        shape=['n_bins'],
         description="""
         Values of the property.
         """,
@@ -635,8 +635,8 @@ class RadialDistributionFunctionValues(EnsemblePropertyValues):
 
     bins = Quantity(
         type=np.float64,
-        shape=["n_bins"],
-        unit="m",
+        shape=['n_bins'],
+        unit='m',
         description="""
         Distances along which the rdf was calculated.
         """,
@@ -644,7 +644,7 @@ class RadialDistributionFunctionValues(EnsemblePropertyValues):
 
     value = Quantity(
         type=np.float64,
-        shape=["n_bins"],
+        shape=['n_bins'],
         description="""
         Values of the property.
         """,
@@ -678,7 +678,7 @@ class EnsembleProperty(Property):
 
     variables_name = Quantity(
         type=str,
-        shape=["n_variables"],
+        shape=['n_variables'],
         description="""
         Name/description of the independent variables along which the observable is defined.
         """,
@@ -707,28 +707,28 @@ class RadialDistributionFunction(EnsembleProperty):
         super().normalize(archive, logger)
 
         if self._rdf_results:
-            self.type = self._rdf_results.get("type")
-            self.n_smooth = self._rdf_results.get("n_smooth")
-            self.n_prune = self._rdf_results.get("n_prune")
+            self.type = self._rdf_results.get('type')
+            self.n_smooth = self._rdf_results.get('n_smooth')
+            self.n_prune = self._rdf_results.get('n_prune')
             self.n_variables = 1
-            self.variables_name = ["distance"]
-            for i_pair, pair_type in enumerate(self._rdf_results.get("types", [])):
+            self.variables_name = ['distance']
+            for i_pair, pair_type in enumerate(self._rdf_results.get('types', [])):
                 sec_rdf_values = self.m_create(RadialDistributionFunctionValues)
                 sec_rdf_values.label = str(pair_type)
                 sec_rdf_values.n_bins = len(
-                    self._rdf_results.get("bins", [[]] * i_pair)[i_pair]
+                    self._rdf_results.get('bins', [[]] * i_pair)[i_pair]
                 )
-                sec_rdf_values.bins = self._rdf_results.get("bins", [[]] * i_pair)[
+                sec_rdf_values.bins = self._rdf_results.get('bins', [[]] * i_pair)[
                     i_pair
                 ]
-                sec_rdf_values.value = self._rdf_results.get("value", [[]] * i_pair)[
+                sec_rdf_values.value = self._rdf_results.get('value', [[]] * i_pair)[
                     i_pair
                 ]
                 sec_rdf_values.frame_start = self._rdf_results.get(
-                    "frame_start", [[]] * i_pair
+                    'frame_start', [[]] * i_pair
                 )[i_pair]
                 sec_rdf_values.frame_end = self._rdf_results.get(
-                    "frame_end", [[]] * i_pair
+                    'frame_end', [[]] * i_pair
                 )[i_pair]
 
 
@@ -750,7 +750,7 @@ class TrajectoryProperty(Property):
 
     frames = Quantity(
         type=np.int32,
-        shape=["n_frames"],
+        shape=['n_frames'],
         description="""
         Frames for which the observable is stored.
         """,
@@ -758,8 +758,8 @@ class TrajectoryProperty(Property):
 
     times = Quantity(
         type=np.float64,
-        shape=["n_frames"],
-        unit="s",
+        shape=['n_frames'],
+        unit='s',
         description="""
         Times for which the observable is stored.
         """,
@@ -767,7 +767,7 @@ class TrajectoryProperty(Property):
 
     value = Quantity(
         type=np.float64,
-        shape=["n_frames"],
+        shape=['n_frames'],
         description="""
         Values of the property.
         """,
@@ -775,7 +775,7 @@ class TrajectoryProperty(Property):
 
     errors = Quantity(
         type=np.float64,
-        shape=["*"],
+        shape=['*'],
         description="""
         Error associated with the determination of the property.
         """,
@@ -802,8 +802,8 @@ class RadiusOfGyration(TrajectoryProperty):
 
     value = Quantity(
         type=np.float64,
-        shape=["n_frames"],
-        unit="m",
+        shape=['n_frames'],
+        unit='m',
         description="""
         Values of the property.
         """,
@@ -813,12 +813,12 @@ class RadiusOfGyration(TrajectoryProperty):
         super().normalize(archive, logger)
 
         if self._rg_results:
-            self.type = self._rg_results.get("type")
-            self.label = self._rg_results.get("label")
-            self.atomsgroup_ref = self._rg_results.get("atomsgroup_ref")
-            self.n_frames = self._rg_results.get("n_frames")
-            self.times = self._rg_results.get("times")
-            self.value = self._rg_results.get("value")
+            self.type = self._rg_results.get('type')
+            self.label = self._rg_results.get('label')
+            self.atomsgroup_ref = self._rg_results.get('atomsgroup_ref')
+            self.n_frames = self._rg_results.get('n_frames')
+            self.times = self._rg_results.get('times')
+            self.value = self._rg_results.get('value')
 
 
 class DiffusionConstantValues(PropertyValues):
@@ -831,7 +831,7 @@ class DiffusionConstantValues(PropertyValues):
     value = Quantity(
         type=np.float64,
         shape=[],
-        unit="m^2/s",
+        unit='m^2/s',
         description="""
         Values of the diffusion constants.
         """,
@@ -863,8 +863,8 @@ class CorrelationFunctionValues(PropertyValues):
 
     times = Quantity(
         type=np.float64,
-        shape=["n_times"],
-        unit="s",
+        shape=['n_times'],
+        unit='s',
         description="""
         Time windows used for the calculation of the correlation function.
         """,
@@ -872,7 +872,7 @@ class CorrelationFunctionValues(PropertyValues):
 
     value_magnitude = Quantity(
         type=np.float64,
-        shape=["n_times"],
+        shape=['n_times'],
         description="""
         Values of the property.
         """,
@@ -896,8 +896,8 @@ class MeanSquaredDisplacementValues(CorrelationFunctionValues):
 
     times = Quantity(
         type=np.float64,
-        shape=["n_times"],
-        unit="s",
+        shape=['n_times'],
+        unit='s',
         description="""
         Time windows used for the calculation of the msds.
         """,
@@ -905,8 +905,8 @@ class MeanSquaredDisplacementValues(CorrelationFunctionValues):
 
     value = Quantity(
         type=np.float64,
-        shape=["n_times"],
-        unit="m^2",
+        shape=['n_times'],
+        unit='m^2',
         description="""
         Mean squared displacement values.
         """,
@@ -914,7 +914,7 @@ class MeanSquaredDisplacementValues(CorrelationFunctionValues):
 
     errors = Quantity(
         type=np.float64,
-        shape=["*"],
+        shape=['*'],
         description="""
         Error associated with the determination of the msds.
         """,
@@ -934,7 +934,7 @@ class CorrelationFunction(Property):
     m_def = Section(validate=False)
 
     direction = Quantity(
-        type=MEnum("x", "y", "z", "xy", "yz", "xz", "xyz"),
+        type=MEnum('x', 'y', 'z', 'xy', 'yz', 'xz', 'xyz'),
         shape=[],
         description="""
         Describes the direction in which the correlation function was calculated.
@@ -965,34 +965,34 @@ class MeanSquaredDisplacement(CorrelationFunction):
         if not self._msd_results:
             return
 
-        self.type = self._msd_results.get("type")
-        self.direction = self._msd_results.get("direction")
-        for i_type, moltype in enumerate(self._msd_results.get("types", [])):
+        self.type = self._msd_results.get('type')
+        self.direction = self._msd_results.get('direction')
+        for i_type, moltype in enumerate(self._msd_results.get('types', [])):
             sec_msd_values = self.m_create(MeanSquaredDisplacementValues)
             sec_msd_values.label = str(moltype)
             sec_msd_values.n_times = len(
-                self._msd_results.get("times", [[]] * i_type)[i_type]
+                self._msd_results.get('times', [[]] * i_type)[i_type]
             )
             sec_msd_values.times = (
-                self._msd_results["times"][i_type]
-                if self._msd_results.get("times") is not None
+                self._msd_results['times'][i_type]
+                if self._msd_results.get('times') is not None
                 else []
             )
             sec_msd_values.value = (
-                self._msd_results["value"][i_type]
-                if self._msd_results.get("value") is not None
+                self._msd_results['value'][i_type]
+                if self._msd_results.get('value') is not None
                 else []
             )
             sec_diffusion = sec_msd_values.m_create(DiffusionConstantValues)
             sec_diffusion.value = (
-                self._msd_results["diffusion_constant"][i_type]
-                if self._msd_results.get("diffusion_constant") is not None
+                self._msd_results['diffusion_constant'][i_type]
+                if self._msd_results.get('diffusion_constant') is not None
                 else []
             )
-            sec_diffusion.error_type = "Pearson correlation coefficient"
+            sec_diffusion.error_type = 'Pearson correlation coefficient'
             sec_diffusion.errors = (
-                self._msd_results["error_diffusion_constant"][i_type]
-                if self._msd_results.get("error_diffusion_constant") is not None
+                self._msd_results['error_diffusion_constant'][i_type]
+                if self._msd_results.get('error_diffusion_constant') is not None
                 else []
             )
 
@@ -1015,7 +1015,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
 
     trajectory = Quantity(
         type=Reference(System),
-        shape=["n_steps"],
+        shape=['n_steps'],
         description="""
         Reference to the system of each step in the trajectory.
         """,
@@ -1098,7 +1098,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
 
         flag_rgs = False
         for calc in sec_calc:
-            if calc.get("radius_of_gyration"):
+            if calc.get('radius_of_gyration'):
                 flag_rgs = True
                 break  # TODO Should transfer Rg's to workflow results if they are already supplied in calculation
 
@@ -1107,11 +1107,11 @@ class MolecularDynamicsResults(ThermodynamicsResults):
             system_topology = sec_system.atoms_group
             rg_results = calc_molecular_radius_of_gyration(universe, system_topology)
             for rg in rg_results:
-                n_frames = rg.get("n_frames")
+                n_frames = rg.get('n_frames')
                 if len(sec_systems) != n_frames:
                     self.logger.warning(
-                        "Mismatch in length of system references in calculation and calculated Rg values."
-                        "Will not store Rg values under calculation section"
+                        'Mismatch in length of system references in calculation and calculated Rg values.'
+                        'Will not store Rg values under calculation section'
                     )
                     continue
 
@@ -1127,15 +1127,15 @@ class MolecularDynamicsResults(ThermodynamicsResults):
                     sec_rgs_calc = calc.radius_of_gyration
                     if not sec_rgs_calc:
                         sec_rgs_calc = calc.m_create(RadiusOfGyrationCalculation)
-                        sec_rgs_calc.kind = rg.get("type")
+                        sec_rgs_calc.kind = rg.get('type')
                     else:
                         sec_rgs_calc = sec_rgs_calc[0]
                     sec_rg_values = sec_rgs_calc.m_create(
                         RadiusOfGyrationValuesCalculation
                     )
-                    sec_rg_values.atomsgroup_ref = rg.get("atomsgroup_ref")
-                    sec_rg_values.label = rg.get("label")
-                    sec_rg_values.value = rg.get("value")[sys_ind]
+                    sec_rg_values.atomsgroup_ref = rg.get('atomsgroup_ref')
+                    sec_rg_values.label = rg.get('label')
+                    sec_rg_values.value = rg.get('value')[sys_ind]
 
 
 class MolecularDynamics(SerialSimulation):
