@@ -12,8 +12,8 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
+        pip install nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop
         pip install '.[dev]' --index-url https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple
-        pip install --force-reinstall nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop
         # pip install --force-reinstall '.[tests]'
         pip install coverage coveralls
     - name: mypy
