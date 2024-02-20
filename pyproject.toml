@@ -27,6 +27,7 @@ dev = [
 ]
 
 tests = [
+    # we need the latest nomad version for testing
     "nomad-lab[infrastructure]@git+https://github.com/nomad-coe/nomad.git@develop",
 ]
 
