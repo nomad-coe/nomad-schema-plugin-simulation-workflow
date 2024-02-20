@@ -1,8 +1,8 @@
 site_name: Documentation
 site_description: |
-  The documentation for NOMAD run schema
+  The documentation for NOMAD simulation workflow schema
 site_author: The NOMAD Authors
-repo_url: https://github.com/nomad-coe/nomad-schema-plugin-run
+repo_url: https://github.com/nomad-coe/nomad-schema-plugin-simulation-workflow
 
 nav:
   - Home: index.md
