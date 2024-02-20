@@ -64,7 +64,7 @@ class StrainDiagrams(ArchiveSection):
 
     value = Quantity(
         type=np.float64,
-        shape=["n_deformations", "n_eta"],
+        shape=['n_deformations', 'n_eta'],
         description="""
         Values of the energy(units:J)/d2E(units:Pa)/cross-validation (depending on the
         value of strain_diagram_type)
@@ -73,7 +73,7 @@ class StrainDiagrams(ArchiveSection):
 
     eta = Quantity(
         type=np.float64,
-        shape=["n_deformations", "n_eta"],
+        shape=['n_deformations', 'n_eta'],
         description="""
         eta values used the strain diagrams
         """,
@@ -150,7 +150,7 @@ class ElasticResults(ThermodynamicsResults):
 
     deformation_types = Quantity(
         type=np.str_,
-        shape=["n_deformations", 6],
+        shape=['n_deformations', 6],
         description="""
         deformation types
         """,
@@ -185,7 +185,7 @@ class ElasticResults(ThermodynamicsResults):
     elastic_constants_matrix_second_order = Quantity(
         type=np.float64,
         shape=[6, 6],
-        unit="pascal",
+        unit='pascal',
         description="""
         2nd order elastic constant (stiffness) matrix in pascals
         """,
@@ -194,7 +194,7 @@ class ElasticResults(ThermodynamicsResults):
     elastic_constants_matrix_third_order = Quantity(
         type=np.float64,
         shape=[6, 6, 6],
-        unit="pascal",
+        unit='pascal',
         description="""
         3rd order elastic constant (stiffness) matrix in pascals
         """,
@@ -203,7 +203,7 @@ class ElasticResults(ThermodynamicsResults):
     compliance_matrix_second_order = Quantity(
         type=np.float64,
         shape=[6, 6],
-        unit="1 / pascal",
+        unit='1 / pascal',
         description="""
         Elastic compliance matrix in 1/GPa
         """,
@@ -212,7 +212,7 @@ class ElasticResults(ThermodynamicsResults):
     elastic_constants_gradient_matrix_second_order = Quantity(
         type=np.float64,
         shape=[18, 18],
-        unit="newton",
+        unit='newton',
         description="""
         gradient of the 2nd order elastic constant (stiffness) matrix in newton
         """,
@@ -221,7 +221,7 @@ class ElasticResults(ThermodynamicsResults):
     bulk_modulus_voigt = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Voigt bulk modulus
         """,
@@ -230,7 +230,7 @@ class ElasticResults(ThermodynamicsResults):
     shear_modulus_voigt = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Voigt shear modulus
         """,
@@ -239,7 +239,7 @@ class ElasticResults(ThermodynamicsResults):
     bulk_modulus_reuss = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Reuss bulk modulus
         """,
@@ -248,7 +248,7 @@ class ElasticResults(ThermodynamicsResults):
     shear_modulus_reuss = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Reuss shear modulus
         """,
@@ -257,7 +257,7 @@ class ElasticResults(ThermodynamicsResults):
     bulk_modulus_hill = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Hill bulk modulus
         """,
@@ -266,7 +266,7 @@ class ElasticResults(ThermodynamicsResults):
     shear_modulus_hill = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Hill shear modulus
         """,
@@ -275,7 +275,7 @@ class ElasticResults(ThermodynamicsResults):
     young_modulus_voigt = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Voigt Young modulus
         """,
@@ -292,7 +292,7 @@ class ElasticResults(ThermodynamicsResults):
     young_modulus_reuss = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Reuss Young modulus
         """,
@@ -309,7 +309,7 @@ class ElasticResults(ThermodynamicsResults):
     young_modulus_hill = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Hill Young modulus
         """,
@@ -342,7 +342,7 @@ class ElasticResults(ThermodynamicsResults):
     debye_temperature = Quantity(
         type=np.float64,
         shape=[],
-        unit="kelvin",
+        unit='kelvin',
         description="""
         Debye temperature
         """,
@@ -351,7 +351,7 @@ class ElasticResults(ThermodynamicsResults):
     speed_sound_transverse = Quantity(
         type=np.float64,
         shape=[],
-        unit="meter / second",
+        unit='meter / second',
         description="""
         Speed of sound along the transverse direction
         """,
@@ -360,7 +360,7 @@ class ElasticResults(ThermodynamicsResults):
     speed_sound_longitudinal = Quantity(
         type=np.float64,
         shape=[],
-        unit="meter / second",
+        unit='meter / second',
         description="""
         Speed of sound along the longitudinal direction
         """,
@@ -369,7 +369,7 @@ class ElasticResults(ThermodynamicsResults):
     speed_sound_average = Quantity(
         type=np.float64,
         shape=[],
-        unit="meter / second",
+        unit='meter / second',
         description="""
         Average speed of sound
         """,
@@ -378,7 +378,7 @@ class ElasticResults(ThermodynamicsResults):
     eigenvalues_elastic = Quantity(
         type=np.float64,
         shape=[6],
-        unit="pascal",
+        unit='pascal',
         description="""
         Eigenvalues of the stiffness matrix
         """,
@@ -466,7 +466,7 @@ class Elastic(ParallelSimulation):
             return max_error
 
         for diagram in self.results.strain_diagrams:
-            if diagram.type == "cross-validation":
+            if diagram.type == 'cross-validation':
                 error = np.amax(diagram.value)
                 max_error = error if error > max_error else max_error
 

@@ -61,8 +61,8 @@ class EOSFit(ArchiveSection):
 
     fitted_energies = Quantity(
         type=np.float64,
-        shape=["n_points"],
-        unit="joule",
+        shape=['n_points'],
+        unit='joule',
         description="""
         Array of the fitted energies corresponding to each volume.
         """,
@@ -71,7 +71,7 @@ class EOSFit(ArchiveSection):
     bulk_modulus = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         Calculated value of the bulk modulus by fitting the volume-energy data.
         """,
@@ -88,7 +88,7 @@ class EOSFit(ArchiveSection):
     equilibrium_volume = Quantity(
         type=np.float64,
         shape=[],
-        unit="m ** 3",
+        unit='m ** 3',
         description="""
         Calculated value of the equilibrium volume by fitting the volume-energy data.
         """,
@@ -97,7 +97,7 @@ class EOSFit(ArchiveSection):
     equilibrium_energy = Quantity(
         type=np.float64,
         shape=[],
-        unit="joule",
+        unit='joule',
         description="""
         Calculated value of the equilibrium energy by fitting the volume-energy data.
         """,
@@ -123,8 +123,8 @@ class EquationOfStateResults(SimulationWorkflowResults):
 
     volumes = Quantity(
         type=np.float64,
-        shape=["n_points"],
-        unit="m ** 3",
+        shape=['n_points'],
+        unit='m ** 3',
         description="""
         Array of volumes per atom for which the energies are evaluated.
         """,
@@ -132,8 +132,8 @@ class EquationOfStateResults(SimulationWorkflowResults):
 
     energies = Quantity(
         type=np.float64,
-        shape=["n_points"],
-        unit="joule",
+        shape=['n_points'],
+        unit='joule',
         description="""
         Array of energies corresponding to each volume.
         """,
@@ -184,16 +184,16 @@ class EquationOfState(ParallelSimulation):
 
         if not self.results.eos_fit:
             function_name_map = {
-                "birch_murnaghan": "birchmurnaghan",
-                "pourier_tarantola": "pouriertarantola",
-                "vinet": "vinet",
-                "murnaghan": "murnaghan",
-                "birch_euler": "birch",
+                'birch_murnaghan': 'birchmurnaghan',
+                'pourier_tarantola': 'pouriertarantola',
+                'vinet': 'vinet',
+                'murnaghan': 'murnaghan',
+                'birch_euler': 'birch',
             }
             if self.results.volumes is not None and self.results.energies is not None:
                 # convert to ase units in order for function optimization to work
-                volumes = self.results.volumes.to("angstrom ** 3").magnitude
-                energies = self.results.energies.to("eV").magnitude
+                volumes = self.results.volumes.to('angstrom ** 3').magnitude
+                energies = self.results.energies.to('eV').magnitude
                 for function_name, ase_name in function_name_map.items():
                     try:
                         eos = aseEOS(volumes, energies, ase_name)
@@ -210,4 +210,4 @@ class EquationOfState(ParallelSimulation):
                         )
                         self.results.eos_fit.append(eos_fit)
                     except Exception:
-                        self.logger.warning("EOS fit not succesful.")
+                        self.logger.warning('EOS fit not succesful.')

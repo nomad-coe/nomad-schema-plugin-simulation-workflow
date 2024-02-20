@@ -56,13 +56,13 @@ def resolve_difference(values):
     return delta_values
 
 
-INPUT_SYSTEM_NAME = "Input system"
-OUTPUT_SYSTEM_NAME = "Output system"
-INPUT_METHOD_NAME = "Input method"
-INPUT_CALCULATION_NAME = "Input calculation"
-OUTPUT_CALCULATION_NAME = "Output calculation"
-WORKFLOW_METHOD_NAME = "Workflow method"
-WORKFLOW_RESULTS_NAME = "Workflow results"
+INPUT_SYSTEM_NAME = 'Input system'
+OUTPUT_SYSTEM_NAME = 'Output system'
+INPUT_METHOD_NAME = 'Input method'
+INPUT_CALCULATION_NAME = 'Input calculation'
+OUTPUT_CALCULATION_NAME = 'Output calculation'
+WORKFLOW_METHOD_NAME = 'Workflow method'
+WORKFLOW_RESULTS_NAME = 'Workflow results'
 
 
 class SimulationWorkflowMethod(ArchiveSection):
@@ -95,7 +95,7 @@ class SimulationWorkflowResults(ArchiveSection):
 
     calculations_ref = Quantity(
         type=Reference(Calculation.m_def),
-        shape=["n_calculations"],
+        shape=['n_calculations'],
         description="""
         List of references to each calculation section in the simulation.
         """,
@@ -134,7 +134,7 @@ class SimulationWorkflow(Workflow):
             self._systems = archive.run[-1].system
             self._methods = archive.run[-1].method
         except Exception:
-            logger.warning("System, method and calculation required for normalization.")
+            logger.warning('System, method and calculation required for normalization.')
             pass
 
         if not self._calculations:
@@ -213,7 +213,7 @@ class SimulationWorkflow(Workflow):
                     )
                 else:
                     inputs.append(Link(name=INPUT_CALCULATION_NAME, section=calc))
-                task.name = f"Step {current_step}"
+                task.name = f'Step {current_step}'
                 tasks.append(task)
                 current_time = max(current_time, calc.time_physical)
                 # add input if first calc in tasks
@@ -222,12 +222,12 @@ class SimulationWorkflow(Workflow):
                 add_outputs = add_outputs or n == len(self._calculations) - 1
             for task in tasks:
                 # add workflow inputs to first parallel tasks
-                if task.name == "Step 1" and add_inputs:
+                if task.name == 'Step 1' and add_inputs:
                     task.inputs.extend(
                         [input for input in self.inputs if input not in task.inputs]
                     )
                 # add outputs of last parallel tasks to workflow outputs
-                if task.name == f"Step {current_step}" and add_outputs:
+                if task.name == f'Step {current_step}' and add_outputs:
                     self.outputs.extend(
                         [
                             output
@@ -278,7 +278,7 @@ class ParallelSimulation(SimulationWorkflow):
                         Link(name=INPUT_METHOD_NAME, section=self._methods[0])
                     )
                 self.tasks.append(
-                    Task(name=f"Calculation {n}", inputs=inputs, outputs=outputs)
+                    Task(name=f'Calculation {n}', inputs=inputs, outputs=outputs)
                 )
 
 
@@ -336,7 +336,7 @@ class SerialSimulation(SimulationWorkflow):
                         Link(name=INPUT_METHOD_NAME, section=self._methods[0])
                     )
                 self.tasks.append(
-                    Task(name=f"Step {n}", inputs=inputs, outputs=outputs)
+                    Task(name=f'Step {n}', inputs=inputs, outputs=outputs)
                 )
 
 
@@ -356,7 +356,7 @@ class BeyondDFT(SerialSimulation):
             task (TaskReference): The task from which the outputs are got.
         """
         for name, section in output_section.m_def.all_quantities.items():
-            name = f"{name}_electronic" if name in ["dos", "band_structure"] else name
+            name = f'{name}_electronic' if name in ['dos', 'band_structure'] else name
             try:
                 calc_section = getattr(task.outputs[-1].section, name)
                 if calc_section:
@@ -375,29 +375,29 @@ class BeyondDFT(SerialSimulation):
         for method, task in task_map.items():
             outputs = ElectronicStructureOutputs()
             self._resolve_outputs_section(outputs, task)
-            setattr(self.results, f"{method}_outputs", outputs)
+            setattr(self.results, f'{method}_outputs', outputs)
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
         if len(self.tasks) != 2:
-            logger.error("Expected two tasks.")
+            logger.error('Expected two tasks.')
             return
 
         # We extract the workflow name from the tasks names
-        self.name = "+".join([task.name for task in self.tasks if task.name])
+        self.name = '+'.join([task.name for task in self.tasks if task.name])
         task_map = {
             task.name.lower(): self.tasks[n] for n, task in enumerate(self.tasks)
         }
         # Resolve workflow2.results for each standard BeyondDFT workflow
-        if self.name == "DFT+GW":
+        if self.name == 'DFT+GW':
             self.get_electronic_structure_workflow_results(task_map)
-        elif self.name == "TB+DMFT":  # TODO extend for DFT tasks
+        elif self.name == 'TB+DMFT':  # TODO extend for DFT tasks
             self.get_electronic_structure_workflow_results(task_map)
-        elif self.name == "DMFT+MaxEnt":
+        elif self.name == 'DMFT+MaxEnt':
             self.get_electronic_structure_workflow_results(task_map)
-        elif self.name == "FirstPrinciples+TB":
-            task_map["first_principles"] = task_map.pop("firstprinciples")
+        elif self.name == 'FirstPrinciples+TB':
+            task_map['first_principles'] = task_map.pop('firstprinciples')
             self.get_electronic_structure_workflow_results(task_map)
 
 
@@ -430,7 +430,7 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
 
     band_gap = Quantity(
         type=Reference(BandGap),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the band gap section.
         """,
@@ -438,7 +438,7 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
 
     dos = Quantity(
         type=Reference(Dos),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the density of states section.
         """,
@@ -446,7 +446,7 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
 
     band_structure = Quantity(
         type=Reference(BandStructure),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the band structure section.
         """,
@@ -454,7 +454,7 @@ class ElectronicStructureOutputs(SimulationWorkflowResults):
 
     greens_functions = Quantity(
         type=Reference(GreensFunctions),
-        shape=["*"],
+        shape=['*'],
         description="""
         Ref to the Green functions section.
         """,
@@ -468,7 +468,7 @@ class MagneticOutputs(SimulationWorkflowResults):
 
     magnetic_shielding = Quantity(
         type=Reference(MagneticShielding),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the magnetic shielding tensors.
         """,
@@ -476,7 +476,7 @@ class MagneticOutputs(SimulationWorkflowResults):
 
     electric_field_gradient = Quantity(
         type=Reference(ElectricFieldGradient),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the electric field gradient tensors.
         """,
@@ -484,7 +484,7 @@ class MagneticOutputs(SimulationWorkflowResults):
 
     spin_spin_coupling = Quantity(
         type=Reference(SpinSpinCoupling),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the spin-spin coupling tensors.
         """,
@@ -492,7 +492,7 @@ class MagneticOutputs(SimulationWorkflowResults):
 
     magnetic_susceptibility_nmr = Quantity(
         type=Reference(MagneticSusceptibility),
-        shape=["*"],
+        shape=['*'],
         description="""
         Reference to the magnetic susceptibility tensors.
         """,

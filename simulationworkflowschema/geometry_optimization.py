@@ -34,7 +34,7 @@ from .general import (
 
 class GeometryOptimizationMethod(SimulationWorkflowMethod):
     type = Quantity(
-        type=MEnum("static", "atomic", "cell_shape", "cell_volume"),
+        type=MEnum('static', 'atomic', 'cell_shape', 'cell_volume'),
         shape=[],
         description="""
         The type of geometry optimization, which denotes what is being optimized.
@@ -68,7 +68,7 @@ class GeometryOptimizationMethod(SimulationWorkflowMethod):
     convergence_tolerance_energy_difference = Quantity(
         type=np.float64,
         shape=[],
-        unit="joule",
+        unit='joule',
         description="""
         The input energy difference tolerance criterion.
         """,
@@ -77,7 +77,7 @@ class GeometryOptimizationMethod(SimulationWorkflowMethod):
     convergence_tolerance_force_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit="newton",
+        unit='newton',
         description="""
         The input maximum net force tolerance criterion.
         """,
@@ -86,7 +86,7 @@ class GeometryOptimizationMethod(SimulationWorkflowMethod):
     convergence_tolerance_stress_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit="pascal",
+        unit='pascal',
         description="""
         The input maximum stress tolerance criterion.
         """,
@@ -95,7 +95,7 @@ class GeometryOptimizationMethod(SimulationWorkflowMethod):
     convergence_tolerance_displacement_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit="meter",
+        unit='meter',
         description="""
         The input maximum displacement tolerance criterion.
         """,
@@ -129,8 +129,8 @@ class GeometryOptimizationResults(SimulationWorkflowResults):
 
     energies = Quantity(
         type=np.float64,
-        unit="joule",
-        shape=["optimization_steps"],
+        unit='joule',
+        shape=['optimization_steps'],
         description="""
         List of energy_total values gathered from the single configuration
         calculations that are a part of the optimization trajectory.
@@ -139,7 +139,7 @@ class GeometryOptimizationResults(SimulationWorkflowResults):
 
     steps = Quantity(
         type=np.int32,
-        shape=["optimization_steps"],
+        shape=['optimization_steps'],
         description="""
         The step index corresponding to each saved configuration.
         """,
@@ -148,7 +148,7 @@ class GeometryOptimizationResults(SimulationWorkflowResults):
     final_energy_difference = Quantity(
         type=np.float64,
         shape=[],
-        unit="joule",
+        unit='joule',
         description="""
         The difference in the energy_total between the last two steps during
         optimization.
@@ -158,7 +158,7 @@ class GeometryOptimizationResults(SimulationWorkflowResults):
     final_force_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit="newton",
+        unit='newton',
         description="""
         The maximum net force in the last optimization step.
         """,
@@ -167,7 +167,7 @@ class GeometryOptimizationResults(SimulationWorkflowResults):
     final_displacement_maximum = Quantity(
         type=np.float64,
         shape=[],
-        unit="meter",
+        unit='meter',
         description="""
         The maximum displacement in the last optimization step with respect to previous.
         """,
@@ -198,21 +198,21 @@ class GeometryOptimization(SerialSimulation):
                 cell1_normed = cell1 / np.linalg.norm(cell1)
                 cell2_normed = cell2 / np.linalg.norm(cell2)
                 if (cell1_normed == cell2_normed).all():
-                    return "cell_volume"
+                    return 'cell_volume'
                 else:
-                    return "cell_shape"
+                    return 'cell_shape'
 
         if len(self._systems) < 2:
-            return "static"
+            return 'static'
 
         else:
             if self._systems[0].atoms is None or self._systems[-1].atoms is None:
-                return "static"
+                return 'static'
 
             cell_init = self._systems[0].atoms.lattice_vectors
             cell_final = self._systems[-1].atoms.lattice_vectors
             if cell_init is None or cell_final is None:
-                return "static"
+                return 'static'
 
             cell_relaxation = compare_cell(cell_init.magnitude, cell_final.magnitude)
 
@@ -222,12 +222,12 @@ class GeometryOptimization(SerialSimulation):
             atom_pos_init = self._systems[0].atoms.positions
             atom_pos_final = self._systems[-1].atoms.positions
             if atom_pos_init is None or atom_pos_final is None:
-                return "static"
+                return 'static'
 
             if (atom_pos_init.magnitude == atom_pos_final.magnitude).all():
-                return "static"
+                return 'static'
 
-            return "atomic"
+            return 'atomic'
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
@@ -260,7 +260,7 @@ class GeometryOptimization(SerialSimulation):
             energies.append(energy.magnitude)
         if invalid:
             logger.warning(
-                "Energy not reported for an calculation that is part of a geometry optimization"
+                'Energy not reported for an calculation that is part of a geometry optimization'
             )
         if energies:
             self.results.energies = energies * EnergyEntry.value.unit

@@ -64,14 +64,14 @@ def load_archive(filename: str):
 
 
 def test_no_workflow():
-    entry_archive = load_archive("tests/data/no_workflow.archive.json")
+    entry_archive = load_archive('tests/data/no_workflow.archive.json')
     assert not entry_archive.workflow2.results.calculations_ref
 
 
 def test_single_point_workflow():
-    entry_archive = load_archive("tests/data/single_point.archive.json")
+    entry_archive = load_archive('tests/data/single_point.archive.json')
     sec_workflow = entry_archive.workflow2
-    assert sec_workflow.method.method == "DFT"
+    assert sec_workflow.method.method == 'DFT'
     assert sec_workflow.results.n_scf_steps == 9
     assert sec_workflow.results.final_scf_energy_difference > 0
     assert sec_workflow.results.dos is not None
@@ -85,51 +85,51 @@ def test_single_point_workflow():
 def test_gw_workflow(gw_workflow):
     """Testing GW workflow (DFT+GW) entry"""
     workflow = gw_workflow.workflow2
-    assert workflow.name == "DFT+GW"
-    assert workflow.method.gw_method_ref.type == "G0W0"
-    assert workflow.method.electrons_representation.type == "plane waves"
-    assert workflow.method.starting_point.name == "GGA_X_PBE"
+    assert workflow.name == 'DFT+GW'
+    assert workflow.method.gw_method_ref.type == 'G0W0'
+    assert workflow.method.electrons_representation.type == 'plane waves'
+    assert workflow.method.starting_point.name == 'GGA_X_PBE'
     results = gw_workflow.results
-    assert results.method.method_name == "GW"
-    assert results.method.workflow_name == "DFT+GW"
-    assert results.method.simulation.program_name == "VASP"
-    assert results.method.simulation.program_version == "4.6.35"
-    assert results.method.simulation.gw.type == "G0W0"
-    assert results.method.simulation.gw.starting_point_type == "GGA"
-    assert results.method.simulation.gw.starting_point_names == ["GGA_X_PBE"]
-    assert results.method.simulation.gw.basis_set_type == "plane waves"
+    assert results.method.method_name == 'GW'
+    assert results.method.workflow_name == 'DFT+GW'
+    assert results.method.simulation.program_name == 'VASP'
+    assert results.method.simulation.program_version == '4.6.35'
+    assert results.method.simulation.gw.type == 'G0W0'
+    assert results.method.simulation.gw.starting_point_type == 'GGA'
+    assert results.method.simulation.gw.starting_point_names == ['GGA_X_PBE']
+    assert results.method.simulation.gw.basis_set_type == 'plane waves'
     assert not results.properties.electronic.band_gap
     assert not results.properties.electronic.greens_functions_electronic
     assert len(results.properties.electronic.dos_electronic_new) == 2
     assert len(results.properties.electronic.band_structure_electronic) == 2
-    assert results.properties.electronic.dos_electronic_new[0].label == "DFT"
-    assert results.properties.electronic.dos_electronic_new[1].label == "GW"
+    assert results.properties.electronic.dos_electronic_new[0].label == 'DFT'
+    assert results.properties.electronic.dos_electronic_new[1].label == 'GW'
 
 
 def test_dmft_workflow(dmft_workflow):
     """Testing DMFT workflow entry"""
     workflow = dmft_workflow.workflow2
-    assert workflow.name == "TB+DMFT"
+    assert workflow.name == 'TB+DMFT'
     assert not workflow.method.tb_method_ref.wannier.is_maximally_localized
     assert workflow.method.dmft_method_ref.n_impurities == 1
     assert workflow.method.dmft_method_ref.n_correlated_orbitals[0] == 3
     assert workflow.method.dmft_method_ref.n_electrons[0] == 1.0
     assert workflow.method.dmft_method_ref.inverse_temperature.magnitude == 60.0
-    assert workflow.method.dmft_method_ref.magnetic_state == "paramagnetic"
-    assert workflow.method.dmft_method_ref.impurity_solver == "CT-HYB"
+    assert workflow.method.dmft_method_ref.magnetic_state == 'paramagnetic'
+    assert workflow.method.dmft_method_ref.impurity_solver == 'CT-HYB'
     results = dmft_workflow.results
-    assert results.method.method_name == "DMFT"
-    assert results.method.workflow_name == "TB+DMFT"
-    assert results.method.simulation.program_name == "w2dynamics"
-    assert results.method.simulation.dmft.impurity_solver_type == "CT-HYB"
+    assert results.method.method_name == 'DMFT'
+    assert results.method.workflow_name == 'TB+DMFT'
+    assert results.method.simulation.program_name == 'w2dynamics'
+    assert results.method.simulation.dmft.impurity_solver_type == 'CT-HYB'
     assert results.method.simulation.dmft.inverse_temperature.magnitude == 60.0
-    assert results.method.simulation.dmft.magnetic_state == "paramagnetic"
+    assert results.method.simulation.dmft.magnetic_state == 'paramagnetic'
     assert results.method.simulation.dmft.u.magnitude == 4.0e-19
     assert results.method.simulation.dmft.jh.magnitude == 0.6e-19
-    assert results.m_xpath("properties.electronic.band_gap")
+    assert results.m_xpath('properties.electronic.band_gap')
     assert len(results.properties.electronic.band_gap) == 1
-    assert results.properties.electronic.band_gap[0].label == "TB"
-    assert results.m_xpath("properties.electronic.band_structure_electronic")
+    assert results.properties.electronic.band_gap[0].label == 'TB'
+    assert results.m_xpath('properties.electronic.band_structure_electronic')
     assert len(results.properties.electronic.band_structure_electronic) == 1
     # TODO check why this testing is not passing
     #   * conftest seems to not be able to normalize the archive_dmft for the Greens functions, despite self_energy_iw is defined.
@@ -139,64 +139,64 @@ def test_dmft_workflow(dmft_workflow):
 def test_maxent_workflow(maxent_workflow):
     """Testing MaxEnt workflow entry"""
     workflow = maxent_workflow.workflow2
-    assert workflow.name == "DMFT+MaxEnt"
+    assert workflow.name == 'DMFT+MaxEnt'
     assert workflow.method.dmft_method_ref.n_impurities == 1
     assert workflow.method.dmft_method_ref.n_correlated_orbitals[0] == 3
     assert workflow.method.dmft_method_ref.n_electrons[0] == 1.0
     assert workflow.method.dmft_method_ref.inverse_temperature.magnitude == 60.0
-    assert workflow.method.dmft_method_ref.magnetic_state == "paramagnetic"
-    assert workflow.method.dmft_method_ref.impurity_solver == "CT-HYB"
+    assert workflow.method.dmft_method_ref.magnetic_state == 'paramagnetic'
+    assert workflow.method.dmft_method_ref.impurity_solver == 'CT-HYB'
     assert workflow.method.maxent_method_ref
     results = maxent_workflow.results
-    assert results.method.method_name == "DMFT"
-    assert results.method.workflow_name == "DMFT+MaxEnt"
-    assert results.method.simulation.program_name == "w2dynamics"
-    assert results.method.simulation.dmft.impurity_solver_type == "CT-HYB"
+    assert results.method.method_name == 'DMFT'
+    assert results.method.workflow_name == 'DMFT+MaxEnt'
+    assert results.method.simulation.program_name == 'w2dynamics'
+    assert results.method.simulation.dmft.impurity_solver_type == 'CT-HYB'
     assert results.method.simulation.dmft.inverse_temperature.magnitude == 60.0
-    assert results.method.simulation.dmft.magnetic_state == "paramagnetic"
+    assert results.method.simulation.dmft.magnetic_state == 'paramagnetic'
     assert results.method.simulation.dmft.u.magnitude == 4.0e-19
     assert results.method.simulation.dmft.jh.magnitude == 0.6e-19
-    assert results.method.simulation.dmft.analytical_continuation == "MaxEnt"
-    assert results.m_xpath("properties.electronic.dos_electronic_new")
+    assert results.method.simulation.dmft.analytical_continuation == 'MaxEnt'
+    assert results.m_xpath('properties.electronic.dos_electronic_new')
     assert len(results.properties.electronic.dos_electronic_new) == 1
-    assert results.m_xpath("properties.electronic.greens_functions_electronic")
+    assert results.m_xpath('properties.electronic.greens_functions_electronic')
     assert len(results.properties.electronic.greens_functions_electronic) == 2
-    assert results.properties.electronic.greens_functions_electronic[0].label == "DMFT"
+    assert results.properties.electronic.greens_functions_electronic[0].label == 'DMFT'
     assert (
-        results.properties.electronic.greens_functions_electronic[1].label == "MaxEnt"
+        results.properties.electronic.greens_functions_electronic[1].label == 'MaxEnt'
     )
 
 
 def test_bse_workflow(bse_workflow):
     """Testing BSE workflow (Photon1+Photon2) entry"""
     workflow = bse_workflow.workflow2
-    assert workflow.name == "BSE"
+    assert workflow.name == 'BSE'
     assert len(workflow.inputs) == 2
-    assert workflow.inputs[0].name == "Input structure"
-    assert workflow.inputs[1].name == "Input BSE methodology"
+    assert workflow.inputs[0].name == 'Input structure'
+    assert workflow.inputs[1].name == 'Input BSE methodology'
     assert (
         len(workflow.outputs) == 2
         and len(workflow.outputs) == workflow.results.n_polarizations
     )
     assert len(workflow.tasks) == 2
-    assert workflow.method.bse_method_ref.type == "Singlet"
-    assert workflow.method.bse_method_ref.solver == "Lanczos-Haydock"
+    assert workflow.method.bse_method_ref.type == 'Singlet'
+    assert workflow.method.bse_method_ref.solver == 'Lanczos-Haydock'
     results = bse_workflow.results
-    assert results.method.method_name == "BSE"
-    assert results.method.workflow_name == "BSE"
-    assert results.method.simulation.program_name == "VASP"
-    assert results.method.simulation.program_version == "4.6.35"
-    assert results.method.simulation.bse.type == "Singlet"
-    assert results.method.simulation.bse.solver == "Lanczos-Haydock"
+    assert results.method.method_name == 'BSE'
+    assert results.method.workflow_name == 'BSE'
+    assert results.method.simulation.program_name == 'VASP'
+    assert results.method.simulation.program_version == '4.6.35'
+    assert results.method.simulation.bse.type == 'Singlet'
+    assert results.method.simulation.bse.solver == 'Lanczos-Haydock'
     assert results.properties.spectroscopic
     spectra = results.properties.spectroscopic.spectra
     assert len(spectra) == 2
-    assert spectra[0].type == "XAS"
-    assert spectra[0].label == "computation"
+    assert spectra[0].type == 'XAS'
+    assert spectra[0].label == 'computation'
     assert spectra[0].n_energies == 11
-    assert spectra[0].energies[3].to("eV").magnitude == approx(3.0)
+    assert spectra[0].energies[3].to('eV').magnitude == approx(3.0)
     assert spectra[0].intensities[3] == approx(130.0)
-    assert spectra[0].intensities_units == "F/m"
+    assert spectra[0].intensities_units == 'F/m'
     assert spectra[0].provenance and spectra[1].provenance
     assert spectra[0].provenance != spectra[1].provenance
 
@@ -204,29 +204,29 @@ def test_bse_workflow(bse_workflow):
 def test_xs_workflow(xs_workflow):
     """Testing XS workflow (DFT+BSEworkflow) entry"""
     workflow = xs_workflow.workflow2
-    assert workflow.name == "XS"
+    assert workflow.name == 'XS'
     assert len(workflow.inputs) == 1
-    assert workflow.inputs[0].name == "Input structure"
+    assert workflow.inputs[0].name == 'Input structure'
     assert len(workflow.outputs) == 2
     assert len(workflow.tasks) == 2
-    assert workflow.tasks[0].name == "DFT" and workflow.tasks[1].name == "BSE 1"
+    assert workflow.tasks[0].name == 'DFT' and workflow.tasks[1].name == 'BSE 1'
     assert (
         workflow.results.dft_outputs.dos
         and workflow.results.dft_outputs.band_structure
         and workflow.results.spectra
     )
     results = xs_workflow.results
-    assert results.method.method_name == "BSE"
-    assert results.method.workflow_name == "XS"
-    assert results.method.simulation.program_name == "VASP"
-    assert results.method.simulation.program_version == "4.6.35"
-    assert results.method.simulation.bse.type == "Singlet"
-    assert results.method.simulation.bse.solver == "Lanczos-Haydock"
-    assert results.method.simulation.bse.starting_point_type == "GGA"
-    assert results.method.simulation.bse.starting_point_names == ["GGA_X_PBE"]
-    assert results.method.simulation.bse.basis_set_type == "plane waves"
+    assert results.method.method_name == 'BSE'
+    assert results.method.workflow_name == 'XS'
+    assert results.method.simulation.program_name == 'VASP'
+    assert results.method.simulation.program_version == '4.6.35'
+    assert results.method.simulation.bse.type == 'Singlet'
+    assert results.method.simulation.bse.solver == 'Lanczos-Haydock'
+    assert results.method.simulation.bse.starting_point_type == 'GGA'
+    assert results.method.simulation.bse.starting_point_names == ['GGA_X_PBE']
+    assert results.method.simulation.bse.basis_set_type == 'plane waves'
     assert results.properties.electronic and results.properties.spectroscopic
-    assert results.properties.electronic.dos_electronic_new[0].label == "DFT"
+    assert results.properties.electronic.dos_electronic_new[0].label == 'DFT'
     assert len(results.properties.spectroscopic.spectra) == 2
     assert (
         results.properties.spectroscopic.spectra[0].provenance
@@ -235,11 +235,11 @@ def test_xs_workflow(xs_workflow):
 
 
 def test_geometry_optimization_workflow():
-    entry_archive = load_archive("tests/data/geometry_optimization.archive.json")
+    entry_archive = load_archive('tests/data/geometry_optimization.archive.json')
     sec_workflow = entry_archive.workflow2
-    assert sec_workflow.method.type == "cell_shape"
-    assert sec_workflow.results.calculation_result_ref.m_def.name == "Calculation"
-    assert sec_workflow.results.final_energy_difference.to("eV").magnitude == approx(
+    assert sec_workflow.method.type == 'cell_shape'
+    assert sec_workflow.results.calculation_result_ref.m_def.name == 'Calculation'
+    assert sec_workflow.results.final_energy_difference.to('eV').magnitude == approx(
         0.00012532
     )
     assert sec_workflow.results.optimization_steps == 3
@@ -255,10 +255,10 @@ def test_geometry_optimization_workflow():
 
 
 def test_elastic_workflow():
-    entry_archive = load_archive("tests/data/elastic.archive.json")
+    entry_archive = load_archive('tests/data/elastic.archive.json')
     sec_workflow = entry_archive.workflow2
-    sec_workflow.results.calculation_result_ref.m_def.name == "Calculation"
-    sec_workflow.method.calculation_method == "energy"
+    sec_workflow.results.calculation_result_ref.m_def.name == 'Calculation'
+    sec_workflow.method.calculation_method == 'energy'
     sec_workflow.method.elastic_constants_order == 2
     sec_workflow.results.is_mechanically_stable
     sec_workflow.method.fitting_error_maximum > 0.0
@@ -266,11 +266,11 @@ def test_elastic_workflow():
 
 
 def test_phonon_workflow():
-    entry_archive = load_archive("tests/data/phonon.archive.json")
+    entry_archive = load_archive('tests/data/phonon.archive.json')
 
     sec_workflow = entry_archive.workflow2
-    assert sec_workflow.results.calculation_result_ref.m_def.name == "Calculation"
-    assert sec_workflow.method.force_calculator == "fhi-aims"
+    assert sec_workflow.results.calculation_result_ref.m_def.name == 'Calculation'
+    assert sec_workflow.method.force_calculator == 'fhi-aims'
     assert sec_workflow.method.mesh_density > 0.0
     assert sec_workflow.results.n_imaginary_frequencies > 0
     assert not sec_workflow.method.random_displacements
@@ -279,28 +279,28 @@ def test_phonon_workflow():
 
 
 def test_molecular_dynamics_workflow():
-    entry_archive = load_archive("tests/data/molecular_dynamics.archive.json")
+    entry_archive = load_archive('tests/data/molecular_dynamics.archive.json')
     sec_workflow = entry_archive.workflow2
-    sec_workflow.results.calculation_result_ref.m_def.name == "Calculation"
+    sec_workflow.results.calculation_result_ref.m_def.name == 'Calculation'
     assert sec_workflow.results.finished_normally
     assert sec_workflow.results.trajectory
 
 
 def test_rdf_and_msd():
-    entry_archive = load_archive("tests/data/rdf_and_msd.archive.json")
+    entry_archive = load_archive('tests/data/rdf_and_msd.archive.json')
 
     sec_workflow = entry_archive.workflow2
     section_md = sec_workflow.results
 
-    assert section_md.radial_distribution_functions[0].type == "molecular"
+    assert section_md.radial_distribution_functions[0].type == 'molecular'
     assert section_md.radial_distribution_functions[0].n_smooth == 2
-    assert section_md.radial_distribution_functions[0].variables_name[0] == "distance"
+    assert section_md.radial_distribution_functions[0].variables_name[0] == 'distance'
 
     assert (
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[0]
         .label
-        == "0-0"
+        == '0-0'
     )
     assert (
         section_md.radial_distribution_functions[0]
@@ -318,7 +318,7 @@ def test_rdf_and_msd():
         .radial_distribution_function_values[0]
         .bins[122]
         .units
-        == "meter"
+        == 'meter'
     )
     assert section_md.radial_distribution_functions[
         0
@@ -340,7 +340,7 @@ def test_rdf_and_msd():
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[3]
         .label
-        == "0-0"
+        == '0-0'
     )
     assert (
         section_md.radial_distribution_functions[0]
@@ -358,7 +358,7 @@ def test_rdf_and_msd():
         .radial_distribution_function_values[3]
         .bins[65]
         .units
-        == "meter"
+        == 'meter'
     )
     assert section_md.radial_distribution_functions[
         0
@@ -380,7 +380,7 @@ def test_rdf_and_msd():
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[5]
         .label
-        == "1-0"
+        == '1-0'
     )
     assert (
         section_md.radial_distribution_functions[0]
@@ -398,7 +398,7 @@ def test_rdf_and_msd():
         .radial_distribution_function_values[5]
         .bins[102]
         .units
-        == "meter"
+        == 'meter'
     )
     assert section_md.radial_distribution_functions[
         0
@@ -420,7 +420,7 @@ def test_rdf_and_msd():
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[10]
         .label
-        == "1-1"
+        == '1-1'
     )
     assert (
         section_md.radial_distribution_functions[0]
@@ -438,7 +438,7 @@ def test_rdf_and_msd():
         .radial_distribution_function_values[10]
         .bins[44]
         .units
-        == "meter"
+        == 'meter'
     )
     assert section_md.radial_distribution_functions[
         0
@@ -456,14 +456,14 @@ def test_rdf_and_msd():
         == 201
     )
 
-    assert section_md.mean_squared_displacements[0].type == "molecular"
-    assert section_md.mean_squared_displacements[0].direction == "xyz"
+    assert section_md.mean_squared_displacements[0].type == 'molecular'
+    assert section_md.mean_squared_displacements[0].direction == 'xyz'
 
     assert (
         section_md.mean_squared_displacements[0]
         .mean_squared_displacement_values[0]
         .label
-        == "0"
+        == '0'
     )
     assert (
         section_md.mean_squared_displacements[0]
@@ -479,7 +479,7 @@ def test_rdf_and_msd():
         .mean_squared_displacement_values[0]
         .times[13]
         .units
-        == "second"
+        == 'second'
     )
     assert section_md.mean_squared_displacements[0].mean_squared_displacement_values[
         0
@@ -489,7 +489,7 @@ def test_rdf_and_msd():
         .mean_squared_displacement_values[0]
         .value[32]
         .units
-        == "meter^2"
+        == 'meter^2'
     )
     assert section_md.mean_squared_displacements[0].mean_squared_displacement_values[
         0
@@ -498,13 +498,13 @@ def test_rdf_and_msd():
         section_md.mean_squared_displacements[0]
         .mean_squared_displacement_values[0]
         .diffusion_constant.value.units
-        == "meter^2/second"
+        == 'meter^2/second'
     )
     assert (
         section_md.mean_squared_displacements[0]
         .mean_squared_displacement_values[0]
         .diffusion_constant.error_type
-        == "Pearson correlation coefficient"
+        == 'Pearson correlation coefficient'
     )
     assert section_md.mean_squared_displacements[0].mean_squared_displacement_values[
         0
@@ -514,7 +514,7 @@ def test_rdf_and_msd():
         section_md.mean_squared_displacements[0]
         .mean_squared_displacement_values[1]
         .label
-        == "1"
+        == '1'
     )
     assert (
         section_md.mean_squared_displacements[0]
@@ -530,7 +530,7 @@ def test_rdf_and_msd():
         .mean_squared_displacement_values[1]
         .times[13]
         .units
-        == "second"
+        == 'second'
     )
     assert section_md.mean_squared_displacements[0].mean_squared_displacement_values[
         1
@@ -540,7 +540,7 @@ def test_rdf_and_msd():
         .mean_squared_displacement_values[1]
         .value[32]
         .units
-        == "meter^2"
+        == 'meter^2'
     )
     assert section_md.mean_squared_displacements[0].mean_squared_displacement_values[
         1
@@ -549,13 +549,13 @@ def test_rdf_and_msd():
         section_md.mean_squared_displacements[0]
         .mean_squared_displacement_values[1]
         .diffusion_constant.value.units
-        == "meter^2/second"
+        == 'meter^2/second'
     )
     assert (
         section_md.mean_squared_displacements[0]
         .mean_squared_displacement_values[1]
         .diffusion_constant.error_type
-        == "Pearson correlation coefficient"
+        == 'Pearson correlation coefficient'
     )
     assert section_md.mean_squared_displacements[0].mean_squared_displacement_values[
         1
@@ -563,20 +563,20 @@ def test_rdf_and_msd():
 
 
 def test_rdf_2():
-    entry_archive = load_archive("tests/data/rdf_2.archive.json")
+    entry_archive = load_archive('tests/data/rdf_2.archive.json')
 
     sec_workflow = entry_archive.workflow2
     section_md = sec_workflow.results
 
-    assert section_md.radial_distribution_functions[0].type == "molecular"
+    assert section_md.radial_distribution_functions[0].type == 'molecular'
     assert section_md.radial_distribution_functions[0].n_smooth == 2
-    assert section_md.radial_distribution_functions[0].variables_name[0] == "distance"
+    assert section_md.radial_distribution_functions[0].variables_name[0] == 'distance'
 
     assert (
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[0]
         .label
-        == "SOL-Protein"
+        == 'SOL-Protein'
     )
     assert (
         section_md.radial_distribution_functions[0]
@@ -594,7 +594,7 @@ def test_rdf_2():
         .radial_distribution_function_values[0]
         .bins[122]
         .units
-        == "meter"
+        == 'meter'
     )
     assert section_md.radial_distribution_functions[
         0
@@ -616,7 +616,7 @@ def test_rdf_2():
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[1]
         .label
-        == "SOL-SOL"
+        == 'SOL-SOL'
     )
     assert (
         section_md.radial_distribution_functions[0]
@@ -634,7 +634,7 @@ def test_rdf_2():
         .radial_distribution_function_values[1]
         .bins[102]
         .units
-        == "meter"
+        == 'meter'
     )
     assert section_md.radial_distribution_functions[
         0
@@ -654,45 +654,45 @@ def test_rdf_2():
 
 
 def test_radius_of_gyration():
-    entry_archive = load_archive("tests/data/radius_of_gyration.archive.json")
+    entry_archive = load_archive('tests/data/radius_of_gyration.archive.json')
 
     sec_calc = entry_archive.run[0].calculation[4]
     sec_rg = sec_calc.radius_of_gyration[0]
     sec_rgvals = sec_rg.radius_of_gyration_values[0]
 
-    assert sec_rg.kind == "molecular"
+    assert sec_rg.kind == 'molecular'
 
-    assert sec_rgvals.label == "Protein_chain_X-index_0"
+    assert sec_rgvals.label == 'Protein_chain_X-index_0'
     assert sec_rgvals.value.magnitude == approx(5.081165959952965e-10)
-    assert sec_rgvals.value.units == "meter"
+    assert sec_rgvals.value.units == 'meter'
 
     sec_calc = entry_archive.run[0].calculation[1]
     sec_rg = sec_calc.radius_of_gyration[0]
     sec_rgvals = sec_rg.radius_of_gyration_values[0]
 
-    assert sec_rg.kind == "molecular"
-    assert sec_rgvals.label == "Protein_chain_X-index_0"
+    assert sec_rg.kind == 'molecular'
+    assert sec_rgvals.label == 'Protein_chain_X-index_0'
     assert sec_rgvals.value.magnitude == approx(5.036762961380965e-10)
-    assert sec_rgvals.value.units == "meter"
+    assert sec_rgvals.value.units == 'meter'
 
     sec_workflow = entry_archive.workflow2
     sec_rg = sec_workflow.results.radius_of_gyration[0]
     frame = 4
 
-    assert sec_rg.type == "molecular"
+    assert sec_rg.type == 'molecular'
 
-    assert sec_rg.label == "Protein_chain_X-index_0"
+    assert sec_rg.label == 'Protein_chain_X-index_0'
     assert sec_rg.value[frame].magnitude == approx(5.081165959952965e-10)
-    assert sec_rg.value[frame].units == "meter"
+    assert sec_rg.value[frame].units == 'meter'
 
     frame = 1
     sec_rg = sec_workflow.results.radius_of_gyration[0]
     sec_calc = entry_archive.run[0].calculation[1]
 
-    assert sec_rg.type == "molecular"
-    assert sec_rg.label == "Protein_chain_X-index_0"
+    assert sec_rg.type == 'molecular'
+    assert sec_rg.label == 'Protein_chain_X-index_0'
     assert sec_rg.value[frame].magnitude == approx(5.036762961380965e-10)
-    assert sec_rg.value[frame].units == "meter"
+    assert sec_rg.value[frame].units == 'meter'
 
 
 def parse_trajectory(filename):
@@ -701,7 +701,7 @@ def parse_trajectory(filename):
 
     archive = EntryArchive()
 
-    run = Run(program=Program(name="ASE"))
+    run = Run(program=Program(name='ASE'))
     for frame in trajectory:
         calc = Calculation(
             energy=Energy(
@@ -728,16 +728,16 @@ def parse_trajectory(filename):
 
 
 def test_eos_workflow():
-    archive = parse_trajectory("tests/data/ase/Cu.traj")
+    archive = parse_trajectory('tests/data/ase/Cu.traj')
 
     eos_fit = archive.workflow2.results.eos_fit
     assert len(eos_fit) == 5
-    assert eos_fit[0].fitted_energies[1].to("eV").magnitude == approx(-0.00636507)
-    assert eos_fit[1].function_name == "pourier_tarantola"
-    assert eos_fit[2].equilibrium_volume.to("angstrom**3").magnitude == approx(
+    assert eos_fit[0].fitted_energies[1].to('eV').magnitude == approx(-0.00636507)
+    assert eos_fit[1].function_name == 'pourier_tarantola'
+    assert eos_fit[2].equilibrium_volume.to('angstrom**3').magnitude == approx(
         11.565388081047471
     )
-    assert eos_fit[3].equilibrium_energy.to("eV").magnitude == approx(
+    assert eos_fit[3].equilibrium_energy.to('eV').magnitude == approx(
         -0.007035923370513912
     )
     assert eos_fit[4].rms_error == approx(1.408202378222592e-07)
@@ -756,7 +756,7 @@ class TestSimulationWorkflow:
         Simulation with calculations done in serial.
         """
         archive = EntryArchive()
-        archive.metadata = EntryMetadata(entry_type="Workflow")
+        archive.metadata = EntryMetadata(entry_type='Workflow')
         archive.workflow2 = SimulationWorkflow(
             method=SimulationWorkflowMethod(), results=SimulationWorkflowResults()
         )
@@ -781,7 +781,7 @@ class TestSimulationWorkflow:
 
         assert workflow.inputs[0].section == workflow.tasks[0].inputs[0].section
         for n, task in enumerate(workflow.tasks[:-1]):
-            assert task.name == f"Step {n + 1}"
+            assert task.name == f'Step {n + 1}'
             assert len(task.inputs) == 1
             assert len(task.outputs) == 1
             assert task.outputs[0].section == workflow.tasks[n + 1].inputs[0].section
@@ -791,19 +791,19 @@ class TestSimulationWorkflow:
         """
         Test tasks creation skipped if tasks are predefined
         """
-        workflow = SimulationWorkflow(tasks=[Task(name="1")])
+        workflow = SimulationWorkflow(tasks=[Task(name='1')])
         serial_simulation.workflow2 = workflow
         workflow.normalize(serial_simulation, LOGGER)
 
         assert len(serial_simulation.workflow2.tasks) == 1
-        assert serial_simulation.workflow2.tasks[0].name == "1"
+        assert serial_simulation.workflow2.tasks[0].name == '1'
 
     def test_tasks_no_time(self, serial_simulation):
         """
         Test tasks creation skipped if at least one calculation has no time info.
         """
 
-        for key in ["time_physical", "time_calculation"]:
+        for key in ['time_physical', 'time_calculation']:
             calc = serial_simulation.run[0].calculation[
                 random.randint(0, self.n_calc - 1)
             ]
@@ -812,7 +812,7 @@ class TestSimulationWorkflow:
             assert not serial_simulation.workflow2.tasks
 
     @pytest.mark.parametrize(
-        "calculation_indices",
+        'calculation_indices',
         [
             # parallel (0 to 3), 4, 5, parallel (6 to 9)
             [[0, 1, 2, 3], [4], [5], [6, 7, 8, 9]],
@@ -853,13 +853,13 @@ class TestSimulationWorkflow:
 
         # workflow inputs as inputs to first parallel tasks
         for n in calculation_indices[0]:
-            assert workflow.tasks[n].name == "Step 1"
+            assert workflow.tasks[n].name == 'Step 1'
             assert workflow.tasks[n].inputs[0].section == workflow.inputs[0].section
 
         # outputs of previous tasks are inputs of succeeding tasks in series
         for i in range(1, len(calculation_indices)):
             for n1 in calculation_indices[i]:
-                assert workflow.tasks[n1].name == f"Step {i + 1}"
+                assert workflow.tasks[n1].name == f'Step {i + 1}'
                 inputs = [input.section for input in workflow.tasks[n1].inputs]
                 for n0 in calculation_indices[i - 1]:
                     assert workflow.tasks[n0].outputs[-1].section in inputs
@@ -877,17 +877,17 @@ class TestChemicalReactionWorkflow:
     workflow.
     """
 
-    @pytest.fixture(autouse=True, scope="class")
+    @pytest.fixture(autouse=True, scope='class')
     def dft_archives(self):
         """
         Parse all relevant dft calculations.
         """
-        test_dir = "tests/data/chemical_reaction"
+        test_dir = 'tests/data/chemical_reaction'
 
         archives = {}
         for root, _, names in os.walk(test_dir):
             for filename in names:
-                if filename != "run.archive.json":
+                if filename != 'run.archive.json':
                     continue
                 archives[os.path.basename(root)] = load_archive(
                     os.path.join(root, filename)
@@ -901,29 +901,29 @@ class TestChemicalReactionWorkflow:
         from RhCu_CH4 into RhCu_CH3 and RhCu_H through a transition state RhCu_CH3_H.
         """
         formula_type = [
-            ["RhCu_CH4", "reactant"],
-            ["RhCu", "reactant"],
-            ["RhCu_CH3_H", "transition state"],
-            ["RhCu_CH3", "product"],
-            ["RhCu_xHfcc", "product"],
+            ['RhCu_CH4', 'reactant'],
+            ['RhCu', 'reactant'],
+            ['RhCu_CH3_H', 'transition state'],
+            ['RhCu_CH3', 'product'],
+            ['RhCu_xHfcc', 'product'],
         ]
         workflow = ChemicalReaction()
         for formula, type in formula_type:
             archive = dft_archives[formula]
             workflow.inputs.append(
-                Link(name=f"{formula} {type}", section=archive.run[0].calculation[-1])
+                Link(name=f'{formula} {type}', section=archive.run[0].calculation[-1])
             )
             # add also slab to transition state to preserve mass balance
-            if formula == "RhCu":
+            if formula == 'RhCu':
                 workflow.inputs.append(
                     Link(
-                        name=f"transition state {formula}",
+                        name=f'transition state {formula}',
                         section=archive.run[0].calculation[-1],
                     )
                 )
 
         return EntryArchive(
-            metadata=EntryMetadata(entry_type="Workflow"), workflow2=workflow
+            metadata=EntryMetadata(entry_type='Workflow'), workflow2=workflow
         )
 
     @pytest.fixture(autouse=True)
@@ -934,32 +934,32 @@ class TestChemicalReactionWorkflow:
         """
 
         formula_type = [
-            ["N", "reactant"],
-            ["PdAg", "reactant"],
-            ["NPdAg", "product"],
+            ['N', 'reactant'],
+            ['PdAg', 'reactant'],
+            ['NPdAg', 'product'],
         ]
         workflow = ChemicalReaction()
         for formula, type in formula_type:
             archive = dft_archives[formula]
             workflow.inputs.append(
-                Link(name=f"{formula} {type}", section=archive.run[0].calculation[-1])
+                Link(name=f'{formula} {type}', section=archive.run[0].calculation[-1])
             )
 
         return EntryArchive(
-            metadata=EntryMetadata(entry_type="Workflow"), workflow2=workflow
+            metadata=EntryMetadata(entry_type='Workflow'), workflow2=workflow
         )
 
     @pytest.mark.parametrize(
-        "workflow_archive, reaction_energy, activation_energy",
+        'workflow_archive, reaction_energy, activation_energy',
         [
             pytest.param(
-                "segregation_workflow_archive",
+                'segregation_workflow_archive',
                 4.41467915e-20,
                 1.02994872e-19,
-                id="segregation",
+                id='segregation',
             ),
             pytest.param(
-                "adsorption_workflow_archive", -3.04029682e-19, None, id="adsorption"
+                'adsorption_workflow_archive', -3.04029682e-19, None, id='adsorption'
             ),
         ],
     )
@@ -1001,6 +1001,6 @@ class TestChemicalReactionWorkflow:
 
         # change the chemical composition in an input to make them inconsistent
         workflow.inputs[-1].section.system_ref.atoms.lattice_vectoprs = lattice
-        workflow.inputs[0].section.system_ref.atoms.labels = ["C"]
+        workflow.inputs[0].section.system_ref.atoms.labels = ['C']
         workflow.normalize(segregation_workflow_archive, LOGGER)
         assert workflow.results.reaction_energy is None
