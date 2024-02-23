@@ -19,7 +19,15 @@ from typing import List
 import numpy as np
 
 from nomad.datamodel.data import ArchiveSection
-from nomad.metainfo import SubSection, Section, Quantity, MEnum, Reference, MSection
+from nomad.metainfo import (
+    SubSection,
+    Section,
+    Quantity,
+    MEnum,
+    Reference,
+    MSection,
+    HDF5Reference,
+)
 from nomad.datamodel.metainfo.workflow import Link
 from runschema.system import System, AtomsGroup
 from runschema.calculation import (
@@ -440,6 +448,14 @@ class FreeEnergyPerturbationParameters(ArchiveSection):
     """
 
     m_def = Section(validate=False)
+
+    type = Quantity(
+        type=MEnum("alchemical", "umbrella_sampling"),
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on or off in the final state (i.e., lambda = 0).
+        """,
+    )
 
     lambdas = SubSection(
         sub_section=Lambdas.m_def,
@@ -891,11 +907,19 @@ class TrajectoryProperty(Property):
         """,
     )
 
-    value = Quantity(
+    value_magnitude = Quantity(
         type=np.float64,
-        shape=["n_frames"],
+        shape=["n_times"],
         description="""
         Values of the property.
+        """,
+    )
+
+    value_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the property, using UnitRegistry() notation.
         """,
     )
 
@@ -908,6 +932,7 @@ class TrajectoryProperty(Property):
     )
 
 
+# TODO Rg + TrajectoryPropery should be removed from workflow. All properties dependent on a single configuration should be store in calculation
 class RadiusOfGyration(TrajectoryProperty):
     """
     Section containing information about the calculation of
@@ -945,6 +970,42 @@ class RadiusOfGyration(TrajectoryProperty):
             self.n_frames = self._rg_results.get("n_frames")
             self.times = self._rg_results.get("times")
             self.value = self._rg_results.get("value")
+
+
+class FreeEnergiesInstantaneousInfinitesimal(TrajectoryProperty):
+    """
+    Section containing information regarding the instantaneous (i.e., for a single configuration)
+    values of free energies calculated via thermodynamic perturbation.
+    The values stored are actually infinitesimal changes in the free energy, determined as derivatives
+    of the Hamiltonian with respect to the coupling parameter (lambda) defining each state for the perturbation.
+    """
+
+    m_def = Section(validate=False)
+
+    method_ref = Quantity(
+        type=Reference(FreeEnergyPerturbationParameters.m_def),
+        shape=[],
+        description="""
+        Links the free energy results with the method parameters.
+        """,
+    )
+
+    n_states = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Number of states defined for the interpolation of the system via free energy perturbation,
+        as indicate in `method_ref`
+        """,
+    )
+
+    value_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=["n_frames", "n_states"],
+        description="""
+        Specifies the HDF5 file and the path to the value in the file.
+        """,
+    )
 
 
 class DiffusionConstantValues(PropertyValues):
@@ -1163,6 +1224,10 @@ class MolecularDynamicsResults(ThermodynamicsResults):
 
     mean_squared_displacements = SubSection(
         sub_section=MeanSquaredDisplacement, repeats=True
+    )
+
+    free_energies_instantaneous_infinitesimal = SubSection(
+        sub_section=FreeEnergiesInstantaneousInfinitesimal, repeats=True
     )
 
     def normalize(self, archive, logger):
