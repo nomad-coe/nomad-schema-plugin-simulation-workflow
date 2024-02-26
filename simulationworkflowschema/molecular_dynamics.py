@@ -918,7 +918,7 @@ class TrajectoryProperty(Property):
 
     value_magnitude = Quantity(
         type=np.float64,
-        shape=["n_times"],
+        shape=["n_frames"],
         description="""
         Values of the property.
         """,
