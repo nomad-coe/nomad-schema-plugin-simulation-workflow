@@ -440,9 +440,10 @@ class Lambdas(MSection):
     )
 
 
-class FreeEnergyPerturbationParameters(ArchiveSection):
+class FreeEnergyCalculationParameters(ArchiveSection):
     """
-    Section containing the parameters pertaining to a free energy perturbation workflow.
+    Section containing the parameters pertaining to a free energy calculation workflow
+    that interpolates between two system states (defined via the interpolation parameter lambda).
     The parameters are stored for each molecular dynamics run separately, to be referenced
     by the overarching workflow.
     """
@@ -453,16 +454,24 @@ class FreeEnergyPerturbationParameters(ArchiveSection):
         type=MEnum("alchemical", "umbrella_sampling"),
         shape=[],
         description="""
-        Specifies whether vdw interactions are on or off in the final state (i.e., lambda = 0).
+        Specifies the type of workflow.
         """,
     )
 
     lambdas = SubSection(
         sub_section=Lambdas.m_def,
         description="""
-        Contains the lists of lambda values defined for the free energy perturbation.
+        Contains the lists of lambda values defined for the interpolation of the system.
         """,
         repeats=True,
+    )
+
+    lambda_index = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        The index of the lambda in `lambdas` corresponding to the state of the current simulation.
+        """,
     )
 
     atom_indices = Quantity(
@@ -642,8 +651,8 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
 
     barostat_parameters = SubSection(sub_section=BarostatParameters.m_def, repeats=True)
 
-    free_energy_perturbation_parameters = SubSection(
-        sub_section=FreeEnergyPerturbationParameters.m_def, repeats=True
+    free_energy_calculation_parameters = SubSection(
+        sub_section=FreeEnergyCalculationParameters.m_def, repeats=True
     )
 
 
@@ -972,7 +981,7 @@ class RadiusOfGyration(TrajectoryProperty):
             self.value = self._rg_results.get("value")
 
 
-class FreeEnergiesInstantaneousInfinitesimal(TrajectoryProperty):
+class FreeEnergyCalculations(TrajectoryProperty):
     """
     Section containing information regarding the instantaneous (i.e., for a single configuration)
     values of free energies calculated via thermodynamic perturbation.
@@ -983,10 +992,19 @@ class FreeEnergiesInstantaneousInfinitesimal(TrajectoryProperty):
     m_def = Section(validate=False)
 
     method_ref = Quantity(
-        type=Reference(FreeEnergyPerturbationParameters.m_def),
+        type=Reference(FreeEnergyCalculationParameters.m_def),
         shape=[],
         description="""
         Links the free energy results with the method parameters.
+        """,
+    )
+
+    lambda_index = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Index of the lambda state for the present simulation within the free energy calculation workflow.
+        I.e., lambda = method_ref.lambdas.values[lambda_index]
         """,
     )
 
@@ -994,16 +1012,55 @@ class FreeEnergiesInstantaneousInfinitesimal(TrajectoryProperty):
         type=int,
         shape=[],
         description="""
-        Number of states defined for the interpolation of the system via free energy perturbation,
-        as indicate in `method_ref`
+        Number of states defined for the interpolation of the system, as indicate in `method_ref`.
         """,
     )
 
-    value_magnitude = Quantity(
-        type=HDF5Reference,
-        shape=["n_frames", "n_states"],
+    value_unit = Quantity(
+        type=str,
+        shape=[],
         description="""
-        Specifies the HDF5 file and the path to the value in the file.
+        Unit of the property, using UnitRegistry() notation.
+        In this case, the unit corresponds to all `value` properties stored within this section.
+        """,
+    )
+
+    value_total_energy_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Value of the total energy for the present lambda state. The expected dimensions are ["n_frames"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
+
+    value_PV_energy_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Value of the pressure-volume energy (i.e., P*V) for the present lambda state. The expected dimensions are ["n_frames"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
+
+    value_total_energy_differences_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Values correspond to the difference in total energy between each specified lambda state
+        and the reference state, which corresponds to the value of lambda of the current simulation.
+        The expected dimensions are ["n_frames", "n_states"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
+
+    value_total_energy_derivative_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Value of the derivative of the total energy with respect to lambda, evaluated for the current
+        lambda state. The expected dimensions are ["n_frames"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
         """,
     )
 
@@ -1226,8 +1283,8 @@ class MolecularDynamicsResults(ThermodynamicsResults):
         sub_section=MeanSquaredDisplacement, repeats=True
     )
 
-    free_energies_instantaneous_infinitesimal = SubSection(
-        sub_section=FreeEnergiesInstantaneousInfinitesimal, repeats=True
+    free_energy_calculations = SubSection(
+        sub_section=FreeEnergyCalculations, repeats=True
     )
 
     def normalize(self, archive, logger):
