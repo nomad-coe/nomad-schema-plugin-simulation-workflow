@@ -454,7 +454,18 @@ class FreeEnergyCalculationParameters(ArchiveSection):
         type=MEnum("alchemical", "umbrella_sampling"),
         shape=[],
         description="""
-        Specifies the type of workflow.
+        Specifies the type of workflow. Allowed values are:
+
+        | kind          | Description                               |
+
+        | ---------------------- | ----------------------------------------- |
+
+        | `"alchemical"`           | A non-physical transformation between 2 well-defined systems,
+                                     typically achieved by smoothly interpolating between Hamiltonians or force fields.  |
+
+        | `"umbrella_sampling"`    | A sampling of the path between 2 well-defined (sub)states of a system,
+                                     typically achieved by applying a biasing force to the force field along a
+                                     specified reaction coordinate.
         """,
     )
 
