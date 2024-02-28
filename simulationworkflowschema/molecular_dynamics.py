@@ -392,7 +392,7 @@ class BarostatParameters(ArchiveSection):
     )
 
 
-class Lambdas(MSection):
+class Lambdas(ArchiveSection):
     """
     Section for storing all lambda parameters for free energy perturbation
     """
@@ -494,50 +494,50 @@ class FreeEnergyCalculationParameters(ArchiveSection):
     )
 
     initial_state_vdw = Quantity(
-        type=MEnum("on", "off"),
+        type=bool,
         shape=[],
         description="""
-        Specifies whether vdw interactions are on or off in the initial state (i.e., lambda = 0).
+        Specifies whether vdw interactions are on (True) or off (False) in the initial state (i.e., lambda = 0).
         """,
     )
 
     final_state_vdw = Quantity(
-        type=MEnum("on", "off"),
+        type=bool,
         shape=[],
         description="""
-        Specifies whether vdw interactions are on or off in the final state (i.e., lambda = 0).
+        Specifies whether vdw interactions are on (True) or off (False) in the final state (i.e., lambda = 0).
         """,
     )
 
     initial_state_coloumb = Quantity(
-        type=MEnum("on", "off"),
+        type=bool,
         shape=[],
         description="""
-        Specifies whether vdw interactions are on or off in the initial state (i.e., lambda = 0).
+        Specifies whether vdw interactions are on (True) or off (False) in the initial state (i.e., lambda = 0).
         """,
     )
 
     final_state_coloumb = Quantity(
-        type=MEnum("on", "off"),
+        type=bool,
         shape=[],
         description="""
-        Specifies whether vdw interactions are on or off in the final state (i.e., lambda = 0).
+        Specifies whether vdw interactions are on (True) or off (False) in the final state (i.e., lambda = 0).
         """,
     )
 
     initial_state_bonded = Quantity(
-        type=MEnum("on", "off"),
+        type=bool,
         shape=[],
         description="""
-        Specifies whether bonded interactions are on or off in the initial state (i.e., lambda = 0).
+        Specifies whether bonded interactions are on (True) or off (False) in the initial state (i.e., lambda = 0).
         """,
     )
 
     final_state_bonded = Quantity(
-        type=MEnum("on", "off"),
+        type=bool,
         shape=[],
         description="""
-        Specifies whether bonded interactions are on or off in the final state (i.e., lambda = 0).
+        Specifies whether bonded interactions are on (True) or off (False) in the final state (i.e., lambda = 0).
         """,
     )
 
