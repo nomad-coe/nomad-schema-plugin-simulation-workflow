@@ -19,7 +19,15 @@ from typing import List
 import numpy as np
 
 from nomad.datamodel.data import ArchiveSection
-from nomad.metainfo import SubSection, Section, Quantity, MEnum, Reference, MSection
+from nomad.metainfo import (
+    SubSection,
+    Section,
+    Quantity,
+    MEnum,
+    Reference,
+    MSection,
+    HDF5Reference,
+)
 from nomad.datamodel.metainfo.workflow import Link
 from runschema.system import System, AtomsGroup
 from runschema.calculation import (
@@ -384,6 +392,156 @@ class BarostatParameters(ArchiveSection):
     )
 
 
+class Lambdas(ArchiveSection):
+    """
+    Section for storing all lambda parameters for free energy perturbation
+    """
+
+    m_def = Section(validate=False)
+
+    type = Quantity(
+        type=MEnum(
+            "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
+        ),
+        shape=[],
+        description="""
+        The type of lambda interpolation
+
+        Allowed values are:
+
+        | type          | Description                               |
+
+        | ---------------------- | ----------------------------------------- |
+
+        | `"output"`           | Lambdas for the free energy outputs saved.
+                                    These will also act as a default in case some
+                                    relevant lambdas are not specified. |
+
+        | `"coulomb"`          | Lambdas for interpolating electrostatic interactions. |
+
+        | `"vdw"`              | Lambdas for interpolating van der Waals interactions. |
+
+        | `"bonded"`           | Lambdas for interpolating all intramolecular interactions. |
+
+        | `"restraint"`        | Lambdas for interpolating restraints. |
+
+        | `"mass"`             | Lambdas for interpolating masses. |
+
+        | `"temperature"`      | Lambdas for interpolating temperature. |
+        """,
+    )
+
+    value = Quantity(
+        type=np.float64,
+        shape=[],
+        description="""
+        List of lambdas.
+        """,
+    )
+
+
+class FreeEnergyCalculationParameters(ArchiveSection):
+    """
+    Section containing the parameters pertaining to a free energy calculation workflow
+    that interpolates between two system states (defined via the interpolation parameter lambda).
+    The parameters are stored for each molecular dynamics run separately, to be referenced
+    by the overarching workflow.
+    """
+
+    m_def = Section(validate=False)
+
+    type = Quantity(
+        type=MEnum("alchemical", "umbrella_sampling"),
+        shape=[],
+        description="""
+        Specifies the type of workflow. Allowed values are:
+
+        | kind          | Description                               |
+
+        | ---------------------- | ----------------------------------------- |
+
+        | `"alchemical"`           | A non-physical transformation between 2 well-defined systems,
+                                     typically achieved by smoothly interpolating between Hamiltonians or force fields.  |
+
+        | `"umbrella_sampling"`    | A sampling of the path between 2 well-defined (sub)states of a system,
+                                     typically achieved by applying a biasing force to the force field along a
+                                     specified reaction coordinate.
+        """,
+    )
+
+    lambdas = SubSection(
+        sub_section=Lambdas.m_def,
+        description="""
+        Contains the lists of lambda values defined for the interpolation of the system.
+        """,
+        repeats=True,
+    )
+
+    lambda_index = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        The index of the lambda in `lambdas` corresponding to the state of the current simulation.
+        """,
+    )
+
+    atom_indices = Quantity(
+        type=np.dtype(np.int32),
+        shape=[],
+        description="""
+        List of atom indices involved in the interpolation.
+        """,
+    )
+
+    initial_state_vdw = Quantity(
+        type=bool,
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on (True) or off (False) in the initial state (i.e., lambda = 0).
+        """,
+    )
+
+    final_state_vdw = Quantity(
+        type=bool,
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on (True) or off (False) in the final state (i.e., lambda = 0).
+        """,
+    )
+
+    initial_state_coloumb = Quantity(
+        type=bool,
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on (True) or off (False) in the initial state (i.e., lambda = 0).
+        """,
+    )
+
+    final_state_coloumb = Quantity(
+        type=bool,
+        shape=[],
+        description="""
+        Specifies whether vdw interactions are on (True) or off (False) in the final state (i.e., lambda = 0).
+        """,
+    )
+
+    initial_state_bonded = Quantity(
+        type=bool,
+        shape=[],
+        description="""
+        Specifies whether bonded interactions are on (True) or off (False) in the initial state (i.e., lambda = 0).
+        """,
+    )
+
+    final_state_bonded = Quantity(
+        type=bool,
+        shape=[],
+        description="""
+        Specifies whether bonded interactions are on (True) or off (False) in the final state (i.e., lambda = 0).
+        """,
+    )
+
+
 class MolecularDynamicsMethod(SimulationWorkflowMethod):
     thermodynamic_ensemble = Quantity(
         type=MEnum('NVE', 'NVT', 'NPT', 'NPH'),
@@ -503,6 +661,10 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
     )
 
     barostat_parameters = SubSection(sub_section=BarostatParameters.m_def, repeats=True)
+
+    free_energy_calculation_parameters = SubSection(
+        sub_section=FreeEnergyCalculationParameters.m_def, repeats=True
+    )
 
 
 class Property(ArchiveSection):
@@ -765,11 +927,19 @@ class TrajectoryProperty(Property):
         """,
     )
 
-    value = Quantity(
+    value_magnitude = Quantity(
         type=np.float64,
         shape=['n_frames'],
         description="""
         Values of the property.
+        """,
+    )
+
+    value_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the property, using UnitRegistry() notation.
         """,
     )
 
@@ -782,6 +952,7 @@ class TrajectoryProperty(Property):
     )
 
 
+# TODO Rg + TrajectoryPropery should be removed from workflow. All properties dependent on a single configuration should be store in calculation
 class RadiusOfGyration(TrajectoryProperty):
     """
     Section containing information about the calculation of
@@ -819,6 +990,90 @@ class RadiusOfGyration(TrajectoryProperty):
             self.n_frames = self._rg_results.get('n_frames')
             self.times = self._rg_results.get('times')
             self.value = self._rg_results.get('value')
+
+
+class FreeEnergyCalculations(TrajectoryProperty):
+    """
+    Section containing information regarding the instantaneous (i.e., for a single configuration)
+    values of free energies calculated via thermodynamic perturbation.
+    The values stored are actually infinitesimal changes in the free energy, determined as derivatives
+    of the Hamiltonian with respect to the coupling parameter (lambda) defining each state for the perturbation.
+    """
+
+    m_def = Section(validate=False)
+
+    method_ref = Quantity(
+        type=Reference(FreeEnergyCalculationParameters.m_def),
+        shape=[],
+        description="""
+        Links the free energy results with the method parameters.
+        """,
+    )
+
+    lambda_index = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Index of the lambda state for the present simulation within the free energy calculation workflow.
+        I.e., lambda = method_ref.lambdas.values[lambda_index]
+        """,
+    )
+
+    n_states = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Number of states defined for the interpolation of the system, as indicate in `method_ref`.
+        """,
+    )
+
+    value_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the property, using UnitRegistry() notation.
+        In this case, the unit corresponds to all `value` properties stored within this section.
+        """,
+    )
+
+    value_total_energy_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Value of the total energy for the present lambda state. The expected dimensions are ["n_frames"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
+
+    value_PV_energy_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Value of the pressure-volume energy (i.e., P*V) for the present lambda state. The expected dimensions are ["n_frames"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
+
+    value_total_energy_differences_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Values correspond to the difference in total energy between each specified lambda state
+        and the reference state, which corresponds to the value of lambda of the current simulation.
+        The expected dimensions are ["n_frames", "n_states"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
+
+    value_total_energy_derivative_magnitude = Quantity(
+        type=HDF5Reference,
+        shape=[],
+        description="""
+        Value of the derivative of the total energy with respect to lambda, evaluated for the current
+        lambda state. The expected dimensions are ["n_frames"].
+        This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
+        """,
+    )
 
 
 class DiffusionConstantValues(PropertyValues):
@@ -1022,21 +1277,27 @@ class MolecularDynamicsResults(ThermodynamicsResults):
     )
 
     radial_distribution_functions = SubSection(
-        sub_section=RadialDistributionFunction, repeats=True
+        sub_section=RadialDistributionFunction.m_def, repeats=True
     )
 
-    ensemble_properties = SubSection(sub_section=EnsembleProperty, repeats=True)
+    ensemble_properties = SubSection(sub_section=EnsembleProperty.m_def, repeats=True)
 
-    correlation_functions = SubSection(sub_section=CorrelationFunction, repeats=True)
+    correlation_functions = SubSection(
+        sub_section=CorrelationFunction.m_def, repeats=True
+    )
 
     radial_distribution_functions = SubSection(
-        sub_section=RadialDistributionFunction, repeats=True
+        sub_section=RadialDistributionFunction.m_def, repeats=True
     )
 
     radius_of_gyration = SubSection(sub_section=RadiusOfGyration, repeats=True)
 
     mean_squared_displacements = SubSection(
-        sub_section=MeanSquaredDisplacement, repeats=True
+        sub_section=MeanSquaredDisplacement.m_def, repeats=True
+    )
+
+    free_energy_calculations = SubSection(
+        sub_section=FreeEnergyCalculations.m_def, repeats=True
     )
 
     def normalize(self, archive, logger):
