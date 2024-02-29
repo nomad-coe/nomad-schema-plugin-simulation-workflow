@@ -48,6 +48,8 @@ from .general import (
     WORKFLOW_RESULTS_NAME,
 )
 from .thermodynamics import ThermodynamicsResults
+from nomad.datamodel.metainfo.annotations import ELNAnnotation
+from nomad.metainfo.metainfo import DirectQuantity, Dimension
 
 
 class ThermostatParameters(ArchiveSection):
@@ -401,7 +403,7 @@ class Lambdas(ArchiveSection):
 
     type = Quantity(
         type=MEnum(
-            "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
+            'output', 'coulomb', 'vdw', 'bonded', 'restraint', 'mass', 'temperature'
         ),
         shape=[],
         description="""
@@ -451,7 +453,7 @@ class FreeEnergyCalculationParameters(ArchiveSection):
     m_def = Section(validate=False)
 
     type = Quantity(
-        type=MEnum("alchemical", "umbrella_sampling"),
+        type=MEnum('alchemical', 'umbrella_sampling'),
         shape=[],
         description="""
         Specifies the type of workflow. Allowed values are:
@@ -667,76 +669,209 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
     )
 
 
-class Property(ArchiveSection):
+class BaseParameter(ArchiveSection):
     """
-    Generic parent section for all property types.
+    Generic section defining a parameters.
     """
 
-    m_def = Section(validate=False)
+    name = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Name of the parameter.
+        """,
+    )
+
+    # ? Not sure what to do here if we don't know the data type of the value
+    value = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Value of the parameter as a string.
+        """,
+    )
+
+    unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the parameter as a string.
+        """,
+    )
+
+    description = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Description of the parameter.
+        """,
+    )
+
+    def normalize(self, archive, logger) -> None:
+        super().normalize(archive, logger)
+
+
+class BaseErrors(ArchiveSection):
+    """
+    A base section used to define errors.
+    """
 
     type = Quantity(
-        type=MEnum('molecular', 'atomic'),
-        shape=[],
-        description="""
-        Describes if the observable is calculated at the molecular or atomic level.
-        """,
-    )
-
-    label = Quantity(
         type=str,
-        shape=[],
         description="""
-        Name or description of the property.
+        Type of error.
         """,
+        a_eln=ELNAnnotation(component='StringEditQuantity'),
     )
 
-    error_type = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Describes the type of error reported for this observable.
-        """,
-    )
-
-
-class PropertyValues(MSection):
-    """
-    Generic parent section for information regarding the values of a property.
-    """
-
-    m_def = Section(validate=False)
-
-    label = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Describes the atoms or molecule types involved in determining the property.
-        """,
-    )
-
-    errors = Quantity(
+    value = Quantity(
         type=np.float64,
         shape=['*'],
         description="""
-        Error associated with the determination of the property.
+        Value/s of the error.
         """,
     )
 
+    def normalize(self, archive, logger) -> None:
+        super().normalize(archive, logger)
 
-class EnsemblePropertyValues(PropertyValues):
+
+class BaseSmoothing(ArchiveSection):
     """
-    Generic section containing information regarding the values of an ensemble property.
+    A base section used to define data smoothing procedures.
     """
 
-    m_def = Section(validate=False)
+    type = Quantity(
+        type=str,
+        description="""
+        Type of smoothing, e.g., "running_average".
+        """,
+        a_eln=ELNAnnotation(component='StringEditQuantity'),
+    )
 
-    n_bins = Quantity(
-        type=int,
+    parameters = SubSection(sub_section=BaseErrors.m_def, repeats=True)
+
+    def normalize(self, archive, logger) -> None:
+        super().normalize(archive, logger)
+
+
+class BaseProperty(ArchiveSection):
+    """
+    A base section used to define properties.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    name = Quantity(
+        type=str,
+        description="""
+        Name of the Property section. This will be set by the individual subclasses.
+        """,
+        a_eln=ELNAnnotation(component='StringEditQuantity'),
+    )
+
+    type = Quantity(
+        type=str,
+        description="""
+        Categorization of the property. Previously used to distinguish "molecular" vs. "atomic" properties.
+        But could have a variety of uses depending on the context.
+        """,
+        a_eln=ELNAnnotation(component='StringEditQuantity'),
+    )
+
+    label = Quantity(
+        type=str,
         shape=[],
         description="""
-        Number of bins.
+        Additional descriptive label for the property.
         """,
     )
+
+    description = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Detailed description of the property.
+        """,
+    )
+
+    # ? Just copied this from Quantity, not sure what I am doing
+    shape = DirectQuantity(type=Dimension, shape=['0..*'], name='shape', default=[])
+
+    variables = Quantity(
+        type=str,
+        shape=['*'],
+        description="""
+        Name/description of the variables along which the property is defined.
+        """,
+    )
+
+    variables_unit = Quantity(
+        type=str,
+        shape=['*'],
+        description="""
+        Unit of the given bins, using UnitRegistry() notation.
+        """,
+    )
+
+    # ? It's still unclear how to deal with cases where we know the units in advance or not. I define all possibilities here, but maybe this is the wrong approach.
+    bins = Quantity(
+        type=np.float64,
+        shape=['*'],
+        description="""
+        Values of the variable along which the property is stored.
+        """,
+    )
+
+    bins_magnitude = Quantity(
+        type=np.float64,
+        shape=['*'],
+        description="""
+        Values of the variable along which the property is stored.
+        """,
+    )
+
+    # TODO Add a check in normalization to ensure that value and bins have the same first dimension
+    value = Quantity(
+        type=np.float64,
+        shape=['*'],
+        description="""
+        Values of the property with units defined within the individual subclass.
+        """,
+    )
+
+    value_magnitude = Quantity(
+        type=np.float64,
+        shape=['*'],
+        description="""
+        Values of the property.
+        """,
+    )
+
+    value_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the property, using UnitRegistry() notation.
+        """,
+    )
+
+    errors = SubSection(sub_section=BaseErrors.m_def, repeats=True)
+
+    def normalize(self, archive, logger) -> None:
+        super().normalize(archive, logger)
+
+
+class EnsembleProperty(BaseProperty):
+    """
+    Generic section containing information about a calculation of any static observable
+    from a trajectory (i.e., from an ensemble average).
+
+    This type of property is determined as a function of some variable of arbitrary dimension,
+    in practice this is done via a discretization (into "bins") along this variable. For scalar
+    observables, the corresponding bin quantities should not be populated.
+    """
 
     frame_start = Quantity(
         type=int,
@@ -754,147 +889,13 @@ class EnsemblePropertyValues(PropertyValues):
         """,
     )
 
-    bins_magnitude = Quantity(
-        type=np.float64,
-        shape=['n_bins'],
-        description="""
-        Values of the variable along which the property is calculated.
-        """,
-    )
+    smoothing_parameters = SubSection(sub_section=BaseSmoothing.m_def, repeats=True)
 
-    bins_unit = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Unit of the given bins, using UnitRegistry() notation.
-        """,
-    )
-
-    value_magnitude = Quantity(
-        type=np.float64,
-        shape=['n_bins'],
-        description="""
-        Values of the property.
-        """,
-    )
-
-    value_unit = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Unit of the property, using UnitRegistry() notation.
-        """,
-    )
-
-
-class RadialDistributionFunctionValues(EnsemblePropertyValues):
-    """
-    Section containing information regarding the values of
-    radial distribution functions (rdfs).
-    """
-
-    m_def = Section(validate=False)
-
-    bins = Quantity(
-        type=np.float64,
-        shape=['n_bins'],
-        unit='m',
-        description="""
-        Distances along which the rdf was calculated.
-        """,
-    )
-
-    value = Quantity(
-        type=np.float64,
-        shape=['n_bins'],
-        description="""
-        Values of the property.
-        """,
-    )
-
-
-class EnsembleProperty(Property):
-    """
-    Generic section containing information about a calculation of any static observable
-    from a trajectory (i.e., from an ensemble average).
-    """
-
-    m_def = Section(validate=False)
-
-    n_smooth = Quantity(
-        type=int,
-        shape=[],
-        description="""
-        Number of bins over which the running average was computed for
-        the observable `values'.
-        """,
-    )
-
-    n_variables = Quantity(
-        type=int,
-        shape=[],
-        description="""
-        Number of variables along which the property is determined.
-        """,
-    )
-
-    variables_name = Quantity(
-        type=str,
-        shape=['n_variables'],
-        description="""
-        Name/description of the independent variables along which the observable is defined.
-        """,
-    )
-
-    ensemble_property_values = SubSection(
-        sub_section=EnsemblePropertyValues.m_def, repeats=True
-    )
-
-
-class RadialDistributionFunction(EnsembleProperty):
-    """
-    Section containing information about the calculation of
-    radial distribution functions (rdfs).
-    """
-
-    m_def = Section(validate=False)
-
-    _rdf_results = None
-
-    radial_distribution_function_values = SubSection(
-        sub_section=RadialDistributionFunctionValues.m_def, repeats=True
-    )
-
-    def normalize(self, archive, logger):
+    def normalize(self, archive, logger) -> None:
         super().normalize(archive, logger)
 
-        if self._rdf_results:
-            self.type = self._rdf_results.get('type')
-            self.n_smooth = self._rdf_results.get('n_smooth')
-            self.n_prune = self._rdf_results.get('n_prune')
-            self.n_variables = 1
-            self.variables_name = ['distance']
-            for i_pair, pair_type in enumerate(self._rdf_results.get('types', [])):
-                sec_rdf_values = self.m_create(RadialDistributionFunctionValues)
-                sec_rdf_values.label = str(pair_type)
-                sec_rdf_values.n_bins = len(
-                    self._rdf_results.get('bins', [[]] * i_pair)[i_pair]
-                )
-                sec_rdf_values.bins = self._rdf_results.get('bins', [[]] * i_pair)[
-                    i_pair
-                ]
-                sec_rdf_values.value = self._rdf_results.get('value', [[]] * i_pair)[
-                    i_pair
-                ]
-                sec_rdf_values.frame_start = self._rdf_results.get(
-                    'frame_start', [[]] * i_pair
-                )[i_pair]
-                sec_rdf_values.frame_end = self._rdf_results.get(
-                    'frame_end', [[]] * i_pair
-                )[i_pair]
 
-
-class TrajectoryProperty(Property):
+class TrajectoryProperty(BaseProperty):
     """
     Generic section containing information about a calculation of any observable
     defined and stored at each individual frame of a trajectory.
@@ -943,13 +944,58 @@ class TrajectoryProperty(Property):
         """,
     )
 
-    errors = Quantity(
+    def normalize(self, archive, logger) -> None:
+        super().normalize(archive, logger)
+
+        self._variables = ['time']
+        self._variables_units = ['second']
+
+
+class RadialDistributionFunction(EnsembleProperty):
+    """
+    Section containing information about the calculation of
+    radial distribution functions (rdfs).
+    """
+
+    _rdf_results = None
+
+    bins = Quantity(
         type=np.float64,
         shape=['*'],
+        unit='m',
         description="""
-        Error associated with the determination of the property.
+        Distances along which the rdf was calculated.
         """,
     )
+
+    def normalize(self, archive, logger):
+        super().normalize(archive, logger)
+
+        # TODO Fix this, removing RadialDistributionFunctionValues and avoiding m_create
+        if self._rdf_results:
+            self.type = self._rdf_results.get('type')
+            self.n_smooth = self._rdf_results.get('n_smooth')
+            self.n_prune = self._rdf_results.get('n_prune')
+            self.n_variables = 1
+            self.variables_name = ['distance']
+            for i_pair, pair_type in enumerate(self._rdf_results.get('types', [])):
+                sec_rdf_values = self.m_create(RadialDistributionFunctionValues)
+                sec_rdf_values.label = str(pair_type)
+                sec_rdf_values.n_bins = len(
+                    self._rdf_results.get('bins', [[]] * i_pair)[i_pair]
+                )
+                sec_rdf_values.bins = self._rdf_results.get('bins', [[]] * i_pair)[
+                    i_pair
+                ]
+                sec_rdf_values.value = self._rdf_results.get('value', [[]] * i_pair)[
+                    i_pair
+                ]
+                sec_rdf_values.frame_start = self._rdf_results.get(
+                    'frame_start', [[]] * i_pair
+                )[i_pair]
+                sec_rdf_values.frame_end = self._rdf_results.get(
+                    'frame_end', [[]] * i_pair
+                )[i_pair]
 
 
 # TODO Rg + TrajectoryPropery should be removed from workflow. All properties dependent on a single configuration should be store in calculation
