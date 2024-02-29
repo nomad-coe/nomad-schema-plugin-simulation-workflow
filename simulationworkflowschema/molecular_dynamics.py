@@ -399,7 +399,7 @@ class Lambdas(ArchiveSection):
 
     m_def = Section(validate=False)
 
-    kind = Quantity(
+    type = Quantity(
         type=MEnum(
             "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
         ),
@@ -409,7 +409,7 @@ class Lambdas(ArchiveSection):
 
         Allowed values are:
 
-        | kind          | Description                               |
+        | type          | Description                               |
 
         | ---------------------- | ----------------------------------------- |
 
@@ -1277,25 +1277,27 @@ class MolecularDynamicsResults(ThermodynamicsResults):
     )
 
     radial_distribution_functions = SubSection(
-        sub_section=RadialDistributionFunction, repeats=True
+        sub_section=RadialDistributionFunction.m_def, repeats=True
     )
 
-    ensemble_properties = SubSection(sub_section=EnsembleProperty, repeats=True)
+    ensemble_properties = SubSection(sub_section=EnsembleProperty.m_def, repeats=True)
 
-    correlation_functions = SubSection(sub_section=CorrelationFunction, repeats=True)
+    correlation_functions = SubSection(
+        sub_section=CorrelationFunction.m_def, repeats=True
+    )
 
     radial_distribution_functions = SubSection(
-        sub_section=RadialDistributionFunction, repeats=True
+        sub_section=RadialDistributionFunction.m_def, repeats=True
     )
 
     radius_of_gyration = SubSection(sub_section=RadiusOfGyration, repeats=True)
 
     mean_squared_displacements = SubSection(
-        sub_section=MeanSquaredDisplacement, repeats=True
+        sub_section=MeanSquaredDisplacement.m_def, repeats=True
     )
 
     free_energy_calculations = SubSection(
-        sub_section=FreeEnergyCalculations, repeats=True
+        sub_section=FreeEnergyCalculations.m_def, repeats=True
     )
 
     def normalize(self, archive, logger):
