@@ -711,6 +711,17 @@ class BaseParameter(ArchiveSection):
         super().normalize(archive, logger)
 
 
+class TestUnit(ArchiveSection):
+    value = Quantity(
+        type=np.float64,
+        flexible_unit=True,
+        shape=['*'],
+        description="""
+        test
+        """,
+    )
+
+
 class BaseErrors(ArchiveSection):
     """
     A base section used to define errors.
@@ -1449,6 +1460,8 @@ class MolecularDynamics(SerialSimulation):
     method = SubSection(sub_section=MolecularDynamicsMethod)
 
     results = SubSection(sub_section=MolecularDynamicsResults)
+
+    test_unit = SubSection(sub_section=TestUnit)
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
