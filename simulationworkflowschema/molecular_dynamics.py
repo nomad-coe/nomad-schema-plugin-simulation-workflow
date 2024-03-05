@@ -1199,6 +1199,152 @@ class CorrelationFunctionValues(PropertyValues):
     )
 
 
+class Property(ArchiveSection):
+    """
+    Generic parent section for all property types.
+    """
+
+    m_def = Section(validate=False)
+
+    type = Quantity(
+        type=MEnum('molecular', 'atomic'),
+        shape=[],
+        description="""
+        Describes if the observable is calculated at the molecular or atomic level.
+        """,
+    )
+
+    label = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Name or description of the property.
+        """,
+    )
+
+    error_type = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Describes the type of error reported for this observable.
+        """,
+    )
+
+
+class PropertyValues(MSection):
+    """
+    Generic parent section for information regarding the values of a property.
+    """
+
+    m_def = Section(validate=False)
+
+    label = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Describes the atoms or molecule types involved in determining the property.
+        """,
+    )
+
+    errors = Quantity(
+        type=np.float64,
+        shape=['*'],
+        description="""
+        Error associated with the determination of the property.
+        """,
+    )
+
+
+class EnsemblePropertyValues(PropertyValues):
+    """
+    Generic section containing information regarding the values of an ensemble property.
+    """
+
+    m_def = Section(validate=False)
+
+    n_bins = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Number of bins.
+        """,
+    )
+
+    frame_start = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Trajectory frame number where the ensemble averaging starts.
+        """,
+    )
+
+    frame_end = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Trajectory frame number where the ensemble averaging ends.
+        """,
+    )
+
+    bins_magnitude = Quantity(
+        type=np.float64,
+        shape=['n_bins'],
+        description="""
+        Values of the variable along which the property is calculated.
+        """,
+    )
+
+    bins_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the given bins, using UnitRegistry() notation.
+        """,
+    )
+
+    value_magnitude = Quantity(
+        type=np.float64,
+        shape=['n_bins'],
+        description="""
+        Values of the property.
+        """,
+    )
+
+    value_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the property, using UnitRegistry() notation.
+        """,
+    )
+
+
+class RadialDistributionFunctionValues(EnsemblePropertyValues):
+    """
+    Section containing information regarding the values of
+    radial distribution functions (rdfs).
+    """
+
+    m_def = Section(validate=False)
+
+    bins = Quantity(
+        type=np.float64,
+        shape=['n_bins'],
+        unit='m',
+        description="""
+        Distances along which the rdf was calculated.
+        """,
+    )
+
+    value = Quantity(
+        type=np.float64,
+        shape=['n_bins'],
+        description="""
+        Values of the property.
+        """,
+    )
+
+
 class MeanSquaredDisplacementValues(CorrelationFunctionValues):
     """
     Section containing information regarding the values of a mean squared displacements (msds).
