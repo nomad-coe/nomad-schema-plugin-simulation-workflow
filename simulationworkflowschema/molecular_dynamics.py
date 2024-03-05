@@ -1158,79 +1158,6 @@ class DiffusionConstantValues(PropertyValues):
     )
 
 
-class CorrelationFunctionValues(PropertyValues):
-    """
-    Generic section containing information regarding the values of a correlation function.
-    """
-
-    m_def = Section(validate=False)
-
-    n_times = Quantity(
-        type=int,
-        shape=[],
-        description="""
-        Number of times windows for the calculation of the correlation function.
-        """,
-    )
-
-    times = Quantity(
-        type=np.float64,
-        shape=['n_times'],
-        unit='s',
-        description="""
-        Time windows used for the calculation of the correlation function.
-        """,
-    )
-
-    value_magnitude = Quantity(
-        type=np.float64,
-        shape=['n_times'],
-        description="""
-        Values of the property.
-        """,
-    )
-
-    value_unit = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Unit of the property, using UnitRegistry() notation.
-        """,
-    )
-
-
-class Property(ArchiveSection):
-    """
-    Generic parent section for all property types.
-    """
-
-    m_def = Section(validate=False)
-
-    type = Quantity(
-        type=MEnum('molecular', 'atomic'),
-        shape=[],
-        description="""
-        Describes if the observable is calculated at the molecular or atomic level.
-        """,
-    )
-
-    label = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Name or description of the property.
-        """,
-    )
-
-    error_type = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Describes the type of error reported for this observable.
-        """,
-    )
-
-
 class PropertyValues(MSection):
     """
     Generic parent section for information regarding the values of a property.
@@ -1315,6 +1242,79 @@ class EnsemblePropertyValues(PropertyValues):
         shape=[],
         description="""
         Unit of the property, using UnitRegistry() notation.
+        """,
+    )
+
+
+class CorrelationFunctionValues(PropertyValues):
+    """
+    Generic section containing information regarding the values of a correlation function.
+    """
+
+    m_def = Section(validate=False)
+
+    n_times = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Number of times windows for the calculation of the correlation function.
+        """,
+    )
+
+    times = Quantity(
+        type=np.float64,
+        shape=['n_times'],
+        unit='s',
+        description="""
+        Time windows used for the calculation of the correlation function.
+        """,
+    )
+
+    value_magnitude = Quantity(
+        type=np.float64,
+        shape=['n_times'],
+        description="""
+        Values of the property.
+        """,
+    )
+
+    value_unit = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Unit of the property, using UnitRegistry() notation.
+        """,
+    )
+
+
+class Property(ArchiveSection):
+    """
+    Generic parent section for all property types.
+    """
+
+    m_def = Section(validate=False)
+
+    type = Quantity(
+        type=MEnum('molecular', 'atomic'),
+        shape=[],
+        description="""
+        Describes if the observable is calculated at the molecular or atomic level.
+        """,
+    )
+
+    label = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Name or description of the property.
+        """,
+    )
+
+    error_type = Quantity(
+        type=str,
+        shape=[],
+        description="""
+        Describes the type of error reported for this observable.
         """,
     )
 
