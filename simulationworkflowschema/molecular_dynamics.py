@@ -50,6 +50,84 @@ from .general import (
 from .thermodynamics import ThermodynamicsResults
 
 
+class InitializationParameters(ArchiveSection):
+    """
+    Section containing the parameters pertaining to setting up the initial state of the system,
+    prior to the molecular dynamics run.
+    """
+
+    temperature = Quantity(
+        type=np.float64,
+        shape=[],
+        unit='kelvin',
+        description="""
+        The initial temperature for the simulation.
+        Typically used when velocities are generated at the beginning of the simulation run.
+        """,
+    )
+
+    velocity_distribution = Quantity(
+        type=MEnum('uniform', 'gaussian', 'exponential', 'gaussian-erf', 'custom'),
+        shape=[],
+        description="""
+        Describes the distribution of the initial velocities. Typically used when the initial
+        velocities are generated at run time.
+
+        Allowed values are:
+
+        | Distribution Type        | Description                               |
+
+        | ---------------------- | ----------------------------------------- |
+
+        | `"uniform"`           | A constant probability density function within a specified range.
+        Each component of the velocity vector is evenly distributed between v_min and v_max.
+
+        | `"gaussian"`          |  A Gaussian distribution of speeds, corresponding to the Maxwellian
+        distribution of velocities of particles in an ideal gas at thermal equilibrium, given by:
+        f(v_i) = (m/(2 \pi k T))^(1/2) exp(- m(v_i)^2 / 2kT), for each velocity component v_i.  |
+
+
+        | `"exponential"`           |  An exponentially decaying probability density function given by:
+        f(v_i) = \lambda exp(-\lambda v_i) , for each velocity component v_i. |
+
+        | `"gaussian-erf"`           | The normal "Gaussian" option with an additional error
+        function tail at high velocities to account for rare events of high-energy particles.
+        The precise implementation of the error function may vary. |
+
+        | `"custom"`        | Velocities are generated via some custom (unspecified) probability distribution. |
+        """,
+    )
+
+    velocity_distribution_min = Quantity(
+        type=np.float64,
+        shape=[],
+        unit='m/s',
+        description="""
+        The minimum velocity allowed within the distribution of generated velocities.
+        Typically used with velocity_distribution = uniform.
+        """,
+    )
+
+    velocity_distribution_max = Quantity(
+        type=np.float64,
+        shape=[],
+        unit='m/s',
+        description="""
+        The maximum velocity allowed within the distribution of generated velocities.
+        Typically used with velocity_distribution = uniform.
+        """,
+    )
+
+    velocity_distribution_decay = Quantity(
+        type=np.float64,
+        shape=[],
+        unit='s/m',
+        description="""
+        Rate or decay parameter used to define the distribution used with velocity_distribution = exponential.
+        """,
+    )
+
+
 class ThermostatParameters(ArchiveSection):
     """
     Section containing the parameters pertaining to the thermostat for a molecular dynamics run.
@@ -122,7 +200,8 @@ class ThermostatParameters(ArchiveSection):
         shape=[],
         unit='kelvin',
         description="""
-        The target temperature for the simulation. Typically used when temperature_profile is "constant".
+        The target temperature for the simulation.
+        Typically used when temperature_profile is "constant".
         """,
     )
 
@@ -401,7 +480,7 @@ class Lambdas(ArchiveSection):
 
     type = Quantity(
         type=MEnum(
-            "output", "coulomb", "vdw", "bonded", "restraint", "mass", "temperature"
+            'output', 'coulomb', 'vdw', 'bonded', 'restraint', 'mass', 'temperature'
         ),
         shape=[],
         description="""
@@ -451,7 +530,7 @@ class FreeEnergyCalculationParameters(ArchiveSection):
     m_def = Section(validate=False)
 
     type = Quantity(
-        type=MEnum("alchemical", "umbrella_sampling"),
+        type=MEnum('alchemical', 'umbrella_sampling'),
         shape=[],
         description="""
         Specifies the type of workflow. Allowed values are:
@@ -654,6 +733,10 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
         description="""
         The number of timesteps between saving the thermodynamic quantities.
         """,
+    )
+
+    initialization_parameters = SubSection(
+        sub_section=InitializationParameters.m_def, repeats=True
     )
 
     thermostat_parameters = SubSection(
