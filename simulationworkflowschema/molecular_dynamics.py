@@ -127,6 +127,14 @@ class InitializationParameters(ArchiveSection):
         """,
     )
 
+    velocity_distribution_seed = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Seed for the random number generator used to generate the velocities.
+        """,
+    )
+
 
 class ThermostatParameters(ArchiveSection):
     """
