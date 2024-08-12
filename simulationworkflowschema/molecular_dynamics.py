@@ -1564,6 +1564,68 @@ class BarostatParameters(ArchiveSection):
     )
 
 
+class ShearFlowParameters(ArchiveSection):
+    """
+    Section containing the parameters pertaining to the shear flow for a molecular dynamics run.
+    """
+
+    m_def = Section(validate=False)
+
+    shear_type = Quantity(
+        type=MEnum('lees_edwards', 'trozzi_ciccotti', 'ashurst_hoover'),
+        shape=[],
+        description="""
+        The name of the method used to implement the effect of shear flow within the simulation.
+
+        Allowed values are:
+
+        | Shear Method          | Description                               |
+
+        | ---------------------- | ----------------------------------------- |
+
+        | `""`                   | No thermostat               |
+
+        | `"lees_edwards"`          | A.W. Lees and S.F. Edwards,
+        [J. Phys. C **5** (1972) 1921](https://doi.org/10.1088/0022-3719/5/15/006)|
+
+        | `"trozzi_ciccotti"`          | A.W. Lees and S.F. Edwards,
+        [Phys. Rev. A **29** (1984) 916](https://doi.org/10.1103/PhysRevA.29.916)|
+
+        | `"ashurst_hoover"`          | W. T. Ashurst and W. G. Hoover,
+        [Phys. Rev. A **11** (1975) 658](https://doi.org/10.1103/PhysRevA.11.658)|
+        """,
+    )
+
+    shear_rate = Quantity(
+        type=np.float64,
+        shape=[3, 3],
+        unit='ps^-1',
+        description="""
+        The external stress tensor include normal (diagonal elements; which are zero in shear simulations)
+        and shear stress' rates (off-diagonal elements).
+        Its elements are: [[σ_x, τ_yx, τ_zx], [τ_xy, σ_y, τ_zy], [τ_xz, τ_yz, σ_z]],
+		where σ and τ are the normal and shear stress' rates.
+        The first and second letters in the index correspond to the normal vector to the shear plane and the direction of shearing, respectively.
+        """,
+    )
+
+    step_start = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Trajectory step where this shearing starts.
+        """,
+    )
+
+    step_end = Quantity(
+        type=int,
+        shape=[],
+        description="""
+        Trajectory step number where this shearing ends.
+        """,
+    )
+
+
 class Lambdas(ArchiveSection):
     """
     Section for storing all lambda parameters for free energy perturbation
@@ -1833,6 +1895,10 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
     )
 
     barostat_parameters = SubSection(sub_section=BarostatParameters.m_def, repeats=True)
+
+    shear_flow_parameters = SubSection(
+        sub_section=ShearFlowParameters.m_def, repeats=True
+    )
 
     free_energy_calculation_parameters = SubSection(
         sub_section=FreeEnergyCalculationParameters.m_def, repeats=True
