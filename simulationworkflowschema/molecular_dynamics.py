@@ -2203,7 +2203,7 @@ class RadiusOfGyration(TrajectoryProperty):
 
     atomsgroup_ref = Quantity(
         type=Reference(AtomsGroup.m_def),
-        shape=[1],
+        shape=[],
         description="""
         References to the atoms_group section containing the molecule for which Rg was calculated.
         """,
