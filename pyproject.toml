@@ -11,7 +11,7 @@ authors = [{ name = "The NOMAD Authors" }]
 license = { text = "Apache-2.0" }
 dependencies = [
     "nomad-lab>=1.2.0",
-    "nomad-schema-plugin-run@git+https://github.com/nomad-coe/nomad-schema-plugin-run.git@develop",
+    "nomad-schema-plugin-run@git+https://github.com/nomad-coe/nomad-schema-plugin-run.git@bf203940dfcc4af9a99a34104b07a9ed7ff866e4",
 ]
 
 [project.urls]
