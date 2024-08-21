@@ -1564,7 +1564,7 @@ class BarostatParameters(ArchiveSection):
     )
 
 
-class ShearFlowParameters(ArchiveSection):
+class ShearParameters(ArchiveSection):
     """
     Section containing the parameters pertaining to the shear flow for a molecular dynamics run.
     """
@@ -1896,9 +1896,7 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
 
     barostat_parameters = SubSection(sub_section=BarostatParameters.m_def, repeats=True)
 
-    shear_flow_parameters = SubSection(
-        sub_section=ShearFlowParameters.m_def, repeats=True
-    )
+    shear_parameters = SubSection(sub_section=ShearParameters.m_def, repeats=True)
 
     free_energy_calculation_parameters = SubSection(
         sub_section=FreeEnergyCalculationParameters.m_def, repeats=True
