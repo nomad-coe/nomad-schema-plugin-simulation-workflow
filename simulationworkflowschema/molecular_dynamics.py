@@ -2224,7 +2224,7 @@ class RadiusOfGyration(TrajectoryProperty):
             self.label = self._rg_results.get('label')
             # TODO Fix this assignment fails with TypeError
             try:
-                self.atomsgroup_ref = self._rg_results.get('atomsgroup_ref')
+                self.atomsgroup_ref = [self._rg_results.get('atomsgroup_ref')]
             except Exception:
                 pass
             self.n_frames = self._rg_results.get('n_frames')
@@ -2636,7 +2636,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
                     )
                     # TODO Fix this assignment fails with TypeError
                     try:
-                        sec_rg_values.atomsgroup_ref = rg.get('atomsgroup_ref')
+                        sec_rg_values.atomsgroup_ref = [rg.get('atomsgroup_ref')]
                     except Exception:
                         pass
                     sec_rg_values.label = rg.get('label')
