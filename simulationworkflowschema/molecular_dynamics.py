@@ -2543,7 +2543,14 @@ class MolecularDynamicsResults(ThermodynamicsResults):
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
-        universe = archive_to_universe(archive)
+        try:
+            universe = archive_to_universe(archive)
+        except Exception:
+            universe = None
+            logger.warning(
+                'Could not convert archive to MDAnalysis Universe, skipping MD results normalization.'
+            )
+
         if universe is None:
             return
 
@@ -2634,7 +2641,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
                     sec_rg_values = sec_rgs_calc.m_create(
                         RadiusOfGyrationValuesCalculation
                     )
-                    print('in Rg normalize')
+
                     # TODO Fix this assignment fails with TypeError
                     try:
                         sec_rg_values.atomsgroup_ref = [rg.get('atomsgroup_ref')]
