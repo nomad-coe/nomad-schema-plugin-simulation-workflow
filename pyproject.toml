@@ -16,21 +16,24 @@ dependencies = [
     "scipy>=1.7.1",
     "networkx>=2.6.3",
 ]
+requires-python = ">=3.9"
 
 [project.urls]
 homepage = "https://github.com/nomad-coe/nomad-schema-simulation-workflow-plugin"
 
-[project.optional-dependencies]
-dev = [
-    "mypy==1.0.1",
-    "pytest==3.10.0",
-    "pytest-timeout==1.4.2",
-    "pytest-cov==2.7.1",
-    "ruff==0.1.4",
-]
-tests = [
+[tool.uv]
+dev-dependencies = [
     "nomad-normalizer-plugin-bandstructure@git+https://github.com/nomad-coe/nomad-normalizer-plugin-bandstructure.git@develop",
     "nomad-normalizer-plugin-system@git+https://github.com/nomad-coe/nomad-normalizer-plugin-system.git@develop",
+    "mypy==1.0.1",
+    "pytest",
+    "pytest-timeout",
+    "pytest-cov",
+    "ruff",
+
+]
+extra-index-url = [
+    "https://gitlab.mpcdf.mpg.de/api/v4/projects/2187/packages/pypi/simple",
 ]
 
 [tool.ruff]
