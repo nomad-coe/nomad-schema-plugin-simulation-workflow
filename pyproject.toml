@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nomad-schema-plugin-simulation-workflow"
-version = "1.0"
+version = "1.0.1"
 description = "Simulation workflow schema plugin for NOMAD."
 readme = "README.md"
 authors = [{ name = "The NOMAD Authors" }]
