@@ -2267,18 +2267,19 @@ class FreeEnergyCalculations(TrajectoryProperty):
         """,
     )
 
-    value_unit = Quantity(
-        type=str,
-        shape=[],
-        description="""
-        Unit of the property, using UnitRegistry() notation.
-        In this case, the unit corresponds to all `value` properties stored within this section.
-        """,
-    )
+    # value_unit = Quantity(
+    #     type=str,
+    #     shape=[],
+    #     description="""
+    #     Unit of the property, using UnitRegistry() notation.
+    #     In this case, the unit corresponds to all `value` properties stored within this section.
+    #     """,
+    # )
 
     value_total_energy_magnitude = Quantity(
         type=HDF5Dataset,
         shape=[],
+        unit='joule',
         description="""
         Value of the total energy for the present lambda state. The expected dimensions are ["n_frames"].
         This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
@@ -2288,6 +2289,7 @@ class FreeEnergyCalculations(TrajectoryProperty):
     value_PV_energy_magnitude = Quantity(
         type=HDF5Dataset,
         shape=[],
+        unit='joule',
         description="""
         Value of the pressure-volume energy (i.e., P*V) for the present lambda state. The expected dimensions are ["n_frames"].
         This quantity is a reference to the data (file+path), which is stored in an HDF5 file for efficiency.
@@ -2297,6 +2299,7 @@ class FreeEnergyCalculations(TrajectoryProperty):
     value_total_energy_differences_magnitude = Quantity(
         type=HDF5Dataset,
         shape=[],
+        unit='joule',
         description="""
         Values correspond to the difference in total energy between each specified lambda state
         and the reference state, which corresponds to the value of lambda of the current simulation.
@@ -2308,6 +2311,7 @@ class FreeEnergyCalculations(TrajectoryProperty):
     value_total_energy_derivative_magnitude = Quantity(
         type=HDF5Dataset,
         shape=[],
+        unit='joule',  # TODO check this unit
         description="""
         Value of the derivative of the total energy with respect to lambda, evaluated for the current
         lambda state. The expected dimensions are ["n_frames"].
