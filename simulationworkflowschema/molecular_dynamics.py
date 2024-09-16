@@ -2267,15 +2267,6 @@ class FreeEnergyCalculations(TrajectoryProperty):
         """,
     )
 
-    # value_unit = Quantity(
-    #     type=str,
-    #     shape=[],
-    #     description="""
-    #     Unit of the property, using UnitRegistry() notation.
-    #     In this case, the unit corresponds to all `value` properties stored within this section.
-    #     """,
-    # )
-
     value_total_energy_magnitude = Quantity(
         type=HDF5Dataset,
         shape=[],
