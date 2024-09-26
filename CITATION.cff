@@ -20,7 +20,7 @@ authors:
   - given-names: Markus
     family-names: Scheidgen
     orcid: 'https://orcid.org/0000-0002-8038-2277'
-doi: 10.5281/zenodo.13844196
+doi: 10.5281/zenodo.13844195
 repository-code: 'https://github.com/nomad-coe/nomad-schema-plugin-simulation-workflow'
 url: 'https://nomad-coe.github.io/nomad-schema-plugin-simulation-workflow/'
 abstract: >-

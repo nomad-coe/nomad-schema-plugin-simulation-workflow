@@ -1,6 +1,6 @@
-[![DOI](https://zenodo.org/badge/744481756.svg)](https://zenodo.org/doi/10.5281/zenodo.13844196)
+[![DOI](https://zenodo.org/badge/744481756.svg)](https://zenodo.org/doi/10.5281/zenodo.13844195)
 
 This is a collection of schemas for various types of simulation workflows.
 
 ## How to cite this work
-Ladines, A.N., Ilyas, A., Pizarro, Rudzinski, J.F., & Scheidgen, M NOMAD Schema Plugin Simulation Workflow [Computer software]. https://zenodo.org/doi/10.5281/zenodo.13844196
+Ladines, A.N., Ilyas, A., Pizarro, Rudzinski, J.F., & Scheidgen, M NOMAD Schema Plugin Simulation Workflow [Computer software]. https://zenodo.org/doi/10.5281/zenodo.13844195
