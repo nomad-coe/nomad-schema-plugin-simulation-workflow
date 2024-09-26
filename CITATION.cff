@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+title: NOMAD Schema Plugin Simulation Workflow
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Alvin Noe
+    family-names: Ladines
+    orcid: 'https://orcid.org/0000-0003-0077-2097'
+  - given-names: Ahmed
+    family-names: Ilyas
+    orcid: 'https://orcid.org/0009-0009-8636-5740'
+  - given-names: José M.
+    family-names: Pizarro
+    orcid: 'https://orcid.org/0000-0002-6751-8192'
+  - given-names: Joseph F.
+    family-names: Rudzinski
+    orcid: 'https://orcid.org/0000-0003-3403-640X'
+  - given-names: Markus
+    family-names: Scheidgen
+    orcid: 'https://orcid.org/0000-0002-8038-2277'
+doi:
+repository-code: 'https://github.com/nomad-coe/nomad-schema-plugin-simulation-workflow'
+url: 'https://nomad-coe.github.io/nomad-schema-plugin-simulation-workflow/'
+abstract: >-
+  `nomad-schema-plugin-simulation-workflow` is a plugin for the NOMAD software (https://zenodo.org/doi/10.5281/zenodo.8366162)
+  providing the core data standard for representation of all simulation workflows in NOMAD as well as a set of specific "standard
+  workflows" that are utilized by the many available NOMAD parsers.
+
+license: Apache-2.0
