@@ -94,13 +94,6 @@ def load_modules():
         'photon_polarization',
         'thermodynamics',
     ]
-    import simulationworkflowschema
-
-    for name in sub_modules:
-        sub_module = importlib.import_module(f'simulationworkflowschema.{name}')
-        for method in sub_module.__dict__:
-            if method in __all__:
-                setattr(simulationworkflowschema, method, sub_module.__dict__[method])
 
 
 class SimulationWorkflowSchemaEntryPoint(SchemaPackageEntryPoint):
