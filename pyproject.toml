@@ -19,7 +19,7 @@ dependencies = [
 requires-python = ">=3.9"
 
 [project.urls]
-homepage = "https://github.com/nomad-coe/nomad-schema-simulation-workflow-plugin"
+homepage = "https://github.com/nomad-coe/nomad-schema-plugin-simulation-workflow"
 
 [tool.uv]
 dev-dependencies = [
