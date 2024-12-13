@@ -102,6 +102,7 @@ def load_modules():
             if method in __all__:
                 setattr(simulationworkflowschema, method, sub_module.__dict__[method])
 
+
 class SimulationWorkflowSchemaEntryPoint(SchemaPackageEntryPoint):
     def load(self):
         load_modules()
