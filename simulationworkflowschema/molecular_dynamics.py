@@ -84,8 +84,10 @@ class BeadGroup(object):
     def positions(self):
         # cache positions for current frame
         if self.universe.trajectory.frame != self.__last_frame:
-            self._cache['positions'] = self._atoms.center_of_mass(
-                unwrap=True, compound=self.compound
+            self._cache['positions'] = (
+                self._atoms.center_of_mass(unwrap=True, compound=self.compound)
+                if self._nbeads != 0
+                else []
             )
             self.__last_frame = self.universe.trajectory.frame
         return self._cache['positions']
@@ -560,9 +562,13 @@ def _get_molecular_bead_groups(
     bead_groups = {}
     for moltype in moltypes:
         ags_by_moltype = universe.select_atoms('moltype ' + moltype)
-        ags_by_moltype = ags_by_moltype[
-            ags_by_moltype.masses > abs(1e-2)
-        ]  # remove any virtual/massless sites (needed for, e.g., 4-bead water models)
+        if ags_by_moltype.n_atoms == 0:
+            continue
+
+        if ags_by_moltype.masses is not None:
+            ags_by_moltype = ags_by_moltype[
+                ags_by_moltype.masses > abs(1e-2)
+            ]  # remove any virtual/massless sites (needed for, e.g., 4-bead water models)
         bead_groups[moltype] = BeadGroup(ags_by_moltype, compound='fragments')
 
     return bead_groups
@@ -616,10 +622,17 @@ def calc_molecular_rdf(
     if not bead_groups:
         return bead_groups
     moltypes = [moltype for moltype in bead_groups.keys()]
+    for moltype in moltypes:
+        print(moltype)
+        print(bead_groups[moltype]._nbeads)
+        print(bead_groups[moltype]._atoms)
+        print(len(bead_groups[moltype]._atoms.atoms))
+        print(bead_groups[moltype].compound)
+        print(len(bead_groups[moltype].positions))
     del_list = [
         i_moltype
         for i_moltype, moltype in enumerate(moltypes)
-        if bead_groups[moltype]._nbeads > max_mols
+        if len(bead_groups[moltype].positions) > max_mols
     ]
     moltypes = np.delete(moltypes, del_list).tolist()
 
