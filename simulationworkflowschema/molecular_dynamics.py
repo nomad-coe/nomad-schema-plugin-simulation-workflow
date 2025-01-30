@@ -467,6 +467,9 @@ def archive_to_universe(
             sec_run, method_index=-1, model_index=-1
         )
 
+    # print('bond list:')
+    # print(bonds)
+
     # get the system times
     system_timestep = 1.0 * ureg.picosecond
 
