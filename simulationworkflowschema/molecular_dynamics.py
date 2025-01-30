@@ -68,6 +68,11 @@ class BeadGroup(object):
     def __init__(self, atoms, compound='fragments'):
         """Initialize with an AtomGroup instance.
         Will split based on keyword 'compounds' (residues or fragments).
+
+        self._atoms: AtomGroup (total number of atoms)
+        self.compound: str (dictates type of grouping)
+        self._nbeads: int (total number of beads)
+        self.positions: list (total number of "compounds")
         """
         self._atoms = atoms
         self.compound = compound
@@ -467,9 +472,6 @@ def archive_to_universe(
             sec_run, method_index=-1, model_index=-1
         )
 
-    # print('bond list:')
-    # print(bonds)
-
     # get the system times
     system_timestep = 1.0 * ureg.picosecond
 
@@ -625,13 +627,6 @@ def calc_molecular_rdf(
     if not bead_groups:
         return bead_groups
     moltypes = [moltype for moltype in bead_groups.keys()]
-    for moltype in moltypes:
-        print(moltype)
-        print(bead_groups[moltype]._nbeads)
-        print(bead_groups[moltype]._atoms)
-        print(len(bead_groups[moltype]._atoms.atoms))
-        print(bead_groups[moltype].compound)
-        print(len(bead_groups[moltype].positions))
     del_list = [
         i_moltype
         for i_moltype, moltype in enumerate(moltypes)
@@ -988,7 +983,7 @@ def calc_molecular_mean_squared_displacements(
     moltypes = [moltype for moltype in bead_groups.keys()]
     del_list = []
     for i_moltype, moltype in enumerate(moltypes):
-        if bead_groups[moltype]._nbeads > max_mols:
+        if len(bead_groups[moltype].positions) > max_mols:
             if max_mols > 50000:
                 LOGGER.warn(
                     'Calculating mean squared displacements for more than 50k molecules.'
