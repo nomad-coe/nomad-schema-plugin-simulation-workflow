@@ -68,6 +68,11 @@ class BeadGroup(object):
     def __init__(self, atoms, compound='fragments'):
         """Initialize with an AtomGroup instance.
         Will split based on keyword 'compounds' (residues or fragments).
+
+        self._atoms: AtomGroup (total number of atoms)
+        self.compound: str (dictates type of grouping)
+        self._nbeads: int (total number of beads)
+        self.positions: list (total number of "compounds")
         """
         self._atoms = atoms
         self.compound = compound
@@ -84,8 +89,10 @@ class BeadGroup(object):
     def positions(self):
         # cache positions for current frame
         if self.universe.trajectory.frame != self.__last_frame:
-            self._cache['positions'] = self._atoms.center_of_mass(
-                unwrap=True, compound=self.compound
+            self._cache['positions'] = (
+                self._atoms.center_of_mass(unwrap=True, compound=self.compound)
+                if self._nbeads != 0
+                else []
             )
             self.__last_frame = self.universe.trajectory.frame
         return self._cache['positions']
@@ -560,9 +567,13 @@ def _get_molecular_bead_groups(
     bead_groups = {}
     for moltype in moltypes:
         ags_by_moltype = universe.select_atoms('moltype ' + moltype)
-        ags_by_moltype = ags_by_moltype[
-            ags_by_moltype.masses > abs(1e-2)
-        ]  # remove any virtual/massless sites (needed for, e.g., 4-bead water models)
+        if ags_by_moltype.n_atoms == 0:
+            continue
+
+        if ags_by_moltype.masses is not None:
+            ags_by_moltype = ags_by_moltype[
+                ags_by_moltype.masses > abs(1e-2)
+            ]  # remove any virtual/massless sites (needed for, e.g., 4-bead water models)
         bead_groups[moltype] = BeadGroup(ags_by_moltype, compound='fragments')
 
     return bead_groups
@@ -619,7 +630,7 @@ def calc_molecular_rdf(
     del_list = [
         i_moltype
         for i_moltype, moltype in enumerate(moltypes)
-        if bead_groups[moltype]._nbeads > max_mols
+        if len(bead_groups[moltype].positions) > max_mols
     ]
     moltypes = np.delete(moltypes, del_list).tolist()
 
@@ -972,7 +983,7 @@ def calc_molecular_mean_squared_displacements(
     moltypes = [moltype for moltype in bead_groups.keys()]
     del_list = []
     for i_moltype, moltype in enumerate(moltypes):
-        if bead_groups[moltype]._nbeads > max_mols:
+        if len(bead_groups[moltype].positions) > max_mols:
             if max_mols > 50000:
                 LOGGER.warn(
                     'Calculating mean squared displacements for more than 50k molecules.'
