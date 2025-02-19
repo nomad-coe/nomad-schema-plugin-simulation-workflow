@@ -1245,13 +1245,14 @@ class ThermostatParameters(ArchiveSection):
             'andersen',
             'berendsen',
             'brownian',
+            'dissipative_particle_dynamics',
             'langevin_goga',
+            'langevin_leap_frog',
             'langevin_schneider',
             'nose_hoover',
             'velocity_rescaling',
             'velocity_rescaling_langevin',
             'velocity_rescaling_woodcock',
-            'langevin_leap_frog',
         ),
         shape=[],
         description="""
@@ -1275,9 +1276,15 @@ class ThermostatParameters(ArchiveSection):
 
         | `"brownian"`           | Brownian Dynamics |
 
+        | `"dissipative_particle_dynamics"` | R.D. Groot and P.B. Warren
+        [J. Chem. Phys. **107**(11), 4423-4435 (1997)](https://doi.org/10.1063/1.474784) |
+
         | `"langevin_goga"`           | N. Goga, A. J. Rzepiela, A. H. de Vries,
         S. J. Marrink, and H. J. C. Berendsen, [J. Chem. Theory Comput. **8**, 3637 (2012)]
         (https://doi.org/10.1021/ct3000876) |
+
+        | `"langevin_leap_frog"` | J.A. Izaguirre, C.R. Sweet, and V.S. Pande
+        [Pac Symp Biocomput. **15**, 240-251 (2010)](https://doi.org/10.1142/9789814295291_0026) |
 
         | `"langevin_schneider"`           | T. Schneider and E. Stoll,
         [Phys. Rev. B **17**, 1302](https://doi.org/10.1103/PhysRevB.17.1302) |
@@ -1294,9 +1301,6 @@ class ThermostatParameters(ArchiveSection):
 
         | `"velocity_rescaling_woodcock"` | L. V. Woodcock,
         [Chem. Phys. Lett. **10**, 257 (1971)](https://doi.org/10.1016/0009-2614(71)80281-6) |
-
-        | `"langevin_leap_frog"` | J.A. Izaguirre, C.R. Sweet, and V.S. Pande
-        [Pac Symp Biocomput. **15**, 240-251 (2010)](https://doi.org/10.1142/9789814295291_0026) |
         """,
     )
 
