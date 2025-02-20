@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/744481756.svg)](https://zenodo.org/doi/10.5281/zenodo.13844195)
+[![DOI](https://zenodo.org/badge/744481756.svg)](https://zenodo.org/badge/latestdoi/744481756)
 
 This is a collection of schemas for various types of simulation workflows.
 
