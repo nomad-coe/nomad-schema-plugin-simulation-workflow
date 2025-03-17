@@ -16,7 +16,6 @@
 # limitations under the License.
 #
 import numpy as np
-from nptyping import NDArray
 
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import SubSection, Section, Quantity, Reference, derived
@@ -189,7 +188,7 @@ class ThermodynamicsResults(SimulationWorkflowResults):
         """,
         cached=True,
     )
-    def heat_capacity_c_v_specific(self) -> NDArray:
+    def heat_capacity_c_v_specific(self) -> np.ndarray:
         """Returns the specific heat capacity by dividing the heat capacity per
         cell with the mass of the atoms in the cell.
         """
@@ -223,7 +222,7 @@ class ThermodynamicsResults(SimulationWorkflowResults):
         """,
         cached=True,
     )
-    def vibrational_free_energy_at_constant_volume_specific(self) -> NDArray:
+    def vibrational_free_energy_at_constant_volume_specific(self) -> np.ndarray:
         import nomad.atomutils
 
         workflow = self.m_parent

@@ -20,7 +20,6 @@ from itertools import chain
 from collections import namedtuple
 import numpy as np
 from array import array
-from nptyping import Int, NDArray
 from scipy import sparse
 from scipy.stats import linregress
 import networkx
@@ -139,8 +138,8 @@ def create_empty_universe(
     n_frames: int = 1,
     n_residues: int = 1,
     n_segments: int = 1,
-    atom_resindex: NDArray[Int] = None,
-    residue_segindex: NDArray[Int] = None,
+    atom_resindex: np.ndarray = None,
+    residue_segindex: np.ndarray = None,
     flag_trajectory: bool = False,
     flag_velocities: bool = False,
     flag_forces: bool = False,
@@ -763,7 +762,7 @@ def __correlation(function, positions: List[float]):
 
 
 def _calc_diffusion_constant(
-    times: NDArray, values: NDArray, dim: int = 3
+    times: np.ndarray, values: np.ndarray, dim: int = 3
 ) -> tuple[float, float]:
     """
     Determines the diffusion constant from a fit of the mean squared displacement
@@ -777,14 +776,14 @@ def _calc_diffusion_constant(
 
 def shifted_correlation_average(
     function: Callable,
-    times: NDArray,
-    positions: NDArray,
+    times: np.ndarray,
+    positions: np.ndarray,
     index_distribution: Callable = __log_indices,
     correlation: Callable = __correlation,
     segments: int = 10,
     window: float = 0.5,
     skip: int = 0,
-) -> tuple[NDArray, NDArray]:
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Code adapted from MDevaluate module: https://github.com/mdevaluate/mdevaluate.git
 
@@ -855,7 +854,7 @@ def shifted_correlation_average(
 
     correlation_times = np.array([times[i] for i in idx]) - times[0]
 
-    result: NDArray
+    result: np.ndarray
     for i_start_frame, start_frame in enumerate(start_frames):
         if i_start_frame == 0:
             result = np.array(list(correlate(start_frame)))
@@ -926,7 +925,7 @@ def calc_molecular_mean_squared_displacements(
 
     def get_nojump_positions(
         universe: MDAnalysis.Universe, selection: MDAnalysis.AtomGroup
-    ) -> NDArray:
+    ) -> np.ndarray:
         """
         Unwraps the positions to create a continuous trajectory without jumps across periodic boundaries.
         """
@@ -945,7 +944,7 @@ def calc_molecular_mean_squared_displacements(
 
         return np.array(nojump_positions)
 
-    def mean_squared_displacement(start: NDArray, current: NDArray):
+    def mean_squared_displacement(start: np.ndarray, current: np.ndarray):
         """
         Calculates mean square displacement between current and initial (start) coordinates.
         """
@@ -1052,7 +1051,7 @@ def calc_molecular_mean_squared_displacements(
 
 
 def calc_radius_of_gyration(
-    universe: MDAnalysis.Universe, molecule_atom_indices: NDArray
+    universe: MDAnalysis.Universe, molecule_atom_indices: np.ndarray
 ) -> Dict:
     """
     Calculates the radius of gyration as a function of time for the atoms 'molecule_atom_indices'.
