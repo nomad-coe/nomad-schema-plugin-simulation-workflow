@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import List
 import numpy as np
 
 from nomad.datamodel.data import ArchiveSection
@@ -129,9 +128,9 @@ class SimulationWorkflow(Workflow):
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
-        self._calculations: List[Calculation] = []
-        self._systems: List[System] = []
-        self._methods: List[Method] = []
+        self._calculations: list[ArchiveSection] = []  # noqa
+        self._systems: list[ArchiveSection] = []  # noqa
+        self._methods: list[ArchiveSection] = []  # noqa
         try:
             self._calculations = archive.run[-1].calculation
             self._systems = archive.run[-1].system

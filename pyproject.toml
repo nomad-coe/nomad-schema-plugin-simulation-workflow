@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [{ name = "The NOMAD Authors" }]
 license = { text = "Apache-2.0" }
 dependencies = [
-    "nomad-lab>=1.3.6.dev1",
+    "nomad-lab>=1.3.13",
     "nomad-schema-plugin-run>=1.0.1",
     "mdanalysis>=2.8.0,<3.0.0 ; python_full_version >= '3.10'",
     "mdanalysis<2.8 ; python_full_version < '3.10'",
@@ -26,7 +26,7 @@ homepage = "https://github.com/nomad-coe/nomad-schema-plugin-simulation-workflow
 dev-dependencies = [
     "nomad-normalizer-plugin-bandstructure",
     "nomad-normalizer-plugin-system",
-    'mypy==1.0.1',
+    'mypy>=1.15',
     'pytest>= 5.3.0, <8',
     'pytest-timeout>=1.4.2',
     'pytest-cov>=2.7.1',
