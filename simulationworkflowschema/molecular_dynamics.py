@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 from itertools import chain
 from collections import namedtuple
 import numpy as np
@@ -139,12 +139,12 @@ def create_empty_universe(
     n_frames: int = 1,
     n_residues: int = 1,
     n_segments: int = 1,
-    atom_resindex: np.ndarray | None = None,
-    residue_segindex: np.ndarray | None = None,
+    atom_resindex: Optional[np.ndarray] = None,
+    residue_segindex: Optional[np.ndarray] = None,
     flag_trajectory: bool = False,
     flag_velocities: bool = False,
     flag_forces: bool = False,
-    timestep: float | None = None,
+    timestep: Optional[float] = None,
 ) -> MDAnalysis.Universe:
     """Create a blank Universe
 
@@ -1117,7 +1117,7 @@ def get_molecules_from_bond_list(
     n_particles: int,
     bond_list: list[tuple],
     particle_types: list[str] = [],
-    particles_typeid: array | None = None,
+    particles_typeid: Optional[array] = None,
 ) -> list[dict[str, Any]]:
     """
     Returns a list of dictionaries with molecule info from each instance in the list of bonds.
