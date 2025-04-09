@@ -159,7 +159,20 @@ class EquationOfState(ParallelSimulation):
             self.outputs.append(Link(name=WORKFLOW_RESULTS_NAME, section=self.results))
 
         if not self._calculations:
-            return
+            # try to get calculations from tasks (in case of instantiation from workflow yaml)
+            try:
+                self._calculations = [
+                    task.task.results.calculations_ref[0] for task in self.tasks
+                ]
+            except Exception:
+                pass
+
+        if not self._systems:
+            # try to get systems from tasks (in case of instantiation from workflow yaml)
+            try:
+                self._systems = [calc.system_ref for calc in self._calculations]
+            except Exception:
+                pass
 
         if self.results.energies is None:
             try:
