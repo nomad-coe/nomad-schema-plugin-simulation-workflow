@@ -30,6 +30,8 @@ from .general import (
     WORKFLOW_METHOD_NAME,
     WORKFLOW_RESULTS_NAME,
 )
+from runschema.run import Run, Program
+from runschema.system import System
 
 
 class EquationOfStateMethod(SimulationWorkflowMethod):
@@ -224,3 +226,9 @@ class EquationOfState(ParallelSimulation):
                         self.results.eos_fit.append(eos_fit)
                     except Exception:
                         self.logger.warning('EOS fit not succesful.')
+
+        # necessary to trigger results normalization
+        if not archive.run:
+            run = Run(program=Program())
+            run.system.append(System(systems_ref=self._systems))
+            archive.run.append(run)
