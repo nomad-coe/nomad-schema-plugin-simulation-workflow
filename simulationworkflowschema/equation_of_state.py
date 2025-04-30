@@ -233,6 +233,5 @@ class EquationOfState(ParallelSimulation):
             # run.system.append(System(systems_ref=[self._systems[0]]))
             run.system.append(self._systems[0])
             run.calculation.append(self._calculations[0])
-            logger.warning(f'adding method {self.tasks[0].task.method}')
             run.method.append(self.tasks[0].task.method)
             archive.run.append(run)
