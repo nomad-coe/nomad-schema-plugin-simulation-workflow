@@ -229,9 +229,9 @@ class EquationOfState(ParallelSimulation):
 
         # necessary to trigger results normalization
         if not archive.run:
+            task0_archive = self.tasks[0].task.m_root()
             run = Run(program=Program())
-            # run.system.append(System(systems_ref=[self._systems[0]]))
-            run.system.append(self._systems[0])
-            run.calculation.append(self._calculations[0])
-            run.method.append(self.tasks[0].task.method)
+            run.system.extend(task0_archive.run[0].system)
+            run.method.extend(task0_archive.run[0].method)
+            run.calculation.extend(task0_archive.run[0].calculation)
             archive.run.append(run)
