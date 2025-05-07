@@ -30,6 +30,7 @@ from .general import (
     WORKFLOW_METHOD_NAME,
     WORKFLOW_RESULTS_NAME,
 )
+from .geometry_optimization import GeometryOptimization
 from runschema.run import Run, Program, Method
 from runschema.system import System
 
@@ -160,17 +161,24 @@ class EquationOfState(ParallelSimulation):
             self.results = EquationOfStateResults()
             self.outputs.append(Link(name=WORKFLOW_RESULTS_NAME, section=self.results))
 
+        task0_archive = self.tasks[0].task.m_root()
+        tasks = self.tasks[:]
+        if task0_archive.workflow2:
+            # remove the first task if it is a GeometryOptimization (not part of the EOS)
+            if isinstance(task0_archive.workflow2, GeometryOptimization):
+                tasks.pop(0)
+
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
             try:
                 self._calculations = [
-                    task.task.results.calculations_ref[0] for task in self.tasks
+                    task.task.results.calculations_ref[0] for task in tasks
                 ]
             except Exception:
                 pass
 
         if not self._systems:
-            # try to get systems from tasks (in case of instantiation from workflow yaml)
+            # try to get systems from calculations (in case of instantiation from workflow yaml)
             try:
                 self._systems = [calc.system_ref for calc in self._calculations]
             except Exception:
@@ -229,9 +237,13 @@ class EquationOfState(ParallelSimulation):
 
         # necessary to trigger results normalization
         if not archive.run:
-            task0_archive = self.tasks[0].task.m_root()
             run = Run(program=Program())
-            run.system.extend(task0_archive.run[0].system)
-            run.method.extend(task0_archive.run[0].method)
-            run.calculation.extend(task0_archive.run[0].calculation)
+            try:
+                # assuming the final structure is the relevant one, e.g., from a GO
+                run.system.extend([task0_archive.run[0].system[-1]])
+                run.method.extend(task0_archive.run[0].method)
+                run.calculation.extend([task0_archive.run[0].calculation[-1]])
+            except Exception:
+                logger.warning('Failed to link structure from first task archive. ')
+                return
             archive.run.append(run)
