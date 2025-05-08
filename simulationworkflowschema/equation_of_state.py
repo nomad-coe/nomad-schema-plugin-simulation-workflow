@@ -30,9 +30,8 @@ from .general import (
     WORKFLOW_METHOD_NAME,
     WORKFLOW_RESULTS_NAME,
 )
-from .geometry_optimization import GeometryOptimization
-from runschema.run import Run, Program, Method
-from runschema.system import System
+from .single_point import SinglePoint
+from runschema.run import Run, Program
 
 
 class EquationOfStateMethod(SimulationWorkflowMethod):
@@ -161,12 +160,17 @@ class EquationOfState(ParallelSimulation):
             self.results = EquationOfStateResults()
             self.outputs.append(Link(name=WORKFLOW_RESULTS_NAME, section=self.results))
 
-        task0_archive = self.tasks[0].task.m_root()
-        tasks = self.tasks[:]
-        if task0_archive.workflow2:
-            # remove the first task if it is a GeometryOptimization (not part of the EOS)
-            if isinstance(task0_archive.workflow2, GeometryOptimization):
-                tasks.pop(0)
+        try:
+            task_archives = [task.task.m_root() for task in self.tasks]
+            tasks = [
+                task
+                for i_task, task in enumerate(self.tasks)
+                if isinstance(task_archives[i_task], SinglePoint)
+            ]
+        except Exception:
+            logger.warning(
+                'Failed to get task archives. Cannot filter for SinglePoint tasks.'
+            )
 
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
@@ -240,10 +244,10 @@ class EquationOfState(ParallelSimulation):
             run = Run(program=Program())
             try:
                 # assuming the final structure is the relevant one, e.g., from a GO
-                run.system.extend([task0_archive.run[0].system[-1]])
-                run.method.extend(task0_archive.run[0].method)
-                run.calculation.extend([task0_archive.run[0].calculation[-1]])
+                run.system.extend([task_archives[0].run[0].system[-1]])
+                run.method.extend(task_archives[0].run[0].method)
+                run.calculation.extend([task_archives[0].run[0].calculation[-1]])
             except Exception:
                 logger.warning('Failed to link structure from first task archive. ')
-                return
+
             archive.run.append(run)
