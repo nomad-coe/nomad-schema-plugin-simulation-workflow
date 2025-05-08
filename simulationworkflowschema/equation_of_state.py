@@ -165,7 +165,7 @@ class EquationOfState(ParallelSimulation):
             tasks = [
                 task
                 for i_task, task in enumerate(self.tasks)
-                if isinstance(task_archives[i_task], SinglePoint)
+                if isinstance(task_archives[i_task].workflow2, SinglePoint)
             ]
         except Exception:
             logger.warning(
