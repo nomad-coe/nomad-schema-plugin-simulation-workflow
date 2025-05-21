@@ -21,7 +21,7 @@ from ase.eos import EquationOfState as aseEOS
 from nomad.atomutils import get_volume
 from nomad.datamodel.data import ArchiveSection
 from nomad.units import ureg
-from nomad.metainfo import SubSection, Section, Quantity
+from nomad.metainfo import SubSection, Section, Quantity, MProxy
 from nomad.datamodel.metainfo.workflow import Link
 from .general import (
     SimulationWorkflowMethod,
@@ -150,48 +150,76 @@ class EquationOfState(ParallelSimulation):
 
     results = SubSection(sub_section=EquationOfStateResults)
 
-    def extract_indices_from_proxy_value(self, path: str):
-        """
-        Extracts run_index and system_index from a path string that contains '/run/<int>/system/<int>'.
+    # def extract_indices_from_proxy_value(self, path: str):
+    #     """
+    #     Extracts run_index and system_index from a path string that contains '/run/<int>/system/<int>'.
 
-        Args:
-            path (str): The input path string.
+    #     Args:
+    #         path (str): The input path string.
 
-        Returns:
-            tuple: (run_index, system_index) as integers, or (None, None) if not found or parsing fails.
-        """
-        parts = path.split('/run/')
-        if len(parts) > 1:
-            try:
-                indices = parts[1].split('/system/')
-                run_index = int(indices[0])
-                system_index = int(indices[1])
-                return run_index, system_index
-            except (IndexError, ValueError):
-                return None, None
-        else:
-            return None, None
+    #     Returns:
+    #         tuple: (run_index, system_index) as integers, or (None, None) if not found or parsing fails.
+    #     """
+    #     parts = path.split('/run/')
+    #     if len(parts) > 1:
+    #         try:
+    #             indices = parts[1].split('/system/')
+    #             run_index = int(indices[0])
+    #             system_index = int(indices[1])
+    #             return run_index, system_index
+    #         except (IndexError, ValueError):
+    #             return None, None
+    #     else:
+    #         return None, None
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
+        print('in eos workflow normalizer')
         # find and verify the input structure
         if self.inputs:
             input_structure = {}
             for input_item in self.inputs:
-                if isinstance(input_item.section.m_proxy_resolve(), System):
+                # self.m_proxy_value = m_proxy_value
+                # self.m_proxy_section = m_proxy_section
+                # self.m_proxy_resolved = None
+                # self.m_proxy_type = m_proxy_type
+                # self.m_proxy_context = m_proxy_context
+                # print(input_item)
+                # logger.warning(f'input_item: {input_item}')
+                # print(f'input_item.m_proxy_value: {input_item.section}')
+                # logger.warning(f'input_item.m_proxy_value: {input_item.section}')
+                if isinstance(input_item.section, MProxy):
+                    input_section = input_item.section.m_proxy_resolve()
+                    input_proxy = input_item.section
+                    # input_system = input_item.section.m_proxy_resolved
+                    # run_index, system_index = self.extract_indices_from_proxy_value(
+                    #     input_item.section.m_proxy_value
+                    # )
+                else:
+                    input_section = input_item.section
+                    input_proxy = None
+                #     input_system = input_item.section
+                system_index = input_section.m_parent_index
+                run_section = input_section.m_parent
+                run_index = run_section.m_parent_index
+                # logger.warning(
+                #     f'input_system: {input_system}, system_index: {system_index}'
+                # )
+                # logger.warning(f'run_section: {run_section}, run_index: {run_index}')
+                # run_index, system_index = ...?
+                if isinstance(input_section, System):
                     if input_structure:
                         logger.warning(
                             'Multiple input structures found. Using the first one.'
                         )
                         continue
                     input_structure['name'] = input_item.name
-                    input_structure['section'] = input_item.section
-                    input_structure['system'] = input_item.section.m_proxy_resolved
-                    run_index, system_index = self.extract_indices_from_proxy_value(
-                        input_item.section.m_proxy_value
-                    )
-                    input_archive = input_item.section.m_root()
+                    # input_structure['section'] = input_section
+                    input_structure['system'] = input_section
+                    input_archive = (
+                        input_section.m_root()
+                    )  # input_item.section.m_root()
                     if input_archive:
                         input_structure['method'] = input_archive.run[run_index].method
                         if system_index == -1:
@@ -202,6 +230,19 @@ class EquationOfState(ParallelSimulation):
                                 break
             if not input_structure:
                 logger.warning('No input structure found in EOS workflow normalizer.')
+
+        # print('input structure:', input_structure)
+        # logger.warning(f'input structure: {input_structure}')
+        if not archive.run and input_structure:
+            run = Run(program=Program())
+            try:
+                run.system.extend([input_structure['system']])
+                run.method.extend(input_structure['method'])
+                run.calculation.extend([input_structure['calculation']])
+            except Exception:
+                logger.warning('Failed to create run section from input structure. ')
+
+            archive.run.append(run)
 
         if not self.method:
             self.method = EquationOfStateMethod()
@@ -225,10 +266,11 @@ class EquationOfState(ParallelSimulation):
         for task in self.tasks:
             flag_input_structure = False
             for input in task.inputs:
-                if (
-                    input.section.m_proxy_value
-                    == input_structure['section'].m_proxy_value
-                ):
+                # logger.warning(
+                #     f'input_structure.m_def: {input_structure["section"].m_def}'
+                # )
+                # logger.warning(f'input.section.m_def: {input.section.m_def}')
+                if input.section.m_proxy_value == input_proxy.m_proxy_value:
                     # overwrite the name of the task input to match the global input
                     input.name = input_structure['name']
                     flag_input_structure = True
@@ -310,13 +352,13 @@ class EquationOfState(ParallelSimulation):
 
         # necessary to trigger results normalization
         # TODO - test moving this above and/or removing super.normalize
-        if not archive.run:
-            run = Run(program=Program())
-            try:
-                run.system.extend([input_structure['system']])
-                run.method.extend(input_structure['method'])
-                run.calculation.extend([input_structure['calculation']])
-            except Exception:
-                logger.warning('Failed to create run section from input structure. ')
+        # if not archive.run:
+        #     run = Run(program=Program())
+        #     try:
+        #         run.system.extend([input_structure['system']])
+        #         run.method.extend(input_structure['method'])
+        #         run.calculation.extend([input_structure['calculation']])
+        #     except Exception:
+        #         logger.warning('Failed to create run section from input structure. ')
 
-            archive.run.append(run)
+        #     archive.run.append(run)
