@@ -191,14 +191,14 @@ class EquationOfState(ParallelSimulation):
                 # logger.warning(f'input_item.m_proxy_value: {input_item.section}')
                 if isinstance(input_item.section, MProxy):
                     input_section = input_item.section.m_proxy_resolve()
-                    input_proxy = input_item.section
+                    input_proxy_value = input_item.section.m_proxy_value
                     # input_system = input_item.section.m_proxy_resolved
                     # run_index, system_index = self.extract_indices_from_proxy_value(
                     #     input_item.section.m_proxy_value
                     # )
                 else:
                     input_section = input_item.section
-                    input_proxy = None
+                    input_proxy_value = ''
                 #     input_system = input_item.section
                 system_index = input_section.m_parent_index
                 run_section = input_section.m_parent
@@ -270,7 +270,7 @@ class EquationOfState(ParallelSimulation):
                 #     f'input_structure.m_def: {input_structure["section"].m_def}'
                 # )
                 # logger.warning(f'input.section.m_def: {input.section.m_def}')
-                if input.section.m_proxy_value == input_proxy.m_proxy_value:
+                if input.section.m_proxy_value == input_proxy_value:
                     # overwrite the name of the task input to match the global input
                     input.name = input_structure['name']
                     flag_input_structure = True
