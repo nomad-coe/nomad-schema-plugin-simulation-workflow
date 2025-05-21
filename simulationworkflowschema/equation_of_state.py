@@ -21,7 +21,7 @@ from ase.eos import EquationOfState as aseEOS
 from nomad.atomutils import get_volume
 from nomad.datamodel.data import ArchiveSection
 from nomad.units import ureg
-from nomad.metainfo import SubSection, Section, Quantity, MProxy
+from nomad.metainfo import SubSection, Section, Quantity
 from nomad.datamodel.metainfo.workflow import Link
 from .general import (
     SimulationWorkflowMethod,
@@ -150,99 +150,51 @@ class EquationOfState(ParallelSimulation):
 
     results = SubSection(sub_section=EquationOfStateResults)
 
-    # def extract_indices_from_proxy_value(self, path: str):
-    #     """
-    #     Extracts run_index and system_index from a path string that contains '/run/<int>/system/<int>'.
-
-    #     Args:
-    #         path (str): The input path string.
-
-    #     Returns:
-    #         tuple: (run_index, system_index) as integers, or (None, None) if not found or parsing fails.
-    #     """
-    #     parts = path.split('/run/')
-    #     if len(parts) > 1:
-    #         try:
-    #             indices = parts[1].split('/system/')
-    #             run_index = int(indices[0])
-    #             system_index = int(indices[1])
-    #             return run_index, system_index
-    #         except (IndexError, ValueError):
-    #             return None, None
-    #     else:
-    #         return None, None
-
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
-        print('in eos workflow normalizer')
-        # find and verify the input structure
+        # TODO - Check beyond the failing old test for example from a parser
+
+        # find the input structure
         if self.inputs:
-            input_structure = {}
+            flag_input_structure = False
+            input_proxy_value = ''
             for input_item in self.inputs:
-                # self.m_proxy_value = m_proxy_value
-                # self.m_proxy_section = m_proxy_section
-                # self.m_proxy_resolved = None
-                # self.m_proxy_type = m_proxy_type
-                # self.m_proxy_context = m_proxy_context
-                # print(input_item)
-                # logger.warning(f'input_item: {input_item}')
-                # print(f'input_item.m_proxy_value: {input_item.section}')
-                # logger.warning(f'input_item.m_proxy_value: {input_item.section}')
-                if isinstance(input_item.section, MProxy):
-                    input_section = input_item.section.m_proxy_resolve()
-                    input_proxy_value = input_item.section.m_proxy_value
-                    # input_system = input_item.section.m_proxy_resolved
-                    # run_index, system_index = self.extract_indices_from_proxy_value(
-                    #     input_item.section.m_proxy_value
-                    # )
-                else:
-                    input_section = input_item.section
-                    input_proxy_value = ''
-                #     input_system = input_item.section
+                section = input_item.section.m_resolved()
+                if not isinstance(section, System):
+                    continue
+
+                flag_input_structure = True
+                input_section = input_item.section.m_proxy_resolved
                 system_index = input_section.m_parent_index
                 run_section = input_section.m_parent
                 run_index = run_section.m_parent_index
-                # logger.warning(
-                #     f'input_system: {input_system}, system_index: {system_index}'
-                # )
-                # logger.warning(f'run_section: {run_section}, run_index: {run_index}')
-                # run_index, system_index = ...?
-                if isinstance(input_section, System):
-                    if input_structure:
-                        logger.warning(
-                            'Multiple input structures found. Using the first one.'
-                        )
-                        continue
-                    input_structure['name'] = input_item.name
-                    # input_structure['section'] = input_section
-                    input_structure['system'] = input_section
-                    input_archive = (
-                        input_section.m_root()
-                    )  # input_item.section.m_root()
-                    if input_archive:
-                        input_structure['method'] = input_archive.run[run_index].method
-                        if system_index == -1:
-                            system_index = len(input_archive.run[run_index].system) - 1
+                input_proxy_value = input_item.section.m_proxy_value
+                input_name = input_item.name
+                input_archive = input_section.m_root()
+                if input_archive:
+                    if system_index == -1:
+                        system_index = len(input_archive.run[run_index].system) - 1
+                if not archive.run:
+                    run = Run(program=Program())
+                    try:
+                        run.system.extend([input_section])
+                        run.method.extend(input_archive.run[run_index].method)
                         for calc in input_archive.run[run_index].calculation:
                             if calc.system_ref.m_parent_index == system_index:
-                                input_structure['calculation'] = calc
+                                run.calculation.extend([calc])
                                 break
-            if not input_structure:
-                logger.warning('No input structure found in EOS workflow normalizer.')
+                    except Exception:
+                        logger.warning(
+                            'Failed to create run section from input structure. '
+                        )
 
-        # print('input structure:', input_structure)
-        # logger.warning(f'input structure: {input_structure}')
-        if not archive.run and input_structure:
-            run = Run(program=Program())
-            try:
-                run.system.extend([input_structure['system']])
-                run.method.extend(input_structure['method'])
-                run.calculation.extend([input_structure['calculation']])
-            except Exception:
-                logger.warning('Failed to create run section from input structure. ')
+                    archive.run.append(run)
 
-            archive.run.append(run)
+                break
+
+        if not flag_input_structure:
+            logger.warning('No input structure found in EOS workflow normalizer.')
 
         if not self.method:
             self.method = EquationOfStateMethod()
@@ -262,27 +214,45 @@ class EquationOfState(ParallelSimulation):
             logger.warning(
                 'Not all tasks are SinglePoints or failed to retrieve task archives. EOS workflow may be incomplete or incorrect.'
             )
+            return
 
         for task in self.tasks:
-            flag_input_structure = False
-            for input in task.inputs:
-                # logger.warning(
-                #     f'input_structure.m_def: {input_structure["section"].m_def}'
-                # )
-                # logger.warning(f'input.section.m_def: {input.section.m_def}')
-                if input.section.m_proxy_value == input_proxy_value:
-                    # overwrite the name of the task input to match the global input
-                    input.name = input_structure['name']
-                    flag_input_structure = True
-                    break
-            if not flag_input_structure:
+            # ALVIN's Suggestion
+            # sections = [input.section for input in task.inputs]
+            # if input_section in sections:  # ! Does not work!
+            #     task.inputs[sections.index(input_section)].name = input_section.name
+            # else:
+            #     # add the input structure to each task if not already present
+            #     task.inputs.append(Link(name=input_name, section=input_section))
+
+            # NEW TRY
+            proxy_values = [input.section.m_proxy_value for input in task.inputs]
+            if input_proxy_value in proxy_values:
+                # get the index of the match
+                index = proxy_values.index(input_proxy_value)
+                task.inputs[index].name = input_name
+            else:
                 # TODO - Test this!
-                # add the global input structure to each task if not already present
-                task.inputs.append(
-                    Link(
-                        name=input_structure['name'], section=input_structure['section']
-                    )
-                )
+                # add the input structure to each task if not already present
+                task.inputs.append(Link(name=input_name, section=input_section))
+
+            # OLD IMPLEMENTATION
+            # flag_input_structure = False
+            # for input in task.inputs:
+            #     if input.section.m_proxy_value == input_proxy_value:
+            #         # overwrite the name of the task input to match the global input
+            #         input.name = input_structure['name']
+            #         flag_input_structure = True
+            #         break
+            # if not flag_input_structure:
+            #     # TODO - Test this!
+            #     # add the global input structure to each task if not already present
+            #     task.inputs.append(
+            #         Link(
+            #             name=input_structure['name'], section=input_structure['system']
+            #         )
+            #     )
+
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
             try:
@@ -349,16 +319,3 @@ class EquationOfState(ParallelSimulation):
                         self.results.eos_fit.append(eos_fit)
                     except Exception:
                         logger.warning('EOS fit not succesful.')
-
-        # necessary to trigger results normalization
-        # TODO - test moving this above and/or removing super.normalize
-        # if not archive.run:
-        #     run = Run(program=Program())
-        #     try:
-        #         run.system.extend([input_structure['system']])
-        #         run.method.extend(input_structure['method'])
-        #         run.calculation.extend([input_structure['calculation']])
-        #     except Exception:
-        #         logger.warning('Failed to create run section from input structure. ')
-
-        #     archive.run.append(run)
