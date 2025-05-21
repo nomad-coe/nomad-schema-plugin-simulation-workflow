@@ -32,6 +32,7 @@ from .general import (
 )
 from .single_point import SinglePoint
 from runschema.run import Run, Program
+from runschema.system import System
 
 
 class EquationOfStateMethod(SimulationWorkflowMethod):
@@ -149,8 +150,56 @@ class EquationOfState(ParallelSimulation):
 
     results = SubSection(sub_section=EquationOfStateResults)
 
+    def extract_indices_from_proxy_value(self, path: str):
+        """
+        Extracts run_index and system_index from a path string that contains '/run/<int>/system/<int>'.
+
+        Args:
+            path (str): The input path string.
+
+        Returns:
+            tuple: (run_index, system_index) as integers, or (None, None) if not found or parsing fails.
+        """
+        parts = path.split('/run/')
+        if len(parts) > 1:
+            try:
+                indices = parts[1].split('/system/')
+                run_index = int(indices[0])
+                system_index = int(indices[1])
+                return run_index, system_index
+            except (IndexError, ValueError):
+                return None, None
+        else:
+            return None, None
+
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
+
+        # find and verify the input structure
+        if self.inputs:
+            input_structure = {}
+            for input_item in self.inputs:
+                if isinstance(input_item.section.m_proxy_resolve(), System):
+                    if input_structure:
+                        logger.warning(
+                            'Multiple input structures found. Using the first one.'
+                        )
+                        continue
+                    input_structure['system'] = input_item.section.m_proxy_resolved
+                    run_index, system_index = self.extract_indices_from_proxy_value(
+                        input_item.section.m_proxy_value
+                    )
+                    input_archive = input_item.section.m_root()
+                    if input_archive:
+                        input_structure['method'] = input_archive.run[run_index].method
+                        if system_index == -1:
+                            system_index = len(input_archive.run[run_index].system) - 1
+                        for calc in input_archive.run[run_index].calculation:
+                            if calc.system_ref.m_parent_index == system_index:
+                                input_structure['calculation'] = calc
+                                break
+            if not input_structure:
+                logger.warning('No input structure found in EOS workflow normalizer.')
 
         if not self.method:
             self.method = EquationOfStateMethod()
@@ -162,21 +211,22 @@ class EquationOfState(ParallelSimulation):
 
         try:
             task_archives = [task.task.m_root() for task in self.tasks]
-            tasks = [
-                task
-                for i_task, task in enumerate(self.tasks)
-                if isinstance(task_archives[i_task].workflow2, SinglePoint)
-            ]
+            assert all(
+                isinstance(task_archive.workflow2, SinglePoint)
+                for task_archive in task_archives
+            )
         except Exception:
             logger.warning(
-                'Failed to get task archives. Cannot filter for SinglePoint tasks.'
+                'Not all tasks are SinglePoints or failed to retrieve task archives. EOS workflow may be incomplete or incorrect.'
             )
+
+        # TODO - overwrite IOs of tasks to match the given input structure
 
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
             try:
                 self._calculations = [
-                    task.task.results.calculations_ref[0] for task in tasks
+                    task.task.results.calculations_ref[0] for task in self.tasks
                 ]
             except Exception:
                 pass
@@ -243,11 +293,10 @@ class EquationOfState(ParallelSimulation):
         if not archive.run:
             run = Run(program=Program())
             try:
-                # assuming the final structure is the relevant one, e.g., from a GO
-                run.system.extend([task_archives[0].run[0].system[-1]])
-                run.method.extend(task_archives[0].run[0].method)
-                run.calculation.extend([task_archives[0].run[0].calculation[-1]])
+                run.system.extend([input_structure['system']])
+                run.method.extend(input_structure['method'])
+                run.calculation.extend([input_structure['calculation']])
             except Exception:
-                logger.warning('Failed to link structure from first task archive. ')
+                logger.warning('Failed to create run section from input structure. ')
 
             archive.run.append(run)
