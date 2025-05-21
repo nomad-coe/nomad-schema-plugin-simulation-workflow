@@ -185,6 +185,8 @@ class EquationOfState(ParallelSimulation):
                             'Multiple input structures found. Using the first one.'
                         )
                         continue
+                    input_structure['name'] = input_item.name
+                    input_structure['section'] = input_item.section
                     input_structure['system'] = input_item.section.m_proxy_resolved
                     run_index, system_index = self.extract_indices_from_proxy_value(
                         input_item.section.m_proxy_value
@@ -220,8 +222,25 @@ class EquationOfState(ParallelSimulation):
                 'Not all tasks are SinglePoints or failed to retrieve task archives. EOS workflow may be incomplete or incorrect.'
             )
 
-        # TODO - overwrite IOs of tasks to match the given input structure
-
+        for task in self.tasks:
+            flag_input_structure = False
+            for input in task.inputs:
+                if (
+                    input.section.m_proxy_value
+                    == input_structure['section'].m_proxy_value
+                ):
+                    # overwrite the name of the task input to match the global input
+                    input.name = input_structure['name']
+                    flag_input_structure = True
+                    break
+            if not flag_input_structure:
+                # TODO - Test this!
+                # add the global input structure to each task if not already present
+                task.inputs.append(
+                    Link(
+                        name=input_structure['name'], section=input_structure['section']
+                    )
+                )
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
             try:
@@ -290,6 +309,7 @@ class EquationOfState(ParallelSimulation):
                         logger.warning('EOS fit not succesful.')
 
         # necessary to trigger results normalization
+        # TODO - test moving this above and/or removing super.normalize
         if not archive.run:
             run = Run(program=Program())
             try:
