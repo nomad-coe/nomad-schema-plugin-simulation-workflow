@@ -158,18 +158,26 @@ class EquationOfState(ParallelSimulation):
         # find the input structure
         if self.inputs:
             flag_input_structure = False
-            input_proxy_value = ''
             for input_item in self.inputs:
-                section = input_item.section.m_resolved()
+                # Always resolve proxies to their actual objects
+                section = (
+                    input_item.section.m_resolved()
+                    if isinstance(input_item.section, MProxy)
+                    else input_item.section
+                )
                 if not isinstance(section, System):
                     continue
 
                 flag_input_structure = True
-                input_section = input_item.section.m_proxy_resolved
+                # Use resolved section for all further logic
+                input_section = (
+                    input_item.section.m_proxy_resolved
+                    if isinstance(input_item.section, MProxy)
+                    else input_item.section
+                )
                 system_index = input_section.m_parent_index
                 run_section = input_section.m_parent
                 run_index = run_section.m_parent_index
-                input_proxy_value = input_item.section.m_proxy_value
                 input_name = input_item.name
                 input_archive = input_section.m_root()
                 if input_archive:
@@ -217,41 +225,38 @@ class EquationOfState(ParallelSimulation):
             return
 
         for task in self.tasks:
-            # ALVIN's Suggestion
-            # sections = [input.section for input in task.inputs]
-            # if input_section in sections:  # ! Does not work!
-            #     task.inputs[sections.index(input_section)].name = input_section.name
+            # --- BEGIN OLD CODE ---
+            # proxy_values = [input.section.m_proxy_value for input in task.inputs]
+            # if input_proxy_value in proxy_values:
+            #     # get the index of the match
+            #     index = proxy_values.index(input_proxy_value)
+            #     task.inputs[index].name = input_name
             # else:
+            #     # TODO - Test this!
             #     # add the input structure to each task if not already present
             #     task.inputs.append(Link(name=input_name, section=input_section))
+            # --- END OLD CODE ---
 
-            # NEW TRY
-            proxy_values = [input.section.m_proxy_value for input in task.inputs]
-            if input_proxy_value in proxy_values:
-                # get the index of the match
-                index = proxy_values.index(input_proxy_value)
+            # Refactored: Always resolve proxies to their actual objects and use id() for comparison
+            task_input_ids = [
+                id(
+                    inp.section.m_resolved()
+                    if isinstance(inp.section, MProxy)
+                    else inp.section
+                )
+                for inp in task.inputs
+            ]
+            input_id = id(
+                input_section.m_resolved()
+                if isinstance(input_section, MProxy)
+                else input_section
+            )
+
+            if input_id in task_input_ids:
+                index = task_input_ids.index(input_id)
                 task.inputs[index].name = input_name
             else:
-                # TODO - Test this!
-                # add the input structure to each task if not already present
                 task.inputs.append(Link(name=input_name, section=input_section))
-
-            # OLD IMPLEMENTATION
-            # flag_input_structure = False
-            # for input in task.inputs:
-            #     if input.section.m_proxy_value == input_proxy_value:
-            #         # overwrite the name of the task input to match the global input
-            #         input.name = input_structure['name']
-            #         flag_input_structure = True
-            #         break
-            # if not flag_input_structure:
-            #     # TODO - Test this!
-            #     # add the global input structure to each task if not already present
-            #     task.inputs.append(
-            #         Link(
-            #             name=input_structure['name'], section=input_structure['system']
-            #         )
-            #     )
 
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)

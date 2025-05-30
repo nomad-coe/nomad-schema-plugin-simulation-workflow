@@ -753,6 +753,58 @@ def parse_trajectory(filename):
 #     assert eos_fit[4].rms_error == approx(1.408202378222592e-07)
 
 
+def test_eos_workflow_minimal():
+    """
+    Minimal synthetic test for EOS normalization and fit logic.
+    """
+    from nomad.datamodel import EntryArchive
+    from simulationworkflowschema.equation_of_state import EquationOfState
+    import numpy as np
+
+    # Create minimal synthetic archive with 5 points
+    archive = EntryArchive()
+    workflow = EquationOfState()
+    archive.workflow2 = workflow
+
+    # Volumes and energies (parabola with minimum at v=2.0)
+    volumes = np.linspace(1.8, 2.2, 5)
+    energies = 0.5 * (volumes - 2.0) ** 2 - 1.0
+
+    # Attach as workflow inputs (simulate calculation sections)
+    class DummyCalc:
+        pass
+
+    workflow.inputs = []
+    for v, e in zip(volumes, energies):
+        calc = DummyCalc()
+        calc.energy_total = type(
+            'E', (), {'to': lambda self, unit: type('V', (), {'magnitude': float(e)})()}
+        )()
+        calc.system_ref = type(
+            'S', (), {'atoms': type('A', (), {'get_volume': lambda self: float(v)})()}
+        )()
+        workflow.inputs.append(type('L', (), {'section': calc})())
+
+    # Run normalization
+    workflow.normalize(archive, LOGGER)
+
+    # Check fit results
+    assert hasattr(workflow.results, 'eos_fit')
+    fits = workflow.results.eos_fit
+    assert isinstance(fits, list)
+    assert len(fits) > 0
+    for fit in fits:
+        assert hasattr(fit, 'function_name')
+        assert hasattr(fit, 'fitted_energies')
+        assert hasattr(fit, 'equilibrium_volume')
+        assert hasattr(fit, 'equilibrium_energy')
+        assert hasattr(fit, 'rms_error')
+        assert len(fit.fitted_energies) == len(volumes)
+        assert fit.equilibrium_volume is not None
+        assert fit.equilibrium_energy is not None
+        assert fit.rms_error >= 0
+
+
 class TestSimulationWorkflow:
     """
     Tests for the base simulation workflow class.
