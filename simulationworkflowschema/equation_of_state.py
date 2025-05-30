@@ -21,7 +21,7 @@ from ase.eos import EquationOfState as aseEOS
 from nomad.atomutils import get_volume
 from nomad.datamodel.data import ArchiveSection
 from nomad.units import ureg
-from nomad.metainfo import SubSection, Section, Quantity
+from nomad.metainfo import SubSection, Section, Quantity, MProxy
 from nomad.datamodel.metainfo.workflow import Link
 from .general import (
     SimulationWorkflowMethod,
