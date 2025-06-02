@@ -29,6 +29,7 @@ from MDAnalysis.core.topology import Topology
 from MDAnalysis.core.universe import Universe
 import MDAnalysis.analysis.rdf as MDA_RDF
 from MDAnalysis.core._get_readers import get_reader_for
+from functools import cached_property
 
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import (
@@ -581,6 +582,7 @@ def _get_molecular_bead_groups(
 
 def calc_molecular_rdf(
     universe: MDAnalysis.Universe,
+    bead_groups: dict[str, BeadGroup],
     n_traj_split: int = 10,
     n_prune: int = 1,
     interval_indices=None,
@@ -590,8 +592,20 @@ def calc_molecular_rdf(
     Calculates the radial distribution functions between for each unique pair of
     molecule types as a function of their center of mass distance.
 
-    interval_indices: 2D array specifying the groups of the n_traj_split intervals to be averaged
-    max_mols: the maximum number of molecules per bead group for calculating the rdf, for efficiency purposes.
+    Parameters
+    ----------
+    universe : MDAnalysis.Universe
+        The MDAnalysis universe object.
+    bead_groups : dict[str, BeadGroup]
+        Precomputed bead groups for the universe (use MolecularDynamicsResults.molecular_bead_groups).
+    n_traj_split : int
+        Number of intervals to split trajectory into for averaging.
+    n_prune : int
+        Pruning parameter for frames.
+    interval_indices : list or None
+        2D array specifying the groups of the n_traj_split intervals to be averaged.
+    max_mols : int
+        Maximum number of molecules per bead group for calculating the rdf, for efficiency purposes.
     """
     # TODO 5k default for max_mols was set after > 50k was giving problems. Should do further testing to see where the appropriate limit should be set.
     if (
@@ -623,10 +637,9 @@ def calc_molecular_rdf(
         if not interval_indices:
             interval_indices = [[i] for i in range(n_traj_split)]
 
-    bead_groups = _get_molecular_bead_groups(universe)
     if not bead_groups:
         return bead_groups
-    moltypes = [moltype for moltype in bead_groups.keys()]
+    moltypes = list(bead_groups.keys())
     del_list = [
         i_moltype
         for i_moltype, moltype in enumerate(moltypes)
@@ -868,14 +881,22 @@ def shifted_correlation_average(
 
 
 def calc_molecular_mean_squared_displacements(
-    universe: MDAnalysis.Universe, max_mols: int = 5000
+    universe: MDAnalysis.Universe,
+    bead_groups: dict[str, BeadGroup],
+    max_mols: int = 5000,
 ) -> dict[str, Any]:
     """
     Calculates the mean squared displacement for the center of mass of each
     molecule type.
 
-    max_mols: the maximum number of molecules per bead group for calculating the msd, for efficiency purposes.
-    50k was tested and is very fast and does not seem to have any memory issues.
+    Parameters
+    ----------
+    universe : MDAnalysis.Universe
+        The MDAnalysis universe object.
+    bead_groups : dict[str, BeadGroup]
+        Precomputed bead groups for the universe (use MolecularDynamicsResults.molecular_bead_groups).
+    max_mols : int
+        Maximum number of molecules per bead group for calculating the msd, for efficiency purposes.
     """
 
     def parse_jumps(
@@ -976,7 +997,6 @@ def calc_molecular_mean_squared_displacements(
         return {}
     times = np.arange(n_frames) * dt
 
-    bead_groups = _get_molecular_bead_groups(universe)
     if bead_groups is {}:
         return bead_groups
 
@@ -989,32 +1009,37 @@ def calc_molecular_mean_squared_displacements(
                     'Calculating mean squared displacements for more than 50k molecules.'
                     ' Expect long processing times!',
                 )
-            try:
-                # select max_mols nr. of rnd molecules from this moltype
-                moltype_indices = np.array(
-                    [atom._ix for atom in bead_groups[moltype]._atoms]
-                )
-                molnums = universe.atoms.molnums[moltype_indices]
-                molnum_types = np.unique(molnums)
-                molnum_types_rnd = np.sort(
-                    np.random.choice(molnum_types, size=max_mols)
-                )
-                atom_indices_rnd = np.concatenate(
-                    [np.where(molnums == molnum)[0] for molnum in molnum_types_rnd]
-                )
-                selection = ' '.join([str(i) for i in atom_indices_rnd])
-                selection = f'index {selection}'
-                ags_moltype_rnd = universe.select_atoms(selection)
-                bead_groups[moltype] = BeadGroup(ags_moltype_rnd, compound='fragments')
-                LOGGER.warn(
-                    'Maximum number of molecules for calculating the msd has been reached.'
-                    ' Will make a random selection for calculation.'
-                )
-            except Exception:
-                LOGGER.warn(
-                    'Error in selecting random molecules for large group when calculating msd. Skipping this molecule type.'
-                )
-                del_list.append(i_moltype)
+                try:
+                    # select max_mols nr. of rnd molecules from this moltype
+                    moltype_indices = np.array(
+                        [atom._ix for atom in bead_groups[moltype]._atoms]
+                    )
+                    molnums = universe.atoms.molnums[moltype_indices]
+                    molnum_types = np.unique(molnums)
+                    molnum_types_rnd = np.sort(
+                        np.random.choice(molnum_types, size=max_mols)
+                    )
+                    atom_indices_rnd = np.concatenate(
+                        [
+                            moltype_indices[molnums == molnum]
+                            for molnum in molnum_types_rnd
+                        ]
+                    )
+                    selection = ' '.join([str(i) for i in atom_indices_rnd])
+                    selection = f'index {selection}'
+                    ags_moltype_rnd = universe.select_atoms(selection)
+                    bead_groups[moltype] = BeadGroup(
+                        ags_moltype_rnd, compound='fragments'
+                    )
+                    LOGGER.warn(
+                        'Maximum number of molecules for calculating the msd has been reached.'
+                        ' Will make a random selection for calculation.'
+                    )
+                except Exception:
+                    LOGGER.warn(
+                        'Error in selecting random molecules for large group when calculating msd. Skipping this molecule type.'
+                    )
+                    del_list.append(i_moltype)
 
     for index in sorted(del_list, reverse=True):
         del moltypes[index]
@@ -2536,10 +2561,6 @@ class MolecularDynamicsResults(ThermodynamicsResults):
         sub_section=CorrelationFunction.m_def, repeats=True
     )
 
-    radial_distribution_functions = SubSection(
-        sub_section=RadialDistributionFunction.m_def, repeats=True
-    )
-
     radius_of_gyration = SubSection(sub_section=RadiusOfGyration, repeats=True)
 
     mean_squared_displacements = SubSection(
@@ -2550,9 +2571,12 @@ class MolecularDynamicsResults(ThermodynamicsResults):
         sub_section=FreeEnergyCalculations.m_def, repeats=True
     )
 
+    # Removed @property and getattr-based universe and molecular_bead_groups
+
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
+        # Construct universe and bead_groups as local variables
         try:
             universe = archive_to_universe(archive)
         except Exception:
@@ -2563,6 +2587,8 @@ class MolecularDynamicsResults(ThermodynamicsResults):
 
         if universe is None:
             return
+
+        bead_groups = _get_molecular_bead_groups(universe)
 
         # calculate molecular radial distribution functions
         if not self.radial_distribution_functions:
@@ -2586,6 +2612,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
             n_prune = int(universe.trajectory.n_frames / len(archive.run[-1].system))
             rdf_results = calc_molecular_rdf(
                 universe,
+                bead_groups,
                 n_traj_split=n_traj_split,
                 n_prune=n_prune,
                 interval_indices=interval_indices,
@@ -2598,7 +2625,9 @@ class MolecularDynamicsResults(ThermodynamicsResults):
 
         # calculate the molecular mean squared displacements
         if not self.mean_squared_displacements:
-            msd_results = calc_molecular_mean_squared_displacements(universe)
+            msd_results = calc_molecular_mean_squared_displacements(
+                universe, bead_groups
+            )
             if msd_results:
                 sec_msds = MeanSquaredDisplacement()
                 sec_msds._msd_results = msd_results
