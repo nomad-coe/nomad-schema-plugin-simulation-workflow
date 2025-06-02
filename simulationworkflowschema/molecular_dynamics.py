@@ -596,7 +596,7 @@ def calc_molecular_rdf(
     universe : MDAnalysis.Universe
         The MDAnalysis universe object.
     bead_groups : dict[str, BeadGroup]
-        Precomputed bead groups for the universe (use MolecularDynamicsResults.molecular_bead_groups).
+        Precomputed bead groups for the universe.
     n_traj_split : int
         Number of intervals to split trajectory into for averaging.
     n_prune : int
@@ -893,7 +893,7 @@ def calc_molecular_mean_squared_displacements(
     universe : MDAnalysis.Universe
         The MDAnalysis universe object.
     bead_groups : dict[str, BeadGroup]
-        Precomputed bead groups for the universe (use MolecularDynamicsResults.molecular_bead_groups).
+        Precomputed bead groups for the universe.
     max_mols : int
         Maximum number of molecules per bead group for calculating the msd, for efficiency purposes.
     """
@@ -2570,12 +2570,9 @@ class MolecularDynamicsResults(ThermodynamicsResults):
         sub_section=FreeEnergyCalculations.m_def, repeats=True
     )
 
-    # Removed @property and getattr-based universe and molecular_bead_groups
-
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
-        # Construct universe and bead_groups as local variables
         try:
             universe = archive_to_universe(archive)
         except Exception:
