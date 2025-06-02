@@ -29,7 +29,6 @@ from MDAnalysis.core.topology import Topology
 from MDAnalysis.core.universe import Universe
 import MDAnalysis.analysis.rdf as MDA_RDF
 from MDAnalysis.core._get_readers import get_reader_for
-from functools import cached_property
 
 from nomad.datamodel.data import ArchiveSection
 from nomad.metainfo import (
