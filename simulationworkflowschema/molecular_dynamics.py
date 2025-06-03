@@ -561,6 +561,11 @@ def _get_molecular_bead_groups(
     """
     Creates bead groups based on the molecular types as defined by the MDAnalysis universe.
     """
+    # Input validation
+    if universe is None:
+        LOGGER.warning('universe is None. Cannot create bead groups.')
+        return {}
+
     if not moltypes:
         atoms_moltypes = getattr(universe.atoms, 'moltypes', [])
         moltypes = np.unique(atoms_moltypes)
@@ -607,11 +612,16 @@ def calc_molecular_rdf(
         Maximum number of molecules per bead group for calculating the rdf, for efficiency purposes.
     """
     # TODO 5k default for max_mols was set after > 50k was giving problems. Should do further testing to see where the appropriate limit should be set.
+    if bead_groups is None or not bead_groups:
+        LOGGER.warning('bead_groups is None or empty. Cannot calculate RDF.')
+        return {}
+
     if (
         not universe
         or not universe.trajectory
         or universe.trajectory[0].dimensions is None
     ):
+        LOGGER.warning('universe is None. Cannot calculate RDF.')
         return {}
 
     n_frames = universe.trajectory.n_frames
@@ -972,11 +982,16 @@ def calc_molecular_mean_squared_displacements(
         vec = start - current
         return (vec**2).sum(axis=1).mean()
 
+    if bead_groups is None or not bead_groups:
+        LOGGER.warning('bead_groups is None or empty. Cannot calculate MSD.')
+        return {}
+
     if (
         not universe
         or not universe.trajectory
         or universe.trajectory[0].dimensions is None
     ):
+        LOGGER.warning('universe is None. Cannot calculate MSD.')
         return {}
 
     n_frames = universe.trajectory.n_frames
@@ -1081,11 +1096,18 @@ def calc_radius_of_gyration(
     """
     Calculates the radius of gyration as a function of time for the atoms 'molecule_atom_indices'.
     """
+    if molecule_atom_indices is None or len(molecule_atom_indices) == 0:
+        LOGGER.warning(
+            'molecule_atom_indices is None or empty. Cannot calculate radius of gyration.'
+        )
+        return {}
+
     if (
         not universe
         or not universe.trajectory
         or universe.trajectory[0].dimensions is None
     ):
+        LOGGER.warning('universe is None. Cannot calculate radius of gyration.')
         return {}
     selection = ' '.join([str(i) for i in molecule_atom_indices])
     selection = f'index {selection}'
@@ -1119,7 +1141,15 @@ def calc_molecular_radius_of_gyration(
     """
     Calculates the radius of gyration as a function of time for each polymer in the system.
     """
-    if not system_topology:
+    if universe is None:
+        LOGGER.warning(
+            'universe is None. Cannot calculate molecular radius of gyration.'
+        )
+        return []
+    if system_topology is None or not system_topology:
+        LOGGER.warning(
+            'system_topology is None or empty. Cannot calculate molecular radius of gyration.'
+        )
         return []
 
     rg_results = []
