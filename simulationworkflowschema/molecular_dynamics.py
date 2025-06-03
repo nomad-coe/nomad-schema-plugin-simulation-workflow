@@ -563,7 +563,7 @@ def _get_molecular_bead_groups(
     """
     # Input validation
     if universe is None:
-        LOGGER.warning('universe is None. Cannot create bead groups.')
+        LOGGER.warning('Universe required to create beads.')
         return {}
 
     if not moltypes:
@@ -613,7 +613,7 @@ def calc_molecular_rdf(
     """
     # TODO 5k default for max_mols was set after > 50k was giving problems. Should do further testing to see where the appropriate limit should be set.
     if bead_groups is None or not bead_groups:
-        LOGGER.warning('bead_groups is None or empty. Cannot calculate RDF.')
+        LOGGER.warning('bead_groups required to calculate RDF.')
         return {}
 
     if (
@@ -621,7 +621,7 @@ def calc_molecular_rdf(
         or not universe.trajectory
         or universe.trajectory[0].dimensions is None
     ):
-        LOGGER.warning('universe is None. Cannot calculate RDF.')
+        LOGGER.warning('universe required to calculate RDF.')
         return {}
 
     n_frames = universe.trajectory.n_frames
@@ -983,7 +983,7 @@ def calc_molecular_mean_squared_displacements(
         return (vec**2).sum(axis=1).mean()
 
     if bead_groups is None or not bead_groups:
-        LOGGER.warning('bead_groups is None or empty. Cannot calculate MSD.')
+        LOGGER.warning('bead_groups required to calculate MSD.')
         return {}
 
     if (
@@ -991,7 +991,7 @@ def calc_molecular_mean_squared_displacements(
         or not universe.trajectory
         or universe.trajectory[0].dimensions is None
     ):
-        LOGGER.warning('universe is None. Cannot calculate MSD.')
+        LOGGER.warning('universe required to calculate MSD.')
         return {}
 
     n_frames = universe.trajectory.n_frames
@@ -1023,37 +1023,32 @@ def calc_molecular_mean_squared_displacements(
                     'Calculating mean squared displacements for more than 50k molecules.'
                     ' Expect long processing times!',
                 )
-                try:
-                    # select max_mols nr. of rnd molecules from this moltype
-                    moltype_indices = np.array(
-                        [atom._ix for atom in bead_groups[moltype]._atoms]
-                    )
-                    molnums = universe.atoms.molnums[moltype_indices]
-                    molnum_types = np.unique(molnums)
-                    molnum_types_rnd = np.sort(
-                        np.random.choice(molnum_types, size=max_mols)
-                    )
-                    atom_indices_rnd = np.concatenate(
-                        [
-                            moltype_indices[molnums == molnum]
-                            for molnum in molnum_types_rnd
-                        ]
-                    )
-                    selection = ' '.join([str(i) for i in atom_indices_rnd])
-                    selection = f'index {selection}'
-                    ags_moltype_rnd = universe.select_atoms(selection)
-                    bead_groups[moltype] = BeadGroup(
-                        ags_moltype_rnd, compound='fragments'
-                    )
-                    LOGGER.warning(
-                        'Maximum number of molecules for calculating the msd has been reached.'
-                        ' Will make a random selection for calculation.'
-                    )
-                except Exception:
-                    LOGGER.warning(
-                        'Error in selecting random molecules for large group when calculating msd. Skipping this molecule type.'
-                    )
-                    del_list.append(i_moltype)
+            try:
+                # select max_mols nr. of rnd molecules from this moltype
+                moltype_indices = np.array(
+                    [atom._ix for atom in bead_groups[moltype]._atoms]
+                )
+                molnums = universe.atoms.molnums[moltype_indices]
+                molnum_types = np.unique(molnums)
+                molnum_types_rnd = np.sort(
+                    np.random.choice(molnum_types, size=max_mols)
+                )
+                atom_indices_rnd = np.concatenate(
+                    [moltype_indices[molnums == molnum] for molnum in molnum_types_rnd]
+                )
+                selection = ' '.join([str(i) for i in atom_indices_rnd])
+                selection = f'index {selection}'
+                ags_moltype_rnd = universe.select_atoms(selection)
+                bead_groups[moltype] = BeadGroup(ags_moltype_rnd, compound='fragments')
+                LOGGER.warning(
+                    'Maximum number of molecules for calculating the msd has been reached.'
+                    ' Will make a random selection for calculation.'
+                )
+            except Exception:
+                LOGGER.warning(
+                    'Error in selecting random molecules for large group when calculating msd. Skipping this molecule type.'
+                )
+                del_list.append(i_moltype)
 
     for index in sorted(del_list, reverse=True):
         del moltypes[index]
@@ -1095,10 +1090,13 @@ def calc_radius_of_gyration(
 ) -> dict[str, Any]:
     """
     Calculates the radius of gyration as a function of time for the atoms 'molecule_atom_indices'.
+
+    molecule_atom_indices : np.ndarray
+        The indices of the atoms corresponding to a single molecule for which the Rg will be calculated.
     """
     if molecule_atom_indices is None or len(molecule_atom_indices) == 0:
         LOGGER.warning(
-            'molecule_atom_indices is None or empty. Cannot calculate radius of gyration.'
+            'molecule_atom_indices is required to calculate radius of gyration'
         )
         return {}
 
@@ -1142,13 +1140,11 @@ def calc_molecular_radius_of_gyration(
     Calculates the radius of gyration as a function of time for each polymer in the system.
     """
     if universe is None:
-        LOGGER.warning(
-            'universe is None. Cannot calculate molecular radius of gyration.'
-        )
+        LOGGER.warning('universe required to calculate molecular radius of gyration')
         return []
     if system_topology is None or not system_topology:
         LOGGER.warning(
-            'system_topology is None or empty. Cannot calculate molecular radius of gyration.'
+            'system_topology require to calculate molecular radius of gyration.'
         )
         return []
 

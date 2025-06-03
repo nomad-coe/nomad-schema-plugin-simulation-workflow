@@ -25,7 +25,7 @@ homepage = "https://github.com/nomad-coe/nomad-schema-plugin-simulation-workflow
 [tool.uv]
 dev-dependencies = [
     "nomad-normalizer-plugin-bandstructure>=1.0.3",
-    "nomad-normalizer-plugin-system",
+    "nomad-normalizer-plugin-system>=1.0.3",
     'mypy>=1.15',
     'pytest>= 5.3.0, <8',
     'pytest-timeout>=1.4.2',
