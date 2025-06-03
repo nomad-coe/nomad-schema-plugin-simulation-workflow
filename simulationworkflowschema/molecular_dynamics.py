@@ -208,13 +208,13 @@ def create_empty_universe(
         n_segments = 0
 
     if atom_resindex is None:
-        LOGGER.warn(
+        LOGGER.warning(
             'Residues specified but no atom_resindex given.  '
             'All atoms will be placed in first Residue.',
         )
 
     if residue_segindex is None:
-        LOGGER.warn(
+        LOGGER.warning(
             'Segments specified but no segment_resindex given.  '
             'All residues will be placed in first Segment',
         )
@@ -842,7 +842,7 @@ def shifted_correlation_average(
         >>> indices, data = shifted_correlation(msd, coords)
     """
     if window + skip >= 1:
-        LOGGER.warn(
+        LOGGER.warning(
             'Invalid parameters for shifted_correlation(), resetting to defaults.',
         )
         window = 0.5
@@ -981,7 +981,7 @@ def calc_molecular_mean_squared_displacements(
 
     n_frames = universe.trajectory.n_frames
     if n_frames < 50:
-        LOGGER.warn(
+        LOGGER.warning(
             'At least 50 frames required to calculate molecular'
             ' mean squared displacements, skipping.',
         )
@@ -989,7 +989,7 @@ def calc_molecular_mean_squared_displacements(
 
     dt = getattr(universe.trajectory, 'dt')
     if dt is None:
-        LOGGER.warn(
+        LOGGER.warning(
             'Universe is missing time step, cannot calculate molecular'
             ' mean squared displacements, skipping.',
         )
@@ -1004,7 +1004,7 @@ def calc_molecular_mean_squared_displacements(
     for i_moltype, moltype in enumerate(moltypes):
         if len(bead_groups[moltype].positions) > max_mols:
             if max_mols > 50000:
-                LOGGER.warn(
+                LOGGER.warning(
                     'Calculating mean squared displacements for more than 50k molecules.'
                     ' Expect long processing times!',
                 )
@@ -1030,12 +1030,12 @@ def calc_molecular_mean_squared_displacements(
                     bead_groups[moltype] = BeadGroup(
                         ags_moltype_rnd, compound='fragments'
                     )
-                    LOGGER.warn(
+                    LOGGER.warning(
                         'Maximum number of molecules for calculating the msd has been reached.'
                         ' Will make a random selection for calculation.'
                     )
                 except Exception:
-                    LOGGER.warn(
+                    LOGGER.warning(
                         'Error in selecting random molecules for large group when calculating msd. Skipping this molecule type.'
                     )
                     del_list.append(i_moltype)
@@ -2652,7 +2652,7 @@ class MolecularDynamicsResults(ThermodynamicsResults):
             for rg in rg_results:
                 n_frames = rg.get('n_frames')
                 if len(sec_systems) != n_frames:
-                    self.logger.warning(
+                    logger.warning(
                         'Mismatch in length of system references in calculation and calculated Rg values.'
                         'Will not store Rg values under calculation section'
                     )
