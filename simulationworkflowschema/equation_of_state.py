@@ -166,6 +166,11 @@ class EquationOfState(ParallelSimulation):
                 # input_item.section.m_resolved() ## DEBUG
                 # logger.warning(f'Is proxy: {isinstance(input_item.section, MProxy)}') ## DEBUG
 
+                # Old way to compare sections
+                input_proxy_value = ''
+                if isinstance(input_item.section, MProxy):
+                    input_proxy_value = input_item.section.m_proxy_value
+
                 section = (
                     input_item.section.m_resolved()
                     if isinstance(input_item.section, MProxy)
@@ -230,25 +235,45 @@ class EquationOfState(ParallelSimulation):
             return
 
         for task in self.tasks:
-            task_input_ids = [
-                id(
-                    inp.section.m_resolved()
-                    if isinstance(inp.section, MProxy)
-                    else inp.section
-                )
-                for inp in task.inputs
-            ]
-            input_id = id(
-                input_section.m_resolved()
-                if isinstance(input_section, MProxy)
-                else input_section
-            )
-
-            if input_id in task_input_ids:
-                index = task_input_ids.index(input_id)
+            # DEBUGGING: resolve task.inputs their its actual object
+            # in order to test non-proxy case with proxy data
+            # TODO - Remove this after proper testing is included
+            # task_input_ids = [
+            #     id(
+            #         inp.section.m_resolved()
+            #         if isinstance(inp.section, MProxy)
+            #         else inp.section
+            #     )
+            #     for inp in task.inputs
+            # ]
+            # Check for matches by proxy value
+            input_proxy_values = [input.section.m_proxy_value for input in task.inputs]
+            if input_proxy_value in input_proxy_values:
+                # get the index of the match
+                index = input_proxy_values.index(input_proxy_value)
                 task.inputs[index].name = input_name
             else:
+                # TODO - Test this!
+                # add the input structure to each task if not already present
                 task.inputs.append(Link(name=input_name, section=input_section))
+
+            # ! Does not work since I want to match simply the archive path of the section
+            # Check for matches by section id
+            # task_input_ids = [
+            #     id(
+            #         inp.section.m_resolved()
+            #         if isinstance(inp.section, MProxy)
+            #         else inp.section
+            #     )
+            #     for inp in task.inputs
+            # ]
+            # input_id = id(input_section)
+
+            # if input_id in task_input_ids:
+            #     index = task_input_ids.index(input_id)
+            #     task.inputs[index].name = input_name
+            # else:
+            #     task.inputs.append(Link(name=input_name, section=input_section))
 
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
