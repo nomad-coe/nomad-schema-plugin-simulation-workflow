@@ -159,7 +159,13 @@ class EquationOfState(ParallelSimulation):
         if self.inputs:
             flag_input_structure = False
             for input_item in self.inputs:
-                # Always resolve proxies to their actual objects
+                # DEBUGGING: resolve input_item.section to its actual object
+                # in order to test non-proxy case with proxy data
+                # TODO - Remove this after proper testing is included
+                # logger.warning(f'Is proxy: {isinstance(input_item.section, MProxy)}') ## DEBUG
+                # input_item.section.m_resolved() ## DEBUG
+                # logger.warning(f'Is proxy: {isinstance(input_item.section, MProxy)}') ## DEBUG
+
                 section = (
                     input_item.section.m_resolved()
                     if isinstance(input_item.section, MProxy)
@@ -169,7 +175,6 @@ class EquationOfState(ParallelSimulation):
                     continue
 
                 flag_input_structure = True
-                # Use resolved section for all further logic
                 input_section = (
                     input_item.section.m_proxy_resolved
                     if isinstance(input_item.section, MProxy)
@@ -225,19 +230,6 @@ class EquationOfState(ParallelSimulation):
             return
 
         for task in self.tasks:
-            # --- BEGIN OLD CODE ---
-            # proxy_values = [input.section.m_proxy_value for input in task.inputs]
-            # if input_proxy_value in proxy_values:
-            #     # get the index of the match
-            #     index = proxy_values.index(input_proxy_value)
-            #     task.inputs[index].name = input_name
-            # else:
-            #     # TODO - Test this!
-            #     # add the input structure to each task if not already present
-            #     task.inputs.append(Link(name=input_name, section=input_section))
-            # --- END OLD CODE ---
-
-            # Refactored: Always resolve proxies to their actual objects and use id() for comparison
             task_input_ids = [
                 id(
                     inp.section.m_resolved()
