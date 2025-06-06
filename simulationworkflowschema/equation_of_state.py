@@ -187,6 +187,8 @@ class EquationOfState(ParallelSimulation):
                 input_section = input_item.section.m_resolved()
                 # TODO - I need an alternative method to get the full input section path
                 # ! m_proxy_value is not available for "noraml sections"
+                print(f'input_item: {input_item}')
+                print(f'input_item.section: {input_item.section}')
                 raw_proxy_value = input_item.section.m_proxy_value
                 logger.warning(f'raw_proxy_value: {raw_proxy_value}')
                 default_path = self.get_default_archive_path(
@@ -268,6 +270,8 @@ class EquationOfState(ParallelSimulation):
             #     # task.section = task.section.m_xpath(default_path)
             #     archive_root = archive.m_context.resolve_archive(raw_proxy_value)
             #     task.section = archive_root.m_resolve(default_path)
+
+            # TODO - Add global output to each task output?
 
             # TODO - I need an alternative method to get the full input section path
             # ! m_proxy_value is not available for "noraml sections"

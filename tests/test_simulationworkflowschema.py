@@ -737,20 +737,20 @@ def parse_trajectory(filename):
 
 # ! This parser seems to has very strange behavior, none of the basic m_xxx
 # ! attributes are defined for the section refs of the workflow
-# def test_eos_workflow():
-#     archive = parse_trajectory('tests/data/ase/Cu.traj')
+def test_eos_workflow():
+    archive = parse_trajectory('tests/data/ase/Cu.traj')
 
-#     eos_fit = archive.workflow2.results.eos_fit
-#     assert len(eos_fit) == 5
-#     assert eos_fit[0].fitted_energies[1].to('eV').magnitude == approx(-0.00636507)
-#     assert eos_fit[1].function_name == 'pourier_tarantola'
-#     assert eos_fit[2].equilibrium_volume.to('angstrom**3').magnitude == approx(
-#         11.565388081047471
-#     )
-#     assert eos_fit[3].equilibrium_energy.to('eV').magnitude == approx(
-#         -0.007035923370513912
-#     )
-#     assert eos_fit[4].rms_error == approx(1.408202378222592e-07)
+    eos_fit = archive.workflow2.results.eos_fit
+    assert len(eos_fit) == 5
+    assert eos_fit[0].fitted_energies[1].to('eV').magnitude == approx(-0.00636507)
+    assert eos_fit[1].function_name == 'pourier_tarantola'
+    assert eos_fit[2].equilibrium_volume.to('angstrom**3').magnitude == approx(
+        11.565388081047471
+    )
+    assert eos_fit[3].equilibrium_energy.to('eV').magnitude == approx(
+        -0.007035923370513912
+    )
+    assert eos_fit[4].rms_error == approx(1.408202378222592e-07)
 
 
 class TestSimulationWorkflow:
