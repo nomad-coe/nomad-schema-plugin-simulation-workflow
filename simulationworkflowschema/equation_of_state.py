@@ -21,7 +21,7 @@ from ase.eos import EquationOfState as aseEOS
 from nomad.atomutils import get_volume
 from nomad.datamodel.data import ArchiveSection
 from nomad.units import ureg
-from nomad.metainfo import SubSection, Section, Quantity, MProxy
+from nomad.metainfo import SubSection, Section, Quantity
 from nomad.datamodel.metainfo.workflow import Link
 from .general import (
     SimulationWorkflowMethod,
@@ -150,20 +150,59 @@ class EquationOfState(ParallelSimulation):
 
     results = SubSection(sub_section=EquationOfStateResults)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.default_archive_paths = {
+            'input': 'run/0/system/-1',
+            'task': 'workflow2',
+        }
+
+    def get_default_archive_path(self, raw_proxy_value, section_type='') -> str:
+        """
+        Returns a certain archive path if the raw proxy value points to the root of the archive.
+        """
+        if raw_proxy_value is None:
+            return ''
+
+        if '#/' in raw_proxy_value:
+            _, after = raw_proxy_value.split('#/', 1)
+            if after:
+                return ''
+            else:
+                return self.default_archive_paths.get(section_type, '')
+        else:
+            return ''
+
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
+
+        logger.warning(f'self.tasks: {self.tasks}')
+        logger.warning(f'self.inputs: {self.inputs}')
 
         # find the input structure
         if self.inputs:
             flag_input_structure = False
             input_proxy_value = ''
             for input_item in self.inputs:
-                input_proxy_value = input_item.section.m_proxy_value
                 input_section = input_item.section.m_resolved()
+                # TODO - I need an alternative method to get the full input section path
+                # ! m_proxy_value is not available for "noraml sections"
+                raw_proxy_value = input_item.section.m_proxy_value
+                logger.warning(f'raw_proxy_value: {raw_proxy_value}')
+                default_path = self.get_default_archive_path(
+                    raw_proxy_value, section_type='input'
+                )
+                logger.warning(f'default_path: {default_path}')
+                if default_path != '':
+                    archive_root = archive.m_context.resolve_archive(raw_proxy_value)
+                    input_section = archive_root.m_resolve(default_path)
                 if not isinstance(input_section, System):
                     continue
 
+                logger.warning(f'self.tasks: {self.tasks}')
+
                 flag_input_structure = True
+                input_proxy_value = raw_proxy_value + default_path
                 system_index = input_section.m_parent_index
                 run_section = input_section.m_parent
                 run_index = run_section.m_parent_index
@@ -190,6 +229,8 @@ class EquationOfState(ParallelSimulation):
 
                 break
 
+        logger.warning(f'self.tasks: {self.tasks}')
+
         if not flag_input_structure:
             logger.warning('No input structure found in EOS workflow normalizer.')
 
@@ -214,6 +255,22 @@ class EquationOfState(ParallelSimulation):
             return
 
         for task in self.tasks:
+            # TODO - I need an alternative method to get the full input section path
+            # ! m_proxy_value is not available for "noraml sections"
+            # logger.warning(f'task: {task.task}')
+            # logger.warning(f'task.section: {task.task.section}')
+            # raw_proxy_value = task.section.m_proxy_value
+            # default_path = self.get_default_archive_path(
+            #     raw_proxy_value, section_type='task'
+            # )
+            # if default_path:
+            #     # replace the task section with the default for tasks
+            #     # task.section = task.section.m_xpath(default_path)
+            #     archive_root = archive.m_context.resolve_archive(raw_proxy_value)
+            #     task.section = archive_root.m_resolve(default_path)
+
+            # TODO - I need an alternative method to get the full input section path
+            # ! m_proxy_value is not available for "noraml sections"
             input_proxy_values = [input.section.m_proxy_value for input in task.inputs]
             if input_proxy_value in input_proxy_values:
                 index = input_proxy_values.index(input_proxy_value)
@@ -287,3 +344,24 @@ class EquationOfState(ParallelSimulation):
                         self.results.eos_fit.append(eos_fit)
                     except Exception:
                         logger.warning('EOS fit not succesful.')
+
+    # @staticmethod
+    # def archive_path_to_jmespath(path: str) -> str:
+    #     """
+    #     Converts an archive path like 'run/0/system/-1' to a jmespath like 'run[0].system[-1]'.
+    #     """
+    #     if not path:
+    #         return ''
+    #     parts = path.strip('/').split('/')
+    #     jmes = []
+    #     i = 0
+    #     while i < len(parts):
+    #         part = parts[i]
+    #         # If next part is an integer, treat as index
+    #         if i + 1 < len(parts) and parts[i + 1].lstrip('-').isdigit():
+    #             jmes.append(f"{part}[{parts[i + 1]}]")
+    #             i += 2
+    #         else:
+    #             jmes.append(part)
+    #             i += 1
+    #     return '.'.join(jmes)
