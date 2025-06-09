@@ -253,17 +253,17 @@ class EquationOfState(ParallelSimulation):
             self.outputs.append(Link(name=WORKFLOW_RESULTS_NAME, section=self.results))
 
         #! Causing test to fail
-        # try:
-        #     task_archives = [task.task.m_root() for task in self.tasks]
-        #     assert all(
-        #         isinstance(task_archive.workflow2, SinglePoint)
-        #         for task_archive in task_archives
-        #     )
-        # except Exception:
-        #     logger.warning(
-        #         'Not all tasks are SinglePoints or failed to retrieve task archives. EOS workflow may be incomplete or incorrect.'
-        #     )
-        #     return
+        try:
+            task_archives = [task.task.m_root() for task in self.tasks]
+            assert all(
+                isinstance(task_archive.workflow2, SinglePoint)
+                for task_archive in task_archives
+            )
+        except Exception:
+            logger.warning(
+                'Not all tasks are SinglePoints or failed to retrieve task archives. EOS workflow may be incomplete or incorrect.'
+            )
+            return
 
         for task in self.tasks:
             # TODO - I need an alternative method to get the full input section path
