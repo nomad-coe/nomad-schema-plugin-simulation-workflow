@@ -21,7 +21,7 @@ from ase.eos import EquationOfState as aseEOS
 from nomad.atomutils import get_volume
 from nomad.datamodel.data import ArchiveSection
 from nomad.units import ureg
-from nomad.metainfo import SubSection, Section, Quantity
+from nomad.metainfo import SubSection, Section, Quantity, MProxy
 from nomad.datamodel.metainfo.workflow import Link
 from .general import (
     SimulationWorkflowMethod,
@@ -157,21 +157,21 @@ class EquationOfState(ParallelSimulation):
             'task': 'workflow2',
         }
 
-    def get_default_archive_path(self, raw_proxy_value, section_type='') -> str:
-        """
-        Returns a certain archive path if the raw proxy value points to the root of the archive.
-        """
-        if raw_proxy_value is None:
-            return ''
+    # def get_default_archive_path(self, raw_proxy_value, section_type='') -> str:
+    #     """
+    #     Returns a certain archive path if the raw proxy value points to the root of the archive.
+    #     """
+    #     if raw_proxy_value is None:
+    #         return ''
 
-        if '#/' in raw_proxy_value:
-            _, after = raw_proxy_value.split('#/', 1)
-            if after:
-                return ''
-            else:
-                return self.default_archive_paths.get(section_type, '')
-        else:
-            return ''
+    #     if '#/' in raw_proxy_value:
+    #         _, after = raw_proxy_value.split('#/', 1)
+    #         if after:
+    #             return ''
+    #         else:
+    #             return self.default_archive_paths.get(section_type, '')
+    #     else:
+    #         return ''
 
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
@@ -179,55 +179,65 @@ class EquationOfState(ParallelSimulation):
         logger.warning(f'self.tasks: {self.tasks}')
         logger.warning(f'self.inputs: {self.inputs}')
 
+        flag_input_structure = False
+        input_path_global = ''
+        archive_root = None
         # find the input structure
         if self.inputs:
-            flag_input_structure = False
-            input_proxy_value = ''
             for input_item in self.inputs:
                 input_section = input_item.section.m_resolved()
                 # TODO - I need an alternative method to get the full input section path
+                print(f'is MProxy: {isinstance(input_section, MProxy)}')
                 # ! m_proxy_value is not available for "noraml sections"
-                print(f'input_item: {input_item}')
-                print(f'input_item.section: {input_item.section}')
-                raw_proxy_value = input_item.section.m_proxy_value
-                logger.warning(f'raw_proxy_value: {raw_proxy_value}')
-                default_path = self.get_default_archive_path(
-                    raw_proxy_value, section_type='input'
-                )
-                logger.warning(f'default_path: {default_path}')
-                if default_path != '':
-                    archive_root = archive.m_context.resolve_archive(raw_proxy_value)
-                    input_section = archive_root.m_resolve(default_path)
+                archive_root = archive.m_root()
+                archive_metadata = archive_root.metadata if archive_root else None
+                input_path_global = ''
+                if isinstance(input_section, MProxy):
+                    input_path_global = input_section.m_proxy_value
+                elif archive_metadata:
+                    upload_id = archive_metadata.upload_id
+                    entry_id = archive_metadata.entry_id
+                    input_path = input_section.m_path()
+                    input_path_global = (
+                        f'../{upload_id}/archive/{entry_id}#/{input_path}'
+                        if upload_id and entry_id and input_path
+                        else ''
+                    )
+
+                # default_path = self.get_default_archive_path(
+                #     input_path_global, section_type='input'
+                # )
+                # logger.warning(f'default_path: {default_path}')
+                # if default_path != '':
+                #     archive_root = archive.m_context.resolve_archive(input_path_global)
+                #     input_section = archive_root.m_resolve(default_path)
                 if not isinstance(input_section, System):
                     continue
 
-                logger.warning(f'self.tasks: {self.tasks}')
-
                 flag_input_structure = True
-                input_proxy_value = raw_proxy_value + default_path
+                # input_proxy_value = input_path_global + default_path
                 system_index = input_section.m_parent_index
                 run_section = input_section.m_parent
                 run_index = run_section.m_parent_index
                 input_name = input_item.name
-                input_archive = input_section.m_root()
-                if input_archive:
+                if archive_root:
                     if system_index == -1:
-                        system_index = len(input_archive.run[run_index].system) - 1
-                if not archive.run:
-                    run = Run(program=Program())
-                    try:
-                        run.system.extend([input_section])
-                        run.method.extend(input_archive.run[run_index].method)
-                        for calc in input_archive.run[run_index].calculation:
-                            if calc.system_ref.m_parent_index == system_index:
-                                run.calculation.extend([calc])
-                                break
-                    except Exception:
-                        logger.warning(
-                            'Failed to create run section from input structure. '
-                        )
+                        system_index = len(archive_root.run[run_index].system) - 1
+                # if not archive.run:
+                #     run = Run(program=Program())
+                #     try:
+                #         run.system.extend([input_section])
+                #         run.method.extend(archive_root.run[run_index].method)
+                #         for calc in archive_root.run[run_index].calculation:
+                #             if calc.system_ref.m_parent_index == system_index:
+                #                 run.calculation.extend([calc])
+                #                 break
+                #     except Exception:
+                #         logger.warning(
+                #             'Failed to create run section from input structure. '
+                #         )
 
-                    archive.run.append(run)
+                #     archive.run.append(run)
 
                 break
 
@@ -275,12 +285,15 @@ class EquationOfState(ParallelSimulation):
 
             # TODO - I need an alternative method to get the full input section path
             # ! m_proxy_value is not available for "noraml sections"
-            input_proxy_values = [input.section.m_proxy_value for input in task.inputs]
-            if input_proxy_value in input_proxy_values:
-                index = input_proxy_values.index(input_proxy_value)
-                task.inputs[index].name = input_name
-            else:
-                task.inputs.append(Link(name=input_name, section=input_section))
+            if input_path_global:
+                input_proxy_values = [
+                    input.section.m_proxy_value for input in task.inputs
+                ]
+                if input_path_global in input_proxy_values:
+                    index = input_proxy_values.index(input_path_global)
+                    task.inputs[index].name = input_name
+                else:
+                    task.inputs.append(Link(name=input_name, section=input_section))
 
         if not self._calculations:
             # try to get calculations from tasks (in case of instantiation from workflow yaml)
