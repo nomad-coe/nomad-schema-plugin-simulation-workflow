@@ -150,12 +150,13 @@ class EquationOfState(ParallelSimulation):
 
     results = SubSection(sub_section=EquationOfStateResults)
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.default_archive_paths = {
-            'input': 'run/0/system/-1',
-            'task': 'workflow2',
-        }
+    # ! For default path code in normalize
+    # def __init__(self, *args, **kwargs):
+    #     super().__init__(*args, **kwargs)
+    #     self.default_archive_paths = {
+    #         'input': 'run/0/system/-1',
+    #         'task': 'workflow2',
+    #     }
 
     # def get_default_archive_path(self, raw_proxy_value, section_type='') -> str:
     #     """
@@ -173,37 +174,39 @@ class EquationOfState(ParallelSimulation):
     #     else:
     #         return ''
 
+    def get_section_global_path(self, section: ArchiveSection) -> str:
+        """
+        Returns the global path of a section in the archive.
+        """
+        if isinstance(section, MProxy):
+            return section.m_proxy_value
+        else:
+            archive_root = section.m_root()
+            archive_metadata = (
+                archive_root.metadata if archive_root is not None else None
+            )
+            if not archive_metadata:
+                return None
+
+            entry_id = archive_metadata.entry_id
+            path = section.m_path()
+            return f'../upload/archive/{entry_id}#{path}' if entry_id and path else None
+
     def normalize(self, archive, logger):
         super().normalize(archive, logger)
 
-        logger.warning(f'self.tasks: {self.tasks}')
-        logger.warning(f'self.inputs: {self.inputs}')
-
         flag_input_structure = False
         input_path_global = ''
-        archive_root = None
+        input_archive_root = None
         # find the input structure
         if self.inputs:
             for input_item in self.inputs:
+                # if isinstance(input_item.section, MProxy):
+                #     input_path_global = input_item.section.m_proxy_value
+                input_path_global = self.get_section_global_path(input_item.section)
                 input_section = input_item.section.m_resolved()
-                # TODO - I need an alternative method to get the full input section path
-                print(f'is MProxy: {isinstance(input_section, MProxy)}')
-                # ! m_proxy_value is not available for "noraml sections"
-                archive_root = archive.m_root()
-                archive_metadata = archive_root.metadata if archive_root else None
-                input_path_global = ''
-                if isinstance(input_section, MProxy):
-                    input_path_global = input_section.m_proxy_value
-                elif archive_metadata:
-                    upload_id = archive_metadata.upload_id
-                    entry_id = archive_metadata.entry_id
-                    input_path = input_section.m_path()
-                    input_path_global = (
-                        f'../{upload_id}/archive/{entry_id}#/{input_path}'
-                        if upload_id and entry_id and input_path
-                        else ''
-                    )
 
+                # ! For replacing short-hand sections with standardized paths
                 # default_path = self.get_default_archive_path(
                 #     input_path_global, section_type='input'
                 # )
@@ -215,29 +218,36 @@ class EquationOfState(ParallelSimulation):
                     continue
 
                 flag_input_structure = True
+                # ! No longer needed
+                # archive_root = (
+                #     archive.m_context.resolve_archive(input_path_global)
+                #     if input_path_global
+                #     else archive_root
+                # )
+                # ! Goes with default path code above
                 # input_proxy_value = input_path_global + default_path
                 system_index = input_section.m_parent_index
                 run_section = input_section.m_parent
                 run_index = run_section.m_parent_index
                 input_name = input_item.name
-                if archive_root:
+                if input_archive_root:
                     if system_index == -1:
-                        system_index = len(archive_root.run[run_index].system) - 1
-                if not archive.run:
-                    run = Run(program=Program())
-                    try:
-                        run.system.extend([input_section])
-                        run.method.extend(archive_root.run[run_index].method)
-                        for calc in archive_root.run[run_index].calculation:
-                            if calc.system_ref.m_parent_index == system_index:
-                                run.calculation.extend([calc])
-                                break
-                    except Exception:
-                        logger.warning(
-                            'Failed to create run section from input structure. '
-                        )
+                        system_index = len(input_archive_root.run[run_index].system) - 1
+                    if not archive.run:
+                        run = Run(program=Program())
+                        try:
+                            run.system.extend([input_section])
+                            run.method.extend(input_archive_root.run[run_index].method)
+                            for calc in input_archive_root.run[run_index].calculation:
+                                if calc.system_ref.m_parent_index == system_index:
+                                    run.calculation.extend([calc])
+                                    break
+                        except Exception:
+                            logger.warning(
+                                'Failed to create run section from input structure. '
+                            )
 
-                    archive.run.append(run)
+                        archive.run.append(run)
 
                 break
 
@@ -282,11 +292,12 @@ class EquationOfState(ParallelSimulation):
 
             # TODO - Add global output to each task output?
 
-            # TODO - I need an alternative method to get the full input section path
-            # ! m_proxy_value is not available for "noraml sections"
             if input_path_global:
+                # input_proxy_values = [
+                #     input.section.m_proxy_value for input in task.inputs
+                # ]
                 input_proxy_values = [
-                    input.section.m_proxy_value for input in task.inputs
+                    self.get_section_global_path(input.section) for input in task.inputs
                 ]
                 if input_path_global in input_proxy_values:
                     index = input_proxy_values.index(input_path_global)
