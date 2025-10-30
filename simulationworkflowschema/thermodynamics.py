@@ -193,7 +193,7 @@ class ThermodynamicsResults(SimulationWorkflowResults):
         """Returns the specific heat capacity by dividing the heat capacity per
         cell with the mass of the atoms in the cell.
         """
-        import nomad.atomutils
+        import nomad.atomutils  # noqa
 
         workflow = self.m_parent
         if not workflow._systems or not workflow._systems[0].atoms:
@@ -226,7 +226,7 @@ class ThermodynamicsResults(SimulationWorkflowResults):
     def vibrational_free_energy_at_constant_volume_specific(
         self,
     ) -> Optional[np.ndarray]:
-        import nomad.atomutils
+        import nomad.atomutils  # noqa
 
         workflow = self.m_parent
         if not workflow._systems or not workflow._systems[0].atoms:

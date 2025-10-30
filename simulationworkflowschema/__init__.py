@@ -94,7 +94,7 @@ def load_modules():
         'photon_polarization',
         'thermodynamics',
     ]
-    import simulationworkflowschema
+    import simulationworkflowschema  # noqa
 
     for name in sub_modules:
         sub_module = importlib.import_module(f'simulationworkflowschema.{name}')
@@ -107,7 +107,7 @@ class SimulationWorkflowSchemaEntryPoint(SchemaPackageEntryPoint):
     def load(self):
         load_modules()
 
-        from .general import m_package
+        from .general import m_package  # noqa
 
         return m_package
 
