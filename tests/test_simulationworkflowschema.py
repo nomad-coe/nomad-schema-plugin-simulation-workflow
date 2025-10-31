@@ -735,6 +735,8 @@ def parse_trajectory(filename):
     return archive
 
 
+# ! This parser seems to has very strange behavior, none of the basic m_xxx
+# ! attributes are defined for the section refs of the workflow
 def test_eos_workflow():
     archive = parse_trajectory('tests/data/ase/Cu.traj')
 
