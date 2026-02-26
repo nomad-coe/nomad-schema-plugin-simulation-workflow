@@ -15,49 +15,50 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-from typing import Any, Callable, Optional
-from itertools import chain
-from collections import namedtuple
-import numpy as np
 from array import array
-from scipy import sparse
-from scipy.stats import linregress
+from collections import namedtuple
+from itertools import chain
+from typing import Any, Callable, Optional
+
+import MDAnalysis
+import MDAnalysis.analysis.rdf as MDA_RDF
 import networkx
 import numpy as np
-import MDAnalysis
+from MDAnalysis.core._get_readers import get_reader_for
 from MDAnalysis.core.topology import Topology
 from MDAnalysis.core.universe import Universe
-import MDAnalysis.analysis.rdf as MDA_RDF
-from MDAnalysis.core._get_readers import get_reader_for
-
+from nomad import atomutils
 from nomad.datamodel.data import ArchiveSection
-from nomad.metainfo import (
-    SubSection,
-    Section,
-    Quantity,
-    MEnum,
-    Reference,
-    MSection,
-)
 from nomad.datamodel.hdf5 import HDF5Dataset
 from nomad.datamodel.metainfo.workflow import Link
-from runschema.system import System, AtomsGroup
+from nomad.metainfo import (
+    MEnum,
+    MSection,
+    Quantity,
+    Reference,
+    Section,
+    SubSection,
+)
+from nomad.units import ureg
+from nomad.utils import get_logger
 from runschema.calculation import (
     RadiusOfGyration as RadiusOfGyrationCalculation,
+)
+from runschema.calculation import (
     RadiusOfGyrationValues as RadiusOfGyrationValuesCalculation,
 )
-from nomad.utils import get_logger
-from nomad.units import ureg
-from nomad import atomutils
+from runschema.system import AtomsGroup, System
+from scipy import sparse
+from scipy.stats import linregress
+
 from .general import (
-    SimulationWorkflowMethod,
-    SimulationWorkflowResults,
-    SerialSimulation,
     WORKFLOW_METHOD_NAME,
     WORKFLOW_RESULTS_NAME,
+    SerialSimulation,
+    SimulationWorkflowMethod,
+    SimulationWorkflowResults,
 )
 from .thermodynamics import ThermodynamicsResults
-
 
 LOGGER = get_logger(__name__)
 
@@ -1867,7 +1868,7 @@ class MolecularDynamicsMethod(SimulationWorkflowMethod):
     integrator_type = Quantity(
         type=MEnum(
             'brownian',
-            'conjugant_gradient',
+            'conjugate_gradient',
             'langevin_goga',
             'langevin_schneider',
             'leap_frog',

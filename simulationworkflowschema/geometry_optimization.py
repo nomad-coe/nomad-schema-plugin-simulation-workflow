@@ -17,17 +17,16 @@
 #
 import numpy as np
 from ase import Atoms
-
-from nomad.metainfo import SubSection, Quantity, MEnum
 from nomad.datamodel.metainfo.workflow import Link
+from nomad.metainfo import MEnum, Quantity, SubSection
 from runschema.calculation import EnergyEntry
 
 from .general import (
-    SimulationWorkflowMethod,
-    SimulationWorkflowResults,
-    SerialSimulation,
     WORKFLOW_METHOD_NAME,
     WORKFLOW_RESULTS_NAME,
+    SerialSimulation,
+    SimulationWorkflowMethod,
+    SimulationWorkflowResults,
     resolve_difference,
 )
 
@@ -61,7 +60,7 @@ class GeometryOptimizationMethod(SimulationWorkflowMethod):
         shape=[],
         description="""
         The method used for geometry optimization. Some known possible values are:
-        `"steepest_descent"`, `"conjugant_gradient"`, `"low_memory_broyden_fletcher_goldfarb_shanno"`.
+        `"steepest_descent"`, `"conjugate_gradient"`, `"low_memory_broyden_fletcher_goldfarb_shanno"`.
         """,
     )
 
