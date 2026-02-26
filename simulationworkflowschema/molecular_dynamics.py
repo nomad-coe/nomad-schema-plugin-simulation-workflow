@@ -20,6 +20,10 @@ from collections import namedtuple
 from itertools import chain
 from typing import Any, Callable, Optional
 
+<<<<<<< Updated upstream
+=======
+import ase
+>>>>>>> Stashed changes
 import MDAnalysis
 import MDAnalysis.analysis.rdf as MDA_RDF
 import networkx
@@ -306,36 +310,48 @@ def archive_to_universe(
 
         bonds (tuple, shape=([])): list of tuples with the atom indices of each bond
     """
-
-    try:
-        sec_run = archive.run[-1]
-        sec_system = sec_run.system
-        sec_system_top = sec_run.system[system_index]
-        sec_atoms = sec_system_top.atoms
-        sec_atoms_group = sec_system_top.atoms_group
-        sec_calculation = sec_run.calculation
-        sec_method = (
-            sec_run.method[method_index] if sec_run.get('method') is not None else {}
+    print(f'Nomad schema: {archive}')
+    if archive.data:
+        print('Found archive.data in nomad-schema')
+        sec_system = archive.data.model_system  # full list — iterated per frame
+        sec_system_top = sec_system[system_index]  # topology frame
+        sec_atoms_group = (
+            sec_system_top.sub_systems if sec_system_top is not None else None
         )
-    except IndexError:
+    else:
         LOGGER.warning(
-            'Supplied indices or necessary sections do not exist in archive. Cannot build the MDA universe.'
+            'No data section found in archive. Cannot build the MDA universe.'
         )
         return None
 
-    n_atoms = sec_atoms.get('n_atoms')
-    if n_atoms is None:
-        LOGGER.warning('No atoms found in the archive. Cannot build the MDA universe.')
-        return None
-
-    n_frames = len(sec_system) if sec_system is not None else 1
-    atom_names = sec_atoms.get('labels')
-    model_atom_parameters = sec_method.get('atom_parameters')
-    atom_types = (
-        [atom.label for atom in model_atom_parameters]
-        if model_atom_parameters
-        else atom_names
+    n_atoms = sec_system_top.n_particles if sec_system_top is not None else None
+    particle_states = (
+        sec_system_top.particle_states if sec_system_top is not None else None
     )
+    atom_names = (
+        [ps.label or 'CGX' for ps in particle_states] if particle_states else None
+    )
+    atom_types = (
+        [ps.chemical_symbol or 'CGX' for ps in particle_states]
+        if particle_states
+        else None
+    )
+    masses = [
+        ureg.convert(ps.mass.magnitude, ps.mass.units, ureg.amu)
+        if ps.mass is not None
+        else ase.data.atomic_masses[
+            ase.data.atomic_numbers.get(ps.chemical_symbol or '', 0)
+        ]
+        for ps in particle_states
+    ]
+    charges = [
+        ureg.convert(ps.partial_charge.magnitude, ps.partial_charge.units, ureg.e)
+        if ps.partial_charge is not None
+        else 0.0
+        for ps in particle_states
+    ]
+    system_times = [out.time for out in archive.data.outputs if out.time is not None]
+    n_frames = len(sec_system) if sec_system is not None else 1
     atom_resindex = np.arange(n_atoms)
     atoms_segindices = np.empty(n_atoms)
     atom_segids = np.array(range(n_atoms), dtype='object')
@@ -352,6 +368,9 @@ def archive_to_universe(
     molecule_n_res = []
     for mol_group_ind, mol_group in enumerate(molecule_groups):
         atoms_segindices[mol_group.atom_indices] = mol_group_ind
+        print(
+            f'mol_group.label: {mol_group.label}, mol_group.atom_indices: {mol_group.atom_indices}'
+        )
         atom_segids[mol_group.atom_indices] = mol_group.label
         molecules = mol_group.atoms_group if mol_group.atoms_group is not None else []
         for mol in molecules:
