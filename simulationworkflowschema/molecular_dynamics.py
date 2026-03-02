@@ -20,10 +20,7 @@ from collections import namedtuple
 from itertools import chain
 from typing import Any, Callable, Optional
 
-<<<<<<< Updated upstream
-=======
 import ase
->>>>>>> Stashed changes
 import MDAnalysis
 import MDAnalysis.analysis.rdf as MDA_RDF
 import networkx
@@ -313,11 +310,14 @@ def archive_to_universe(
     print(f'Nomad schema: {archive}')
     if archive.data:
         print('Found archive.data in nomad-schema')
-        sec_system = archive.data.model_system  # full list — iterated per frame
+        data = archive.data
+        sec_system = data.model_system  # full list — iterated per frame
         sec_system_top = sec_system[system_index]  # topology frame
         sec_atoms_group = (
             sec_system_top.sub_systems if sec_system_top is not None else None
         )
+        sec_method = data.model_method[method_index] if data.model_method else None
+        sec_outputs = data.outputs if data.outputs else None
     else:
         LOGGER.warning(
             'No data section found in archive. Cannot build the MDA universe.'
@@ -350,7 +350,9 @@ def archive_to_universe(
         else 0.0
         for ps in particle_states
     ]
-    system_times = [out.time for out in archive.data.outputs if out.time is not None]
+    system_times = (
+        [out.time for out in sec_outputs if out.time is not None] if sec_outputs else []
+    )
     n_frames = len(sec_system) if sec_system is not None else 1
     atom_resindex = np.arange(n_atoms)
     atoms_segindices = np.empty(n_atoms)
