@@ -448,9 +448,12 @@ def test_rdf_and_msd():
         .units
         == 'meter'
     )
+    # Allow for variation across supported numerical library versions.
     assert section_md.radial_distribution_functions[
         0
-    ].radial_distribution_function_values[10].value[101] == approx(1.4750986777470825)
+    ].radial_distribution_function_values[10].value[101] == approx(
+        1.4750986777470825, rel=1e-5
+    )
     assert (
         section_md.radial_distribution_functions[0]
         .radial_distribution_function_values[10]
