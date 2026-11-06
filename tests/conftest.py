@@ -551,8 +551,8 @@ def get_template_gw_workflow() -> EntryArchive:
         GWworkflow.outputs,
         Link(name='Output GW calculation', section=archive_gw.run[-1].calculation[-1]),
     )
-    workflow.m_add_sub_section(GWworkflow.tasks, task_dft)
-    workflow.m_add_sub_section(GWworkflow.tasks, task_gw)
+    workflow.tasks.append(task_dft)
+    workflow.tasks.append(task_gw)
     template.workflow2 = workflow
     return template
 
@@ -607,8 +607,8 @@ def get_template_dmft_workflow() -> EntryArchive:
             name='Output DMFT calculation', section=archive_dmft.run[-1].calculation[-1]
         ),
     )
-    workflow.m_add_sub_section(DMFTworkflow.tasks, task_proj)
-    workflow.m_add_sub_section(DMFTworkflow.tasks, task_dmft)
+    workflow.tasks.append(task_proj)
+    workflow.tasks.append(task_dmft)
     template.workflow2 = workflow
     return template
 
@@ -675,8 +675,8 @@ def get_template_maxent_workflow() -> EntryArchive:
         ),
     ]
     workflow.outputs = outputs
-    workflow.m_add_sub_section(MaxEntworkflow.tasks, task_dmft)
-    workflow.m_add_sub_section(MaxEntworkflow.tasks, task_maxent)
+    workflow.tasks.append(task_dmft)
+    workflow.tasks.append(task_maxent)
     template.workflow2 = workflow
     return template
 
@@ -783,8 +783,8 @@ def get_template_bse_workflow() -> EntryArchive:
             section=archive_photon_2.run[-1].calculation[-1],
         ),
     )
-    workflow.m_add_sub_section(PhotonPolarization.tasks, task_photon_1)
-    workflow.m_add_sub_section(PhotonPolarization.tasks, task_photon_2)
+    workflow.tasks.append(task_photon_1)
+    workflow.tasks.append(task_photon_2)
     template.workflow2 = workflow
     return template
 
@@ -839,8 +839,8 @@ def get_template_xs_workflow() -> EntryArchive:
         XSworkflow.outputs,
         Link(name='Polarization 2', section=archive_bse.workflow2.outputs[1].section),
     )
-    workflow.m_add_sub_section(XSworkflow.tasks, task_dft)
-    workflow.m_add_sub_section(XSworkflow.tasks, task_bse)
+    workflow.tasks.append(task_dft)
+    workflow.tasks.append(task_bse)
     template.workflow2 = workflow
     return template
 
